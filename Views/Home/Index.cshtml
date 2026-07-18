@@ -1,0 +1,341 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@* Include the Compare Toast Component *@
+@await Html.PartialAsync("_CompareToast")
+
+<!-- ==========================================
+     SECTION 1: THE HERO & BOOKING WIDGET
+     ========================================== -->
+<header class="seo-hero-section">
+    <div class="hero-container">
+        <!-- Target your primary high-volume broad keyword here -->
+        <h1>Affordable Car Rentals & Vehicle Hire Worldwide</h1>
+        <p class="hero-subtitle">Compare rental car rates, choose your fleet, and book online with flexible cancellations.</p>
+
+        <!-- Booking Widget Container (Replace with your actual form/booking plugin iframe) -->
+        <div class="booking-widget-box" aria-label="Car Rental Reservation Form">
+            <form asp-controller="Home" asp-action="SearchItems" method="get" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="search-term">Search Items</label>
+                        <input type="text" id="search-term" name="searchTerm" placeholder="Search by Type, Model or Manufacturer" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pickup-date">Pick-up Date</label>
+                        <input type="date" id="pickup-date" name="pickup_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="return-date">Return Date</label>
+                        <input type="date" id="return-date" name="return_date">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="passenger-capacity">Passenger Capacity</label>
+                        <input type="number" id="passenger-capacity" name="passenger_capacity" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="luggage-capacity">Luggage Capacity</label>
+                        <input type="number" id="luggage-capacity" name="luggage_capacity" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="transmission">Transmission</label>
+                        <select id="transmission" name="transmission">
+                            <option value="automatic">Automatic</option>
+                            <option value="manual">Manual</option>
+                            <option value="any" selected>Any</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Submit to search</label>
+                        <button type="submit" class="btn-search">Find My Car</button>
+                    </div>
+                </div>
+            </form>
+            <div class="form-row" style="margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+                <div class="form-group">
+                    <label> </label>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="@Url.Action("ReservationForm", "PortalReservation", new { itemId = 0, transactionType = "Booking" })" class="btn btn-outline-primary" style="flex: 1; text-align: center;">
+                            <i class="bi bi-calendar-check"></i> Book Now
+                        </a>
+                        <a href="@Url.Action("ReservationForm", "PortalReservation", new { itemId = 0, transactionType = "Quote" })" class="btn btn-outline-primary" style="flex: 1; text-align: center;">
+                            <i class="bi bi-clipboard-check"></i> Request Quote
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</header>
+
+<!-- ==========================================
+     SECTION 2: CORE FLEET CATEGORIES
+     ========================================== -->
+<section class="seo-fleet-section" aria-labelledby="fleet-heading">
+    <h2 id="fleet-heading">Explore Our Diverse Rental Car Fleet</h2>
+    <p class="section-intro">Select from our wide range of reliable vehicles tailored to fit your specific travel needs and budget constraints.</p>
+
+    <div class="fleet-grid">
+        @if (ViewBag.ProductCategories != null)
+        {
+            foreach (var category in ViewBag.ProductCategories)
+            {
+                <div class="fleet-card">
+                    <article class="fleet-card">
+                    <img src="@category.ImageUrl" alt="@category.Title rental car available" loading="lazy">
+                    <h3>@category.Title</h3>
+                    <p>@(category.Description ?? "Explore our selection of quality vehicles in this category.")</p>
+                    <a href="@category.PageUrl" class="fleet-link">Browse @category.Title</a>
+                    </article>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Fallback categories if data is unavailable -->
+            <!-- Category 1 -->
+            <article class="fleet-card">
+                <img src="images/suv-rental.jpg" alt="Mid-size SUV rental car available for family trips" loading="lazy">
+                <h3>SUV Rentals</h3>
+                <p>Spacious, secure all-wheel-drive vehicles perfect for family road trips and rugged terrain adventures.</p>
+                <a href="/fleet/suv-rentals" class="fleet-link">Browse SUV Rentals</a>
+            </article>
+
+            <!-- Category 2 -->
+            <article class="fleet-card">
+                <img src="images/luxury-rental.jpg" alt="Premium luxury rental car for corporate travel" loading="lazy">
+                <h3>Luxury &amp; Exotic Cars</h3>
+                <p>Premium sports cars and elite sedans configured for business travel, corporate accounts, or special events.</p>
+                <a href="/fleet/luxury-cars" class="fleet-link">View Luxury Fleet</a>
+            </article>
+
+            <!-- Category 3 -->
+            <article class="fleet-card">
+                <img src="images/economy-rental.jpg" alt="Fuel-efficient economy rental car for city driving" loading="lazy">
+                <h3>Economy Car Rentals</h3>
+                <p>Compact, highly fuel-efficient cars ideal for solo commuters, budget travelers, and tight city parking.</p>
+                <a href="/fleet/economy-cars" class="fleet-link">Rent Economy Cars</a>
+            </article>
+
+            <!-- Category 4 -->
+            <article class="fleet-card">
+                <img src="images/van-rental.jpg" alt="Multi-passenger transit van rental for group transit" loading="lazy">
+                <h3>Passenger Van Rentals</h3>
+                <p>Multi-seat transit vans built for large group outings, extended families, and team excursions.</p>
+                <a href="/fleet/passenger-vans" class="fleet-link">Explore Van Rentals</a>
+            </article>
+        }
+    </div>
+
+</section>
+
+<!-- ==========================================
+     SECTION 3: SERVICES
+     ========================================== -->
+<section class="seo-locations-section" aria-labelledby="locations-heading">
+    <h2 id="locations-heading">Car Rental Services</h2>
+    <p class="section-intro">Pick up your vehicle at any of our highly rated local airport stations or convenient downtown branch offices.</p>
+
+    <div class="locations-list">
+        @if (ViewBag.ServiceCategories != null)
+        {
+            foreach (var service in ViewBag.ServiceCategories)
+            {
+                <div class="location-item">
+                    <img src="@service.ImageUrl"
+                         alt="@service.Title rental car available"
+                         loading="lazy"
+                         width="230"
+                         height="150">
+                    <h3>@service.Title</h3>
+                    <p>@(service.Description ?? "Convenient service location for all your rental needs.")</p>
+                    <a href="@service.PageUrl" class="location-link">@service.Title Services</a>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Fallback locations if data is unavailable -->
+            <div class="location-item">
+                <h3>Los Angeles (LAX)</h3>
+                <p>Convenient airport terminal pickup options with 24/7 vehicle drop-off availability.</p>
+                <a href="/locations/los-angeles-lax" class="location-link">Rent a Car at LAX Airport</a>
+            </div>
+            <div class="location-item">
+                <h3>Miami Downtown</h3>
+                <p>Centrally located downtown service desk adjacent to top coastal luxury resorts and hotels.</p>
+                <a href="/locations/miami-downtown" class="location-link">Rent a Car in Downtown Miami</a>
+            </div>
+            <div class="location-item">
+                <h3>Chicago O'Hare (ORD)</h3>
+                <p>Fast-track rental services providing direct access to premium multi-passenger transit fleets.</p>
+                <a href="/locations/chicago-ohare-ord" class="location-link">Rent a Car at O'Hare Airport</a>
+            </div>
+            <div class="location-item">
+                <h3>New York City</h3>
+                <p>Flexible short-term and monthly leasing arrangements available right across metro Manhattan hubs.</p>
+                <a href="/locations/new-york-city" class="location-link">Rent a Car in New York City</a>
+            </div>
+        }
+    </div>
+    <div class="all-locations-btn-container">
+        <a href="/Home/OurServices" class="btn-secondary">View All Rental Services</a>
+    </div>
+</section>
+
+<!-- ==========================================
+     SECTION 4: WhyUs (VALUE PROP & HOW IT WORKS)
+     ========================================== -->
+<section class="seo-value-section" aria-labelledby="value-heading">
+    <h2 id="value-heading">Why Choose Us For Your Next Road Trip?</h2>
+
+    <div class="value-grid">
+        @if (ViewBag.WhyUs != null)
+        {
+            foreach (var whyus in ViewBag.WhyUs)
+            {
+                <div class="value-prop-item">
+                    @if (!string.IsNullOrEmpty(whyus.ImageUrl))
+                    {
+                        <img src="@whyus.ImageUrl" 
+                             alt="@whyus.Title" 
+                             loading="lazy"
+                             width="60"
+                             height="60"
+                             class="value-icon">
+                    }
+                    <h3>@whyus.Title</h3>
+                    <p>@(whyus.Description ?? "Discover the benefits of choosing our car rental services.")</p>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Fallback content if data is unavailable -->
+            <div class="value-prop-item">
+                <span class="icon">🏷️</span>
+                <h3>No Hidden Booking Fees</h3>
+                <p>We provide absolute transparency with up-front pricing tiers. The baseline reservation price you see online is exactly what you pay at the collection counter.</p>
+            </div>
+            <div class="value-prop-item">
+                <span class="icon">🛣️</span>
+                <h3>Unlimited Mileage Options</h3>
+                <p>Drive without boundaries. Select from our wide range of fleet categories outfitted with full unlimited mileage plans for long-distance regional travel.</p>
+            </div>
+            <div class="value-prop-item">
+                <span class="icon">🛠️</span>
+                <h3>24/7 Roadside Assistance</h3>
+                <p>Every single reservation comes backed by comprehensive mechanical protection and on-call roadside towing support to keep your journey moving safely.</p>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- ==========================================
+     SECTION 5: FEATURED ARTICLES
+     ========================================== -->
+<section class="seo-locations-section" aria-labelledby="locations-heading">
+    <h2 id="locations-heading">Featured Articles</h2>
+    <p class="section-intro">Stay informed with our latest insights and tips for a seamless car rental experience.</p>
+
+    <div class="locations-list">
+        @if (ViewBag.FeaturedArticles != null)
+        {
+            foreach (var article in ViewBag.FeaturedArticles)
+            {
+                <div class="location-item">
+                    <img src="@article.ImageUrl"
+                         alt="@article.Title rental car available"
+                         loading="lazy"
+                         width="230"
+                         height="150">
+                    <h3>@article.Title</h3>
+                    <p>@(article.Description ?? "")</p>
+                    <a href="@article.PageUrl" class="location-link">@article.Title Services</a>
+                </div>
+            }
+        }
+    </div>
+    <div class="all-locations-btn-container">
+        <a href="/Home/Articles" class="btn-secondary">View All Car Rental Articles</a>
+    </div>
+
+</section>
+
+
+<!-- ==========================================
+     SECTION 5: SOCIAL PROOF & TRUST (E-E-A-T)
+     ========================================== -->
+<!--
+<section class="seo-reviews-section" aria-labelledby="reviews-heading">
+    <h2 id="reviews-heading">What Our Customers Say</h2>
+    <p class="section-intro">Read verified reviews from real drivers who enjoy our streamlined reservation services and clean fleets.</p>
+
+    <div class="reviews-container">
+        <blockquote class="review-card">
+            <div class="rating-stars" aria-label="5 out of 5 stars">⭐⭐⭐⭐⭐</div>
+            <p class="review-text">"The airport pickup process at LAX was completely seamless. The SUV was clean, well-maintained, and exactly what I booked online."</p>
+            <cite class="review-author">— Sarah M., Verified Traveler</cite>
+        </blockquote>
+        <blockquote class="review-card">
+            <div class="rating-stars" aria-label="5 out of 5 stars">⭐⭐⭐⭐⭐</div>
+            <p class="review-text">"Excellent customer service and zero hidden fees. Being able to cancel my booking 48 hours in advance for free saved my corporate trip."</p>
+            <cite class="review-author">— Michael T., Business Client</cite>
+        </blockquote>
+    </div>
+</section>
+-->
+<!-- ==========================================
+     SECTION 6: FREQUENTLY ASKED QUESTIONS
+     ========================================== -->
+<section class="seo-faq-section" aria-labelledby="faq-heading">
+    <h2 id="faq-heading">Frequently Asked Questions About Car Rental</h2>
+
+    <!-- Use structured semantic details tag for excellent mobile user-experience and clean layout -->
+    <div class="faq-accordion-wrapper">
+        @if (ViewBag.Faq != null)
+        {
+            foreach (var faq in ViewBag.Faq)
+            {
+                <details class="faq-item">
+                    <summary><strong>@faq.Title</strong></summary>
+                    <div class="faq-answer">
+                        <p>@faq.Description</p>
+                    </div>
+                </details>
+            }
+        }
+        <!--
+        <details class="faq-item">
+            <summary><strong>What do I need to rent a car?</strong></summary>
+            <div class="faq-answer">
+                <p>To finalize a vehicle pickup, you must present a valid driver's license held for at least one year, a major credit card under the primary driver's name, and matching official government identification or passports for international travelers.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary><strong>Are there age restrictions for vehicle rentals?</strong></summary>
+            <div class="faq-answer">
+                <p>The standard minimum rental age is 21 across most operating branches. However, drivers aged 21 to 24 may incur a nominal daily young driver fee, and specific premium fleet restrictions apply to sports or high-capacity luxury models.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary><strong>Can I modify or cancel my reservation?</strong></summary>
+            <div class="faq-answer">
+                <p>Yes, most reservations can be modified or cancelled up to 48 hours before your scheduled pickup time without penalty. Premium or specialty vehicle bookings may have different cancellation policies.</p>
+            </div>
+        </details>
+        -->
+    </div>
+    <div class="all-locations-btn-container">
+        <a href="/Home/FaqList" class="btn-secondary">View All Rental FAQs</a>
+    </div>
+
+</section>

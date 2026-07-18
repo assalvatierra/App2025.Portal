@@ -1,0 +1,88 @@
+@model IEnumerable<Portal.Models.ContentDto>
+
+@{
+    ViewData["Title"] = ViewBag.PageTitle ?? "Our Services";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">@ViewBag.PageTitle</h1>
+
+            @if (!string.IsNullOrWhiteSpace(ViewBag.PageMessage as string))
+            {
+                <p class="lead">@ViewBag.PageMessage</p>
+            }
+
+            <!-- Back to Home Button -->
+            <div class="mb-3">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Home
+                </a>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="alert alert-success" role="alert">
+                    Found @Model.Count() service(s)
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var content in Model)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                @if (!string.IsNullOrEmpty(content.ImageUrl))
+                                {
+                                    <img src="@content.ImageUrl" class="card-img-top" alt="@content.Title" style="height: 200px; object-fit: cover;">
+                                }
+                                <div class="card-body">
+                                    <h5 class="card-title">@content.Title</h5>
+                                    <p class="card-text">@(content.Description ?? "Explore this service.")</p>
+                                </div>
+                                @if (!string.IsNullOrEmpty(content.PageUrl))
+                                {
+                                    <div class="card-footer bg-transparent">
+                                        <a href="@content.PageUrl" class="btn btn-primary btn-sm w-100">Learn More</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <h4 class="alert-heading">No Content Found</h4>
+                    <p>No content is currently available. Please check back later.</p>
+                    <hr>
+                    <p class="mb-0">
+                        <a asp-controller="Home" asp-action="Index" class="alert-link">Return to Home</a>
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Additional styles for better card presentation -->
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    }
+
+    .card-title {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .card-text {
+        color: #555;
+    }
+</style>

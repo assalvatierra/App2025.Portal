@@ -1,0 +1,75 @@
+@model (Portal.Models.ItemDto item, List<int> compareList, bool showActions, string cardMode, string transactionType)
+
+@{
+    var item = Model.item;
+    var compareList = Model.compareList ?? new List<int>();
+    var showActions = Model.showActions;
+    var cardMode = Model.cardMode;
+    var transactionType = Model.transactionType ?? "Reservation";
+}
+
+<div class="col">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body">
+            <img src="@item.ImageUrl" alt="@(item.ImageAlt ?? $"{item.PortalItem.Name} rental car available")" loading="lazy" height="165">
+
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">@item.Title</h5>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(item.Description))
+            {
+                <p class="card-text text-muted">@item.Description</p>
+            }
+        </div>
+
+        <!-- Section: Specifications -->
+        @await Html.PartialAsync("_ItemSpecifications_CarRental", item.PortalItem.PortalItemSpecs)
+        @await Html.PartialAsync("_ItemPrice", item.PortalItem.PortalItemPrices)
+        @if (showActions)
+        {
+            <!-- Section: Footer -->
+            <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
+                @if (cardMode == "List")
+                {
+                    <a asp-controller="PortalReservation" 
+                       asp-action="ReservationForm" 
+                       asp-route-itemId="@item.PortalItem.Id"
+                       asp-route-transactionType="@transactionType"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-calendar-check"></i> Reserve
+                    </a>
+
+                    @if (compareList.Contains(item.PortalItem.Id))
+                    {
+                        <button type="button" 
+                        class="btn btn-sm btn-outline-danger remove-from-compare-btn" 
+                        data-item-id="@item.PortalItem.Id"
+                        data-item-name="@item.Title">
+                            <i class="bi bi-x-circle"></i> Remove from Compare
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" 
+                        class="btn btn-sm btn-outline-info add-to-compare-btn" 
+                        data-item-id="@item.PortalItem.Id"
+                        data-item-name="@item.Title">
+                            <i class="bi bi-clipboard-check"></i> Add to Compare
+                        </button>
+                    }
+                }
+                @if (cardMode == "Browse")
+                {
+                    <a asp-controller="PortalReservation"
+                       asp-action="ReservationForm"
+                       asp-route-itemId="@item.PortalItem.Id"
+                       asp-route-transactionType="@transactionType"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-calendar-check"></i> Select
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>

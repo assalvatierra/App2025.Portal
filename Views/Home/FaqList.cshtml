@@ -1,0 +1,72 @@
+@model IEnumerable<Portal.Models.ContentDto>
+
+@{
+    ViewData["Title"] = ViewBag.PageTitle ?? "Frequently Asked Questions";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 mb-3">@ViewBag.PageTitle</h1>
+                <p class="lead text-muted">Find answers to common questions about our car rental services</p>
+            </div>
+
+            <!-- Back to Home Button -->
+            <div class="mb-4">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Home
+                </a>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <!-- FAQ Accordion Wrapper -->
+                <section class="seo-faq-section" aria-labelledby="faq-heading">
+                    <div class="faq-accordion-wrapper">
+                        @foreach (var faq in Model)
+                        {
+                            <details class="faq-item">
+                                <summary><strong>@faq.Title</strong></summary>
+                                <div class="faq-answer">
+                                    <p>@faq.Description</p>
+                                </div>
+                            </details>
+                        }
+                    </div>
+                </section>
+
+                <!-- Summary Info -->
+                <div class="text-center mt-4">
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        Showing @Model.Count() frequently asked question(s)
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center" role="alert">
+                    <h4 class="alert-heading">
+                        <i class="bi bi-question-circle"></i> No FAQs Available
+                    </h4>
+                    <p>No frequently asked questions are currently available. Please check back later or contact us for assistance.</p>
+                    <hr>
+                    <p class="mb-0">
+                        <a asp-controller="Home" asp-action="Index" class="alert-link">Return to Home</a>
+                    </p>
+                </div>
+            }
+
+            <!-- Contact Section -->
+            <div class="mt-5 p-4 bg-light rounded text-center">
+                <h3 class="h4 mb-3">Still have questions?</h3>
+                <p>Can't find the answer you're looking for? Please feel free to reach out to our customer support team.</p>
+                <a href="#" class="btn btn-primary">
+                    <i class="bi bi-envelope"></i> Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

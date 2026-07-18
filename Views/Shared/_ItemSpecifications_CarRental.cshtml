@@ -1,0 +1,49 @@
+@model ICollection<Erp.Domain.Models.PortalItemSpec>
+@using System.Text.Json
+
+@if (Model != null && Model.Any())
+{
+    <!--Specification -->
+    <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted"><strong>Specification</strong></h6>
+        <ul class="list-group list-group-flush">
+            @foreach (var spec in Model.OrderBy(s => s.Order))
+            {
+                <li class="list-group-item">
+                    @if (!string.IsNullOrWhiteSpace(spec.JsonData))
+                    {
+                        try
+                        {
+                            var jsonData = JsonSerializer.Deserialize<Dictionary<string, string>>(spec.JsonData);
+
+                            @if (jsonData != null)
+                            {
+                                @if (jsonData.ContainsKey("passenger_capacity"))
+                                {
+                                    <div><i class="bi bi-person-fill"></i> <span>Passenger:</span> @jsonData["passenger_capacity"]</div>
+                                }
+                                @if (jsonData.ContainsKey("luggage_capacity"))
+                                {
+                                    <div><i class="bi bi-suitcase-fill"></i> <span>Luggage:</span> @jsonData["luggage_capacity"]</div>
+                                }
+                                @if (jsonData.ContainsKey("transmission"))
+                                {
+                                    <div><i class="bi bi-gear-fill"></i> <span>Transmission:</span> @jsonData["transmission"]</div>
+                                }
+                                @if (jsonData.ContainsKey("fuel"))
+                                {
+                                    <div><i class="bi bi-fuel-pump-fill"></i> <span>Fuel:</span> @jsonData["fuel"]</div>
+                                }
+
+                            }
+                        }
+                        catch
+                        {
+                            @spec.JsonData
+                        }
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}

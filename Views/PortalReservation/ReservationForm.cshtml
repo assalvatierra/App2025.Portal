@@ -1,0 +1,168 @@
+@model Portal.ViewModels.ReservationFormViewModel
+
+@{
+    ViewData["Title"] = Model.Reservation.TransactionType == "Quote" ? "Request Quote" : "Reservation Form";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            @* Display Item Card if available *@
+            @if (Model.Item != null)
+            {
+                <div class="mb-4">
+                    <h4 class="mb-3">Selected Item</h4>
+                    <div class="row row-cols-1 g-4">
+                        @await Html.PartialAsync("_ItemCard", (Model.Item, new List<int>(), showActions: false, cardMode: "", transactionType: Model.Reservation.TransactionType))
+                    </div>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeItemModal">
+                            <i class="bi bi-arrow-left-right"></i> Change Item
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <div class="card shadow">
+                <div class="card-header reservation-bg text-white">
+                    <h2 class="reservation-white-text-bg">
+                        @if (Model.Reservation.TransactionType == "Quote")
+                        {
+                            @:Request Quote Form
+                        }
+                        else
+                        {
+                            @:Reservation Form
+                        }
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form id="reservationForm" asp-action="ReservationForm" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <input type="hidden" asp-for="Reservation.PortalItemId" />
+                        <input type="hidden" asp-for="Reservation.TransactionType" />
+                        <input type="hidden" asp-for="Reservation.Status" />
+                        <input type="hidden" asp-for="Reservation.JsonData" />
+
+                        <div class="mb-3">
+                            <label asp-for="Reservation.CustomerName" class="form-label">Customer Name</label>
+                            <input asp-for="Reservation.CustomerName" class="form-control" placeholder="Enter your full name" />
+                            <span asp-validation-for="Reservation.CustomerName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Reservation.ContactNo" class="form-label">Contact Number</label>
+                            <input asp-for="Reservation.ContactNo" class="form-control" placeholder="Enter your contact number" />
+                            <span asp-validation-for="Reservation.ContactNo" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Reservation.ContactEmail" class="form-label">Email Address</label>
+                            <input asp-for="Reservation.ContactEmail" type="email" class="form-control" placeholder="Enter your email address" />
+                            <span asp-validation-for="Reservation.ContactEmail" class="text-danger"></span>
+                        </div>
+
+                        @await Html.PartialAsync("_ReservationAdditionalDetails", Model)
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.Action("CancelReservationForm", "PortalReservation")" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            @if (Model.Item != null)
+                            {
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> 
+                                    @if (Model.Reservation.TransactionType == "Quote")
+                                    {
+                                        @:Submit Quote Request
+                                    }
+                                    else
+                                    {
+                                        @:Submit Reservation
+                                    }
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changeItemModal">
+                                    <i class="bi bi-plus-circle"></i> Select Item
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Change Item Modal *@
+<div class="modal fade" id="changeItemModal" tabindex="-1" aria-labelledby="changeItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeItemModalLabel">Select a Different Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="itemListContainer">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading items...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        // Load items when modal is shown
+        document.getElementById('changeItemModal').addEventListener('show.bs.modal', function (event) {
+            // Only load if container is empty or has the loading spinner
+            var container = document.getElementById('itemListContainer');
+            if (!container.dataset.loaded) {
+                var transactionType = '@Model.Reservation.TransactionType';
+                fetch('@Url.Action("BrowseProducts", "Home")?transactionType=' + encodeURIComponent(transactionType))
+                    .then(response => response.text())
+                    .then(html => {
+                        // Parse the response and extract just the items list
+                        var parser = new DOMParser();
+                        var doc = parser.parseFromString(html, 'text/html');
+                        var itemsContainer = doc.querySelector('.row.row-cols-1');
+
+                        if (itemsContainer) {
+                            container.innerHTML = itemsContainer.outerHTML;
+                        } else {
+                            container.innerHTML = '<div class="alert alert-warning">No items available</div>';
+                        }
+                        container.dataset.loaded = 'true';
+                    })
+                    .catch(error => {
+                        console.error('Error loading items:', error);
+                        container.innerHTML = '<div class="alert alert-danger">Error loading items. Please try again.</div>';
+                    });
+            }
+        });
+
+        // Show modal automatically if Item is null
+        @if (Model.Item == null)
+        {
+            <text>
+        document.addEventListener('DOMContentLoaded', function() {
+            var changeItemModal = new bootstrap.Modal(document.getElementById('changeItemModal'));
+            changeItemModal.show();
+        });
+            </text>
+        }
+    </script>
+}

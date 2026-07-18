@@ -1,0 +1,17 @@
+@model List<Erp.Domain.Models.PortalItemPrice>
+
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted"><strong>Price</strong></h6>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+
+            @foreach (var price in Model)
+            {
+                <div>@price.BasePrice @price.BaseCurrency / @price.BaseUnit</div>
+            }
+            </li>
+        </ul>
+    </div>
+}

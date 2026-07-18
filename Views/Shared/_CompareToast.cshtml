@@ -1,0 +1,162 @@
+@* Compare Items Toast Notification *@
+<div id="compareToastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11;">
+    <div id="compareToast" class="toast align-items-center text-white bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-clipboard-check me-2"></i>
+                <span id="compareToastMessage">You have items ready to compare!</span>
+                <div class="mt-2">
+                    <a asp-controller="Home" asp-action="ItemsToCompare" class="btn btn-sm btn-light me-2">
+                        <i class="bi bi-eye"></i> View Comparison
+                    </a>
+                    <button type="button" id="clearCompareBtn" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-trash"></i> Clear All
+                    </button>
+                </div>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Use IIFE to encapsulate and wait for dependencies
+    (function initCompareToast() {
+        // Check if jQuery is loaded, if not, wait and retry
+        if (typeof $ === 'undefined') {
+            console.log('jQuery not loaded yet, retrying...');
+            setTimeout(initCompareToast, 100);
+            return;
+        }
+
+        // Check if Bootstrap is loaded
+        if (typeof bootstrap === 'undefined') {
+            console.log('Bootstrap not loaded yet, retrying...');
+            setTimeout(initCompareToast, 100);
+            return;
+        }
+
+        console.log('Dependencies loaded, initializing compare toast');
+
+        // Define checkCompareItems as a global function
+        window.checkCompareItems = function() {
+            console.log('Checking compare items...');
+            $.ajax({
+                url: '@Url.Action("GetCompareCount", "Home")',
+                type: 'GET',
+                success: function (response) {
+                    console.log('Compare count response:', response);
+                    if (response.count > 0) {
+                        // Update the toast message with count
+                        $('#compareToastMessage').text(`You have ${response.count} item(s) ready to compare!`);
+
+                        // Show the toast
+                        var toastElement = document.getElementById('compareToast');
+                        if (toastElement) {
+                            console.log('Showing compare toast');
+                            var toast = new bootstrap.Toast(toastElement);
+                            toast.show();
+                        } else {
+                            console.log('Toast element not found');
+                        }
+                    } else {
+                        console.log('No items in compare list');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error checking compare items:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                }
+            });
+        };
+
+        // Auto-check when DOM is ready
+        $(document).ready(function () {
+            console.log('DOM ready, initializing compare toast');
+            checkCompareItems();
+
+            // Handle Clear All button click
+            $('#clearCompareBtn').on('click', function () {
+                var button = $(this);
+
+                // Confirm with user
+                if (!confirm('Are you sure you want to clear all items from the comparison list?')) {
+                    return;
+                }
+
+                // Disable button during request
+                button.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("ClearCompareList", "Home")',
+                    type: 'POST',
+                    success: function (response) {
+                        if (response.success) {
+                            // Hide the toast
+                            var toastElement = document.getElementById('compareToast');
+                            if (toastElement) {
+                                var toast = bootstrap.Toast.getInstance(toastElement);
+                                if (toast) {
+                                    toast.hide();
+                                }
+                            }
+
+                            // Show success message
+                            showClearToast('success', response.message || 'All items cleared from comparison list');
+
+                            // Reload page if on ItemsToCompare view
+                            if (window.location.pathname.includes('ItemsToCompare')) {
+                                setTimeout(function() {
+                                    window.location.href = '@Url.Action("Index", "Home")';
+                                }, 1500);
+                            }
+                        } else {
+                            showClearToast('error', response.message || 'Failed to clear comparison list');
+                            button.prop('disabled', false);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        showClearToast('error', 'An error occurred. Please try again.');
+                        button.prop('disabled', false);
+                    }
+                });
+            });
+
+            // Toast notification function for clear action
+            function showClearToast(type, message) {
+                var toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
+                var toastHtml = `
+                    <div class="toast align-items-center text-white ${toastClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `;
+
+                // Create toast container if it doesn't exist
+                if ($('#clearToastContainer').length === 0) {
+                    $('body').append('<div id="clearToastContainer" class="toast-container position-fixed top-0 end-0 p-3"></div>');
+                }
+
+                var toastElement = $(toastHtml);
+                $('#clearToastContainer').append(toastElement);
+
+                var toast = new bootstrap.Toast(toastElement[0], {
+                    autohide: true,
+                    delay: 3000
+                });
+                toast.show();
+
+                // Remove toast element after it's hidden
+                toastElement.on('hidden.bs.toast', function () {
+                    $(this).remove();
+                });
+            }
+        });
+    })();
+</script>
+

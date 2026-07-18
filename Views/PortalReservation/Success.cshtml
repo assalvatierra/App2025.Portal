@@ -1,0 +1,123 @@
+@model Erp.Domain.Models.PortalReservation
+
+@{
+    ViewData["Title"] = Model.TransactionType == "Quote" ? "Quote Request Successful" : "Reservation Successful";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header reservation-bg text-white">
+                    <div class="text-center py-3">
+                        <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+                        <h2 class="reservation-white-text-bg mt-3 mb-0">
+                            @if (Model.TransactionType == "Quote")
+                            {
+                                @:Quote Request Successful!
+                            }
+                            else
+                            {
+                                @:Reservation Successful!
+                            }
+                        </h2>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-success" role="alert">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <strong>
+                            @if (Model.TransactionType == "Quote")
+                            {
+                                @:Thank you for your quote request!
+                            }
+                            else
+                            {
+                                @:Thank you for your reservation!
+                            }
+                        </strong> We've received your request and will process it shortly.
+                    </div>
+
+                    <h5 class="mb-3">Reservation Details</h5>
+                    <div class="mb-4">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">
+                                <strong>Reservation ID:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-primary">#@Model.Id</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">
+                                <strong>Customer Name:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                @Model.CustomerName
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">
+                                <strong>Contact Number:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                @Model.ContactNo
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">
+                                <strong>Email Address:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                @Model.ContactEmail
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">
+                                <strong>Date Received:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                @(Model.DateReceived.ToString("MMMM dd, yyyy hh:mm tt") ?? "N/A")
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">
+                                <strong>Status:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-success">@Model.Status</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted">
+                                <strong>Transaction Type:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-info">@Model.TransactionType</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-top pt-4 mt-4">
+                        <p class="text-muted mb-4">
+                            <i class="bi bi-envelope"></i>
+                            A confirmation email has been sent to <strong>@Model.ContactEmail</strong>
+                        </p>
+
+                        <div class="d-flex justify-content-between gap-3">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary flex-fill">
+                                <i class="bi bi-house-door"></i> Back to Home
+                            </a>
+                            @if (Model.TransactionType != "Quote")
+                            {
+                                <a asp-controller="Payment" asp-action="Index" asp-route-reservationId="@Model.Id" class="btn btn-primary flex-fill">
+                                    <i class="bi bi-credit-card"></i> Proceed to Payment
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
