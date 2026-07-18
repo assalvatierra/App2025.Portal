@@ -17,6 +17,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Register 3-layer architecture dependencies
+builder.Services.AddScoped<IPortalConfigurationDbLayer, PortalConfigurationDbLayer>();
+builder.Services.AddScoped<IPortalConfigurationService, PortalConfigurationService>();
 builder.Services.AddScoped<IPortalItemDbLayer, PortalItemDbLayer>();
 builder.Services.AddScoped<IPortalItemService, PortalItemService>();
 builder.Services.AddScoped<IPortalItemSpecDbLayer, PortalItemSpecDbLayer>();

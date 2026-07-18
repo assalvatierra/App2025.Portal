@@ -7,6 +7,7 @@ namespace Portal.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext(options)
     {
+        public DbSet<PortalConfiguration> PortalConfiguration { get; set; } = default!;
         public DbSet<PortalItem> PortalItem { get; set; } = default!;
         public DbSet<PortalItemSpec> PortalItemSpec { get; set; } = default!;
         public DbSet<PortalReservation> PortalReservation { get; set; } = default!;
