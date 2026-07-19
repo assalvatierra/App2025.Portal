@@ -5,6 +5,7 @@ namespace Portal.DBServices
 {
     public class PortalConfigurationService: IPortalConfigurationService
     {
+        const string PORTAL_CODE = "PORTAL";
         private readonly IPortalConfigurationDbLayer _portalConfigurationDbLayer;
         public PortalConfigurationService(IPortalConfigurationDbLayer portalConfigurationDbLayer)
         {
@@ -13,7 +14,7 @@ namespace Portal.DBServices
         public async Task<List<PortalConfiguration>> GetPortalConfigurationByNameAsync(string name)
         {
             // Call the database layer to get portal configurations by name
-            return await _portalConfigurationDbLayer.GetPortalConfigurationByNameAndCodeAsync(name, "PORTAL");
+            return await _portalConfigurationDbLayer.GetPortalConfigurationByNameAndCodeAsync(name, PORTAL_CODE);
         }
     }
 }
