@@ -2,6 +2,6 @@
 {
     public interface IReservationService
     {
-        public void ProcessPendingReservations();
+        public Task ProcessPendingReservations();
     }
 }

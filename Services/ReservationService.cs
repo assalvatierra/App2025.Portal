@@ -6,60 +6,92 @@ namespace Portal.Services
 {
     public class ReservationService:IReservationService
     {
+        private readonly IPortalConfigurationService _configuration;
         private readonly IPortalReservationService _reservationDbService;
         private readonly IEmailService _emailService;
-        public ReservationService(IPortalReservationService reservationDbService, IEmailService emailService)
+        public ReservationService(
+            IPortalConfigurationService configuration, 
+            IPortalReservationService reservationDbService, 
+            IEmailService emailService
+            )
         {
+            _configuration = configuration;
             _reservationDbService = reservationDbService;
             _emailService = emailService;
         }
-        public void ProcessPendingReservations()
+        public async Task ProcessPendingReservations()
         {
             var pendingReservations = _reservationDbService.GetByStatusAsync("New").Result;
-            foreach (var reservation in pendingReservations)
+
+            if(pendingReservations != null && pendingReservations.Any())
             {
-                // Send email notification
-                this.SendInternalReservationNotification(reservation);
-
-                // Update reservation status to "Processed"
-
-                //reservation.Status = "Processed";
-                //_reservationDbService.UpdateReservation(reservation);
+                await this.SendInternalReservationNotification(pendingReservations);
             }
+
+            //foreach (var reservation in pendingReservations)
+            //{
+            //    // Send email notification
+            //    this.SendInternalReservationNotification(reservation);
+
+            //    // Update reservation status to "Processed"
+
+            //    //reservation.Status = "Processed";
+            //    //_reservationDbService.UpdateReservation(reservation);
+            //}
         }
 
-        private async void SendInternalReservationNotification(PortalReservation reservation)
+        private async Task SendInternalReservationNotification(List<PortalReservation> reservations)
         {
             string[] EmailRecipient = Array.Empty<string>();
+            string emailSubject = string.Empty;
+            string emailTitle = string.Empty;
             string emailMessage = string.Empty;
 
-            // TODO: Get the email and message from configuration
-            EmailRecipient = new[] { "assalvatierra@yahoo.com" };
-            emailMessage = "New Reservation";
+            //get configuration setting value
+            var config = _configuration.GetPortalConfigurationByNameAsync("Reservation").Result;
+            if(config != null)
+            {
+                string jsonsetting = config.First().Settings;
+                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonsetting);
 
+                string notificationEmail = settings.ContainsKey("InternalNotificationEmail") ? settings["InternalNotificationEmail"] : string.Empty;
+                EmailRecipient = new[] { notificationEmail };
 
-            //if (!string.IsNullOrEmpty(paymentExternal.JsonInfo))
-            //{
-            //    var jsonInfo = JsonSerializer.Deserialize<PaymentExternalJsonInfo>(
-            //        paymentExternal.JsonInfo,
-            //        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            //    );
-            //    if (jsonInfo != null)
-            //    {
-            //        customerEmail = new[] { jsonInfo.ReceiptEmail ?? string.Empty };
-            //        emailMessage = jsonInfo.EmailMessage ?? string.Empty;
-            //    }
-            //}
+                emailSubject = settings.ContainsKey("InternalNotificationEmailSubject") ? settings["InternalNotificationEmailSubject"] : "New Reservation";
+                emailTitle = settings.ContainsKey("InternalNotificationEmailTitle") ? settings["InternalNotificationEmailTitle"] : "Reservation";
+                emailMessage = settings.ContainsKey("InternalNotificationEmailMessage") ? settings["InternalNotificationEmailMessage"] : "A new reservation has been made.";
+            }
 
-            await _emailService.SendEmailAsync(
+            // make list of reservation details
+            string reservationDetails = string.Join("<br/>", 
+                reservations.Select(r => 
+                    $"Reservation ID: {r.Id}, Customer: {r.CustomerName}, Email: {r.ContactEmail}, Date Received: {r.DateReceived}"));
+
+            if(EmailRecipient.Length > 0 && !string.IsNullOrEmpty(EmailRecipient[0]))
+            {
+              await _emailService.SendEmailAsync(
                 EmailRecipient,
                 Array.Empty<string>(),
                 Array.Empty<string>(),
-                "Realbreeze Travel & Tours ",
-                $"New Reservation Request\n<br>" +
-                $"Customer: {reservation.CustomerName}\n<br>" +
-                $"{emailMessage}\n<br>" 
+                emailSubject,
+                $"{emailTitle}\n<br>" +
+                $"{emailMessage}\n<br>" +
+                $"{reservationDetails}\n<br>" 
                 );
+            }
+            else {
+                // Log or handle the case where no email recipient is configured
+                //send email notification to administrator email
+                string adminEmail = _configuration.GetPortalAdminEmail().Result;
+                await _emailService.SendEmailAsync(
+                    new[] { adminEmail },
+                    Array.Empty<string>(),
+                    Array.Empty<string>(),
+                    "Reservation Notification Error",
+                    $"No internal notification email configured. Please check the portal configuration settings."
+                );
+
+            }
 
         }
     }

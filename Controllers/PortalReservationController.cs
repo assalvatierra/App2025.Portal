@@ -119,8 +119,8 @@ namespace Portal.Controllers
             var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
             if(config.Any())
             {
-                string strSetting = config.First().Settings;
-                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(strSetting);
+                string jsonsetting = config.First().Settings;
+                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonsetting);
                 ViewBag.ProceedToPayment = settings.ContainsKey("ProceedToPayment") && bool.TryParse(settings["ProceedToPayment"], out var proceed) ? proceed : false;  
             }
             return View(reservations);
