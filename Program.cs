@@ -31,6 +31,7 @@ builder.Services.AddScoped<IPortalContentDbLayer, PortalContentDbLayer>();
 builder.Services.AddScoped<IPortalContentService, PortalContentService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<ISitemapService, SitemapService>();
 
 // Add session support
 builder.Services.AddDistributedMemoryCache();
