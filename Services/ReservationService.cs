@@ -9,23 +9,33 @@ namespace Portal.Services
         private readonly IPortalConfigurationService _configuration;
         private readonly IPortalReservationService _reservationDbService;
         private readonly IEmailService _emailService;
+        private readonly ILogger<ReservationService> _logger;
         public ReservationService(
             IPortalConfigurationService configuration, 
             IPortalReservationService reservationDbService, 
-            IEmailService emailService
+            IEmailService emailService,
+            ILogger<ReservationService> logger
             )
         {
             _configuration = configuration;
             _reservationDbService = reservationDbService;
             _emailService = emailService;
+            _logger = logger;
         }
         public async Task ProcessPendingReservations()
         {
+            _logger.LogInformation("ProcessPendingReservations called at {Time}", DateTime.Now);
+
             var pendingReservations = _reservationDbService.GetByStatusAsync("New").Result;
 
             if(pendingReservations != null && pendingReservations.Any())
             {
+                _logger.LogInformation("Found {Count} pending reservations", pendingReservations.Count);
                 await this.SendInternalReservationNotification(pendingReservations);
+            }
+            else
+            {
+                _logger.LogInformation("No pending reservations found");
             }
 
             //foreach (var reservation in pendingReservations)

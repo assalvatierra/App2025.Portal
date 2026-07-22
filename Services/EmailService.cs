@@ -91,7 +91,7 @@ namespace Portal.Services
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(username, password),
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                Timeout = 30000 // 30 seconds timeout
+                Timeout = 120000 // 120 seconds timeout
             };
 
             try

@@ -29,7 +29,7 @@ builder.Services.AddScoped<IPortalCategoryDbLayer, PortalCategoryDbLayer>();
 builder.Services.AddScoped<IPortalCategoryServices, PortalCategoryServices>();
 builder.Services.AddScoped<IPortalContentDbLayer, PortalContentDbLayer>();
 builder.Services.AddScoped<IPortalContentService, PortalContentService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailService, EmailServiceV2>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 
 // Add session support

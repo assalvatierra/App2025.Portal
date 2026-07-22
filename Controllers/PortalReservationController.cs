@@ -16,17 +16,20 @@ namespace Portal.Controllers
         private readonly IPortalReservationService _service;
         private readonly IPortalItemService _portalItemService;
         private readonly IReservationService _reservationService;
+        private readonly ILogger<PortalReservationController> _logger;
 
         public PortalReservationController(
             IPortalConfigurationService portalConfigurationService,
             IPortalReservationService service, 
             IPortalItemService portalItemService,
-            IReservationService reservationService)
+            IReservationService reservationService,
+            ILogger<PortalReservationController> logger)
         {
             _Configuration = portalConfigurationService;
             _service = service;
             _portalItemService = portalItemService;
             _reservationService = reservationService;
+            _logger = logger;
         }
 
         // GET: PortalReservation/ReservationForm
@@ -230,10 +233,15 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [Route("api/[controller]/ProcessPendingReservations")]
         public async Task<IActionResult> ProcessPendingReservations()
         {
-            _reservationService.ProcessPendingReservations();
-            return NoContent();
+            _logger.LogInformation("ProcessPendingReservations endpoint called at {Time} from {RemoteIp}", 
+                DateTime.Now, 
+                HttpContext.Connection.RemoteIpAddress);
+
+            await _reservationService.ProcessPendingReservations();
+            return Ok(new { message = "Pending reservations processed successfully" });
         }
 
     }
