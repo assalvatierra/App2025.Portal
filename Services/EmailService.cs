@@ -17,10 +17,14 @@ namespace Portal.Services
             // email settings
             // https://myaccount.google.com/apppasswords
 
+            var smtpServer = _configuration["EmailSettings:Host"];
+            var smtpPort = int.Parse(_configuration["EmailSettings:Port"]);
+            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"]);
             var fromAddress = _configuration["EmailSettings:FromAddress"];
             var displayName = _configuration["EmailSettings:FromName"];
             var username = _configuration["EmailSettings:UserName"];
             var password = _configuration["EmailSettings:Password"];
+            var headermailer = _configuration["EmailSettings:HeaderMailer"];
 
             if (string.IsNullOrWhiteSpace(fromAddress))
             {
@@ -69,20 +73,36 @@ namespace Portal.Services
                 }
             }
 
+            // Validate that at least one recipient exists
+            if (message.To.Count == 0 && message.CC.Count == 0 && message.Bcc.Count == 0)
+            {
+                throw new InvalidOperationException("At least one recipient (To, CC, or BCC) is required.");
+            }
+
             // Helps receiving servers classify the message correctly
-            message.Headers.Add("X-Mailer", "AngularApp1 Mailer");
-            message.Headers.Add("Precedence", "bulk");
+            //message.Headers.Add("X-Mailer", headermailer);
+            //message.Headers.Add("Precedence", "bulk");
             message.Priority = MailPriority.Normal;
             message.ReplyToList.Add(new MailAddress(fromAddress, displayName ?? string.Empty));
 
-            using var client = new SmtpClient("smtp.gmail.com", 587)
+            using var client = new SmtpClient(smtpServer, smtpPort)
             {
-                EnableSsl = true,
+                EnableSsl = enableSsl,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(username, password)
+                Credentials = new NetworkCredential(username, password),
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 30000 // 30 seconds timeout
             };
 
-            await client.SendMailAsync(message);
+            try
+            {
+                await client.SendMailAsync(message);
+            }
+            catch (SmtpException ex)
+            {
+                // Log detailed SMTP error for debugging
+                throw new InvalidOperationException($"Failed to send email via SMTP. Status: {ex.StatusCode}, Message: {ex.Message}", ex);
+            }
         }
 
         public Task<string> ReadEmailAsync(string emailId)
