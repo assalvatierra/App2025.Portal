@@ -108,7 +108,7 @@
                             <a asp-controller="Home" asp-action="Index" class="btn btn-secondary flex-fill">
                                 <i class="bi bi-house-door"></i> Back to Home
                             </a>
-                            @if (Model.TransactionType != "Quote")
+                            @if (ViewBag.ProceedToPayment==true && Model.TransactionType != "Quote")
                             {
                                 <a asp-controller="Payment" asp-action="Index" asp-route-reservationId="@Model.Id" class="btn btn-primary flex-fill">
                                     <i class="bi bi-credit-card"></i> Proceed to Payment

@@ -20,6 +20,12 @@ namespace Portal.DBLayer
 
         public async Task<List<PortalItem>> SearchItemsAsync(string searchTerm, List<int> itemIds)
         {
+            List<string> searchKeywords=new List<string>();
+            searchTerm
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .ToList()
+                .ForEach(t =>t.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(t1 => searchKeywords.Add(t1)));
+
             var query = _context.PortalItem                    
                 .Include(itemspecs => itemspecs.PortalItemSpecs)
                 .Include(portalItemPrices => portalItemPrices.PortalItemPrices
@@ -31,13 +37,16 @@ namespace Portal.DBLayer
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(p => 
-                        (p.IsActive && !p.IsArchived) &&
-                        (
-                            (p.Name.Contains(searchTerm)) || 
-                            (p.Description != null && p.Description.Contains(searchTerm)) ||
-                            (p.Code != null && p.Code.Contains(searchTerm))
-                         )
+                        (p.IsActive && !p.IsArchived) 
                     );
+                searchKeywords.ForEach(keyword =>
+                {
+                    query = query.Where(p =>
+                        (p.Name.Contains(keyword)) ||
+                        (p.Description != null && p.Description.Contains(keyword)) ||
+                        (p.Code != null && p.Code.Contains(keyword))
+                    );
+                });
             }
 
             if (itemIds != null && itemIds.Count > 0)
@@ -70,18 +79,6 @@ namespace Portal.DBLayer
             {
                 query = query.Where(c => c.PortalItemCategories.Any(pic => pic.PortalCategory != null && pic.PortalCategory.CategoryType == type));
             }
-
-
-            //if (!string.IsNullOrWhiteSpace(category))
-            //{
-            //    query = query.Where(p => p.PortalItemCategories.Any(pic => 
-            //    pic.PortalCategory.Name.Trim().ToUpper() == category.Trim().ToUpper()
-            //    && (
-            //        pic.PortalCategory.CategoryType.Trim().ToUpper() == type.Trim().ToUpper()
-            //        || string.IsNullOrWhiteSpace(type)
-            //        )
-            //    ));
-            //}
 
             return await query.ToListAsync();
         }

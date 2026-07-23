@@ -12,14 +12,18 @@ namespace Portal.Controllers
     //[Authorize]
     public class PortalReservationController : Controller
     {
+        private readonly IPortalConfigurationService _Configuration;
         private readonly IPortalReservationService _service;
         private readonly IPortalItemService _portalItemService;
         private readonly IReservationService _reservationService;
 
-        public PortalReservationController(IPortalReservationService service, 
+        public PortalReservationController(
+            IPortalConfigurationService portalConfigurationService,
+            IPortalReservationService service, 
             IPortalItemService portalItemService,
             IReservationService reservationService)
         {
+            _Configuration = portalConfigurationService;
             _service = service;
             _portalItemService = portalItemService;
             _reservationService = reservationService;
@@ -112,6 +116,13 @@ namespace Portal.Controllers
             }
 
             ViewBag.Message = "Reservation submitted successfully!";
+            var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
+            if(config.Any())
+            {
+                string jsonsetting = config.First().Settings;
+                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonsetting);
+                ViewBag.ProceedToPayment = settings.ContainsKey("ProceedToPayment") && bool.TryParse(settings["ProceedToPayment"], out var proceed) ? proceed : false;  
+            }
             return View(reservations);
         }
 
