@@ -83,10 +83,6 @@ namespace Portal.Services
         public List<string> GetItemPages()
         {
             List<string> items = new List<string>();
-            items.Add("/shop/");
-            items.Add("/about-car-rental-davao/");
-            items.Add("/contact-us/");
-
             items.Add("/Home/OurProducts");
             items.Add("/Home/OurServices");
             items.Add("/Home/Articles");
