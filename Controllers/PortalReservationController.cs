@@ -90,10 +90,20 @@ namespace Portal.Controllers
                     reservation.JsonData = "{}";
                 }
 
-                await _service.AddAsync(reservation);
+                var addedReservation = await _service.AddAsync(reservation);
+
+                if (addedReservation == null)
+                {
+                    ModelState.AddModelError("", "Failed to add reservation. Please try again.");
+                    return View(viewModel);
+                }
+
+                await this._reservationService.SendCustomerNotification(addedReservation);
+
+                //this._reservationService.
                 TempData["SuccessMessage"] = "Reservation submitted successfully!";
-                TempData["TransactionType"] = reservation.TransactionType;
-                return RedirectToAction("Success", new { id = reservation.Id });
+                TempData["TransactionType"] = addedReservation.TransactionType;
+                return RedirectToAction("Success", new { id = addedReservation.Id });
             }
 
             // Reload the item on validation failure

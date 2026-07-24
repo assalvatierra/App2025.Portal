@@ -1,7 +1,9 @@
-﻿namespace Portal.Services
+﻿using Erp.Domain.Models;
+namespace Portal.Services
 {
     public interface IReservationService
     {
-        public Task ProcessPendingReservations();
+        Task SendCustomerNotification(PortalReservation reservation );
+        Task ProcessPendingReservations();
     }
 }

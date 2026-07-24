@@ -32,22 +32,57 @@ namespace Portal.Services
             {
                 _logger.LogInformation("Found {Count} pending reservations", pendingReservations.Count);
                 await this.SendInternalReservationNotification(pendingReservations);
+
+                foreach (var reservation in pendingReservations)
+                {
+                    await this.SendCustomerNotification(reservation);
+                }
             }
             else
             {
                 _logger.LogInformation("No pending reservations found");
             }
+        }
 
-            //foreach (var reservation in pendingReservations)
-            //{
-            //    // Send email notification
-            //    this.SendInternalReservationNotification(reservation);
+        public async Task SendCustomerNotification(PortalReservation reservation)
+        {
+            if (reservation == null)
+            {
+                _logger.LogWarning("SendCustomerNotification called with null reservation");
+                return;
+            }
 
-            //    // Update reservation status to "Processed"
+            if (string.IsNullOrWhiteSpace(reservation.ContactEmail))
+            {
+                _logger.LogWarning("Reservation {ReservationId} has no contact email; skipping customer notification", reservation.Id);
+                return;
+            }
 
-            //    //reservation.Status = "Processed";
-            //    //_reservationDbService.UpdateReservation(reservation);
-            //}
+            try
+            {
+                string subject = "Your reservation is in progress";
+                string body = $"Dear {reservation.CustomerName},<br/><br/>" +
+                              $"We have received your reservation (ID: {reservation.Id}) on {reservation.DateReceived:G}. " +
+                              "It is now in progress and our team will contact you if any additional information is required.<br/><br/>" +
+                              "Thank you for choosing us.<br/><br/>" +
+                              "Regards,<br/>Portal Team";
+
+                await _emailService.SendEmailAsync(
+                    new[] { reservation.ContactEmail },
+                    Array.Empty<string>(),
+                    Array.Empty<string>(),
+                    subject,
+                    body
+                );
+
+                reservation.Status = "In Progress";
+                await _reservationDbService.UpdateAsync(reservation);
+                _logger.LogInformation("Sent customer notification for reservation {ReservationId} and updated status to In Progress", reservation.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send customer notification for reservation {ReservationId}", reservation.Id);
+            }
         }
 
         private async Task SendInternalReservationNotification(List<PortalReservation> reservations)
