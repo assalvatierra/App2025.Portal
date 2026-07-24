@@ -1,57 +1,77 @@
-html {
-  font-size: 14px;
+﻿body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background: #f9f9f9;
+    color: #333;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.content-area {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+h1, h2, h3 {
+    color: #006699;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+ul {
+    margin: 10px 0 20px 20px;
 }
 
-body {
-  margin-bottom: 60px;
+.contact {
+    background: #eef7ff;
+    padding: 15px;
+    border-left: 4px solid #006699;
+    margin: 20px 0;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.highlight {
+    font-weight: bold;
+    color: #cc0000;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.article-banner-img {
+    width: 100%;
 }
 
-/* Compare Toast Styling */
-#compareToast {
-    min-width: 350px;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+.list-img-link{
+    height: 190px;
 }
 
-#compareToast .toast-body {
+.list-text-center {
     display: flex;
     align-items: center;
+    height: 200px;
+}
+
+
+.list-text-center span{
+    padding:20px;
+    font-weight:bold;
+    font-size:20px;
+}
+
+.section-images {
+    display: flex;
     flex-wrap: wrap;
+    flex-direction:row;
 }
 
-#compareToast .btn-light {
-    font-size: 0.875rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    transition: background-color 0.15s ease-in-out;
-}
+    .section-images img {
+        padding: 0px;
+        max-width: auto;
+    }
 
-#compareToast .btn-light:hover {
-    background-color: #e2e6ea;
-    border-color: #dae0e5;
+.section-images-4 img {
+    padding: 0px;
+    max-width: auto;
+    height: 170px;
 }
 
 /* Base layout */
