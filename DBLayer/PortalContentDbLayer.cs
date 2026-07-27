@@ -15,16 +15,16 @@ namespace Portal.DBLayer
         {
             return await _context.PortalContent.ToListAsync();
         }
-        public async Task<List<PortalContent>> GetContentsByCategoryAsync(string category, string? type)
+        public async Task<List<PortalContent>> GetContentsByCategoryAsync(List<string> category, string? type)
         {
             var query = _context.PortalContent
                 .Include(p => p.PortalContentCategories)
                 .ThenInclude(pcc => pcc.PortalCategory)
                 .Where(c=>c.Status=="Active")
                 .AsQueryable();
-            if (!string.IsNullOrEmpty(category))
+            if (category != null && category.Any())
             {
-                query = query.Where(c => c.PortalContentCategories.Any(pcc => pcc.PortalCategory != null && pcc.PortalCategory.Name == category));
+                query = query.Where(c => c.PortalContentCategories.Any(pcc => pcc.PortalCategory != null && category.Contains(pcc.PortalCategory.Name)));
             }
             if (!string.IsNullOrEmpty(type))
             {

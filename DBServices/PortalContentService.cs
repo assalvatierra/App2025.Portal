@@ -15,14 +15,24 @@ namespace Portal.DBServices
             public string? PageUrl { get; set; }
         }
 
-
+        private readonly IConfiguration _configuration;
         private readonly IPortalContentDbLayer _portalContentDbLayer;
-        public PortalContentService(IPortalContentDbLayer portalContentDbLayer)
+        public PortalContentService(
+            IConfiguration configuration,
+            IPortalContentDbLayer portalContentDbLayer)
         {
             _portalContentDbLayer = portalContentDbLayer;
+            _configuration = configuration;
         }
-        public async Task<List<ContentDto>> GetContentsByCategoryAsync(string category, string? type)
+        public async Task<List<ContentDto>> GetContentsByCategoryAsync(List<string> category, string? type)
         {
+            var TemporaryContents = _configuration["TemporaryContents:Enabled"];
+            if (bool.Parse(TemporaryContents))
+            {
+                var TemporaryServices = _configuration["TemporaryContents:" + type];
+                category = category.Concat(new[] { TemporaryServices }).ToList();
+            }
+
             var content = await _portalContentDbLayer.GetContentsByCategoryAsync(category, type);
             return content.Select(c =>
                 {

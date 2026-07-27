@@ -5,7 +5,7 @@ namespace Portal.DBServices
 {
     public interface IPortalContentService
     {
-        Task<List<ContentDto>> GetContentsByCategoryAsync(string category, string? type);
+        Task<List<ContentDto>> GetContentsByCategoryAsync(List<string> category, string? type);
         Task<PortalContent?> GetByIdAsync(int id);
 
     }

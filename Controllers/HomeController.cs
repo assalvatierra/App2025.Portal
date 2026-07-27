@@ -30,10 +30,10 @@ namespace Portal.Controllers
             ViewBag.ProductCategories = categories
                 .Where(c => c.PortalCategory.CategoryType == "Product");
 
-            ViewBag.ServiceCategories = await _portalContentService.GetContentsByCategoryAsync("Services", null);
-            ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync("WhyUs", null);
-            ViewBag.Faq = await _portalContentService.GetContentsByCategoryAsync("Faq", null);
-            ViewBag.FeaturedArticles = await _portalContentService.GetContentsByCategoryAsync("FeaturedBlog", null);
+            ViewBag.ServiceCategories = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, "Service");
+            ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "WhyUs" }, "WhyUs");
+            ViewBag.Faq = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Faq" }, "Faq");
+            ViewBag.FeaturedArticles = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "FeaturedBlog" }, "FeaturedBlog");
 
             return View();
         }
@@ -101,7 +101,8 @@ namespace Portal.Controllers
         public async Task<IActionResult> OurServices()
         {
             ViewBag.PageTitle = "Car Rental Services";
-            var results = await _portalContentService.GetContentsByCategoryAsync("Services", null);
+
+            var results = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, null);
 
             return View("ContentList", results);
         }
@@ -110,7 +111,7 @@ namespace Portal.Controllers
         public async Task<IActionResult> Articles()
         {
             ViewBag.PageTitle = "Car Rental Articles";
-            var results = await _portalContentService.GetContentsByCategoryAsync("Articles", null);
+            var results = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Articles" }, null);
 
             return View("ContentList", results);
         }
@@ -119,7 +120,7 @@ namespace Portal.Controllers
         public async Task<IActionResult> FeaturedBlog()
         {
             ViewBag.PageTitle = "Car Rental Featured";
-            var results = await _portalContentService.GetContentsByCategoryAsync("FeaturedBlog", "");
+            var results = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "FeaturedBlog" }, "");
 
             return View("ContentList", results);
         }
@@ -128,7 +129,7 @@ namespace Portal.Controllers
         public async Task<IActionResult> FaqList()
         {
             ViewBag.PageTitle = "Car Rental FAQs";
-            var results = await _portalContentService.GetContentsByCategoryAsync("Faq", null);
+            var results = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Faq" }, null);
 
             return View("FaqList", results);
         }
