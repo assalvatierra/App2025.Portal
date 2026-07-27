@@ -22,4 +22,44 @@
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJ-Car-Rental-Davao-Group-Tavel-cost-effective-group.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJ-Davao-Car-Rental-Fortuner-Davao-freedom-to-explore.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJ-Davao-Car-Rental-Kapatagan-freedom-to-explore.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJ-Davao-Car-Rental-Van-freedom-to-explore.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Digos-Kaptagan-Day-Tour.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Featured-Davao-City-Tour.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Featured-Davao-Countryside-Tour-.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Featured-Marilog-Buda-Tour.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Featured-Mati-Davao-Oriental.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Featured-Samal-Inland-Tour.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Featured-Surigao-del-Sur-Tour.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJDavao-Car-Rental-Top-5-reasons-to-avail-Tour-in-davao-banner.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Bangkerohan-Fruit-Store-navigate-davao.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Davao-Crocodile-Park-must-see-destinations-2.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Davao-Crocodile-Park-must-see-destinations.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Davao-Package-Buda-Tour-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Davao-Package-Buda-Tour-Bemwa-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Davao-Package-Buda-Tour-Sonnenberg-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Davao-Package-Davao-Hagimit-Falls-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Davao-Package-Surigao-Tour-Enchanted-River-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Durian-Fruit-enjoy-local-fruits.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Durian-Store-davao-enjoy-local-flavors.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Jonathan-Tejada-Calma-travel-companion.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Malagos-Group-Tour-travel-companion.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Mati-Package-Mati-Tour-Dahican-Beach-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Mati-Package-Mati-Tour-Dinosaur-Island-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Mount-Apo-3-must-see-destinations.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Pasalubong-center-navigate-like-a-local.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Phil-Eagle-3-must-see-destinations.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Philippine-eagle-must-see-destinations.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Pobacion-Market-Davao-navigate-davao.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Roxas-Foods-enjoy-local-flavors.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Roxas-Night-Market-enjoy-local-flavors-2.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Roxas-Night-Market-enjoy-local-flavors.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Samal-Island-Hopping-Guests-travel-companion.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Surigao-Package-Surigao-Tour-Tinuy-an-falls-access-to-gems.webp" />
+    <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\Van-cost-effective-group.webp" />
+  </ItemGroup>
+
 </Project>
