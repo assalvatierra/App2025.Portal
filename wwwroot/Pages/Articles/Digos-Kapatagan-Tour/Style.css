@@ -63,14 +63,28 @@ ul {
 }
 
     .section-images img {
-        height: 230px;
-        width: 33%;
+        max-width: 100%;
+        height: auto;
+        margin: 10px 0;
     }
 
 .section-images-4 img {
     padding: 0px;
     max-width: auto;
     height: 170px;
+}
+
+.section img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+}
+
+
+.section-img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
 }
 
 /* Base layout */
