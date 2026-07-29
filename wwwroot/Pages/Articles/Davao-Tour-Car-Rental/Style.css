@@ -180,18 +180,6 @@ body {
         margin-bottom: 0.5rem;
     }
 
-/* CTA box */
-.cta-box {
-    margin-top: 1rem;
-    padding: 1rem 1.25rem;
-    border-radius: 8px;
-    background: #1a3b5d;
-    color: #ffffff;
-}
-
-    .cta-box p {
-        margin: 0.25rem 0;
-    }
 
 /* Tags */
 .tags {

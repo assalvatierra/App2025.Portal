@@ -208,39 +208,10 @@
                     <li><strong>Secure Belongings:</strong> Lock the vehicle and keep valuables out of sight.</li>
                 </ul>
             </section>
-            
-    <section class="section">
-        <h2>Ready to Rent a SUV Car?</h2>
-        <p>
-            Rent a SUV Car. We offer reliable vehicles at great prices.
-            Reserve your ride today and hit the road!
-        </p>
-        <div class="cta-box">
-            <p><strong>CHAT:</strong> Viber / WhatsApp (+63) 926-733-5449</p>
-            <p><strong>MOBILE:</strong> Globe (+63) 926-733-5449 • Smart (+63) 998-959-1074</p>
-            <p><strong>E-mail:</strong> AJDavao88@gmail.com</p>
-            <p><strong>Facebook:</strong> AJDavao Car Rentals</p>
-        </div>
-                    
-        <div class="form-row" style="margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
-            <div class="form-group">
-                <label> </label>
-                <div style="display: flex; gap: 10px;">
-                    <a href="@Url.Action("ReservationForm", "PortalReservation", new { itemId = 0, transactionType = "Booking" })" class="btn btn-outline-primary" style="flex: 1; text-align: center;">
-                        <i class="bi bi-calendar-check"></i> Reserve Now
-                    </a>
-                    <a href="@Url.Action("ReservationForm", "PortalReservation", new { itemId = 0, transactionType = "Quote" })" class="btn btn-outline-primary" style="flex: 1; text-align: center;">
-                        <i class="bi bi-clipboard-check"></i> Request Quote
-                    </a>
-                </div>
-            </div>
-        </div>
 
-        <p class="tags">
-            Tagged: <span>Davao Car Rental</span>, <span>SUV Rental</span>, <span>VAN Rental</span>
-            ,<span>Sedan Rental</span>, <span>MPV Rental</span>, <span>Car Rental Davao</span>
-            ,<span>Digos Kapatagan Tour rent a car</span>, <span>Digos City rent a car</span>
-        </p>
-    </section>
+    @if (ViewBag.CtaBox != null)
+    {
+        @await Html.PartialAsync("_CtaBox", (App2025.Portal.Models.CtaBoxViewModel)ViewBag.CtaBox)
+    }
         </article>
     </main>
