@@ -74,6 +74,19 @@ ul {
     height: 170px;
 }
 
+.section-img-3 img {
+    max-width: 100%;
+    height: auto;
+    margin: 0px 0;
+}
+
+
+.section-img-3 {
+    max-width: 30%;
+    height: auto;
+    margin: 0px 0;
+}
+
 /* Base layout */
 body {
     margin: 0;
@@ -116,7 +129,8 @@ body {
 }
 
 .section {
-    margin-top: 2rem;
+    margin-top: 0.5rem;
+    padding: 10px 10px;
 }
 
     .section h2 {
