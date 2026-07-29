@@ -79,7 +79,7 @@
      ========================================== -->
 <section class="seo-fleet-section" aria-labelledby="fleet-heading">
     <h2 id="fleet-heading">Explore Our Diverse Rental Car Fleet</h2>
-    <p class="section-intro">Select from our wide range of reliable vehicles tailored to fit your specific travel needs and budget constraints.</p>
+    <p class="section-intro">Select from our wide range of reliable vehicles tailored to fit your specific travel needs and budget constraints</p>
 
     <div class="fleet-grid">
         @if (ViewBag.ProductCategories != null)
@@ -162,34 +162,36 @@
 <!-- ==========================================
      SECTION 5: FEATURED ARTICLES
      ========================================== -->
-<section class="seo-locations-section" aria-labelledby="locations-heading">
-    <h2 id="locations-heading">Featured Articles</h2>
-    <p class="section-intro">Stay informed with our latest insights and tips for a seamless car rental experience.</p>
+@if (ViewBag.FeaturedArticlesConfig != null && ViewBag.FeaturedArticlesConfig.Enabled)
+{
+    <section class="seo-locations-section" aria-labelledby="locations-heading">
+        <h2 id="locations-heading">Featured Articles</h2>
+        <p class="section-intro">Stay informed with our latest insights and tips for a seamless car rental experience.</p>
 
-    <div class="locations-list">
-        @if (ViewBag.FeaturedArticles != null)
-        {
-            foreach (var article in ViewBag.FeaturedArticles)
+        <div class="locations-list">
+            @if (ViewBag.FeaturedArticles != null)
             {
-                <div class="location-item">
-                    <img src="@article.ImageUrl"
-                         alt="@article.Title rental car available"
-                         loading="lazy"
-                         width="230"
-                         height="150">
-                    <h3>@article.Title</h3>
-                    <p>@(article.Description ?? "")</p>
-                    <a href="@article.PageUrl" class="location-link">@article.Title Services</a>
-                </div>
+                foreach (var article in ViewBag.FeaturedArticles)
+                {
+                    <div class="location-item">
+                        <img src="@article.ImageUrl"
+                        alt="@article.Title rental car available"
+                        loading="lazy"
+                        width="230"
+                        height="150">
+                        <h3>@article.Title</h3>
+                        <p>@(article.Description ?? "")</p>
+                        <a href="@article.PageUrl" class="location-link">@article.Title Services</a>
+                    </div>
+                }
             }
-        }
-    </div>
-    <div class="all-locations-btn-container">
-        <a href="/Home/Articles" class="btn-secondary">View All Car Rental Articles</a>
-    </div>
+        </div>
+        <div class="all-locations-btn-container">
+            <a href="/Home/Articles" class="btn-secondary">View All Car Rental Articles</a>
+        </div>
 
-</section>
-
+    </section>
+}
 
 <!-- ==========================================
      SECTION 5: SOCIAL PROOF & TRUST (E-E-A-T)
