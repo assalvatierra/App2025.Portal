@@ -3,27 +3,58 @@ using Portal.DBServices;
 using Portal.Models;
 using Portal.Helpers;
 using System.Diagnostics;
+using Erp.Domain.Models;
 
 namespace Portal.Controllers
 {
+    public class HomeConfiguration
+    {
+        public List<HomeSection> Sections { get; set; }
+    }
+    public class HomeSection
+    {
+        public string Section { get; set; }
+        public string Title { get; set; }
+        public string intro { get; set; }
+        public bool Enabled { get; set; }
+        public int itemsToShow { get; set; } = 0;
+    }
+
     public class HomeController : Controller
     {
         private readonly IPortalItemService _portalItemService;
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
+        private readonly IPortalConfigurationService _portalConfigurationService;
 
         public HomeController(
             IPortalItemService portalItemService, 
             IPortalCategoryServices portalCategoryService,
-            IPortalContentService portalContentService)
+            IPortalContentService portalContentService,
+            IPortalConfigurationService portalConfigurationService)
         {
             _portalItemService = portalItemService;
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;
+            _portalConfigurationService = portalConfigurationService;
         }
 
         public async Task<IActionResult> Index()
         {
+            var hpc = await _portalConfigurationService.GetPortalConfigurationByNameAsync("HomePage");
+            PortalConfiguration pc = hpc.FirstOrDefault();
+            if (pc != null && !string.IsNullOrEmpty(pc.Settings))
+            {
+                var homeconfig = System.Text.Json.JsonSerializer.Deserialize<HomeConfiguration>(pc.Settings);
+                ViewBag.HomeSections = homeconfig.Sections.Where(s => s.Enabled).ToList();
+
+                ViewBag.FeaturedArticlesConfig = homeconfig.Sections.Where(s => s.Section == "FeaturedArticles").FirstOrDefault();
+            }
+            else
+            {
+                ViewBag.HomeSections = new List<HomeSection>();
+            }
+
             var categories = await _portalCategoryService.GetAllByStatusAsync("Active");
 
             // fetch categories for Product
