@@ -71,7 +71,7 @@ ul {
 .section-images-4 img {
     padding: 0px;
     max-width: auto;
-    height: 170px;
+    height: 150px;
 }
 
 /* Base layout */
@@ -113,6 +113,10 @@ body {
 .post-intro {
     font-size: 1rem;
     color: #444;
+}
+
+section {
+    padding: 0px 20px;
 }
 
 .section {
