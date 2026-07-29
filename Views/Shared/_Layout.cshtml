@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Lato:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/Home.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/footer.css" asp-append-version="true" />
     <style>
         :root { --brand:#0d6efd; --nav-bg:#f8fbff; --nav-gradient: linear-gradient(90deg,#ffffff,#f0f6ff); }
         body { font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
@@ -63,11 +64,14 @@
         </main>
     </div>
 
+   <partial name="PrefooterPartial" />
+
     <footer class="border-top footer text-muted">
-        <div class="container">
+        <div class="container" style="color: #ecf0f1;">
             &copy; 2026 - Portal - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
-    </footer>
+    </footer> 
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
