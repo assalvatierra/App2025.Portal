@@ -1,12 +1,9 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Short-Term Car Rental: Things to Know when Renting</title>
-    <link rel="stylesheet" href="Style.css">
+﻿@{
+    ViewData["Title"] = "Rent a Car for Tour in Davao";
+}
 
-</head>
-<body>
+<link rel="stylesheet" href="~/Pages/Articles/Short-Term-Car-Rental/Style.css">
+
     <main id="primary" class="content-area">
         <article class="post">
             <header class="post-header">
@@ -21,10 +18,10 @@
 
 
             <div class="section-images-4">
-                <img src="Short-term-rental/Short-term-Rental-Pickup.webp" height="150" />
-                <img src="Short-term-rental/Short-term-Rental-SUV.webp" height="130" width="230" />
-                <img src="Short-term-rental/Short-term-Rental-Van.webp" height="150" />
-                <img src="Short-term-rental/Short-term-Rental-MPV.webp" height="150" />
+                <img src="~/Pages/Articles/Short-Term-Car-Rental/Short-term-rental/Short-term-Rental-Pickup.webp" />
+                <img src="~/Pages/Articles/Short-Term-Car-Rental/Short-term-rental/Short-term-Rental-SUV.webp"  />
+                <img src="~/Pages/Articles/Short-Term-Car-Rental/Short-term-rental/Short-term-Rental-Van.webp"  />
+                <img src="~/Pages/Articles/Short-Term-Car-Rental/Short-term-rental/Short-term-Rental-MPV.webp" />
             </div>
 
 
@@ -58,7 +55,7 @@
                 </ul>
             </div>
 
-            <div >
+            <div>
                 <h2>
                     Short-Term Car Rental: What You Need to Know
                 </h2>
@@ -137,32 +134,40 @@
                     inspecting the vehicle can smooth out the rental experience. With this info in hand, you’re ready to hit the road without any bumps along the way!
                 </p>
             </div>
-
-            <section class="section">
-                <h2>Ready to Book Short Term Rental in Davao?</h2>
-                <p>
-                    Looking for an Short Term Rental (SUV,MPV,Van) in Davao? We offer reliable vehicles at great prices.
-                    Reserve your ride today and hit the road!
-                </p>
-                <div class="cta-box">
-                    <p><strong>CHAT:</strong> Viber / WhatsApp (+63) 926-733-5449</p>
-                    <p><strong>MOBILE:</strong> Globe (+63) 926-733-5449 • Smart (+63) 998-959-1074</p>
-                    <p><strong>E-mail:</strong> AJDavao88@gmail.com</p>
-                    <p><strong>Facebook:</strong> AJDavao Car Rentals</p>
+            
+    <section class="section">
+        <h2>Ready to Rent a Short term Car?</h2>
+        <p>
+            Rent a Short term Car. We offer reliable vehicles at great prices.
+            Reserve your ride today and hit the road!
+        </p>
+        <div class="cta-box">
+            <p><strong>CHAT:</strong> Viber / WhatsApp (+63) 926-733-5449</p>
+            <p><strong>MOBILE:</strong> Globe (+63) 926-733-5449 • Smart (+63) 998-959-1074</p>
+            <p><strong>E-mail:</strong> AJDavao88@gmail.com</p>
+            <p><strong>Facebook:</strong> AJDavao Car Rentals</p>
+        </div>
+                    
+        <div class="form-row" style="margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+            <div class="form-group">
+                <label> </label>
+                <div style="display: flex; gap: 10px;">
+                    <a href="@Url.Action("ReservationForm", "PortalReservation", new { itemId = 0, transactionType = "Booking" })" class="btn btn-outline-primary" style="flex: 1; text-align: center;">
+                        <i class="bi bi-calendar-check"></i> Reserve Now
+                    </a>
+                    <a href="@Url.Action("ReservationForm", "PortalReservation", new { itemId = 0, transactionType = "Quote" })" class="btn btn-outline-primary" style="flex: 1; text-align: center;">
+                        <i class="bi bi-clipboard-check"></i> Request Quote
+                    </a>
                 </div>
-                <p class="tags">
-                    Tagged: <span>Davao Car Rental</span>
-                    <span>affordable</span>, <span>best deals</span>, <span>budget</span>, <span>car for hire</span>, 
-                    <span>car for rent</span>, <span>davao city</span>, <span>Fortuner</span>, <span>Grandia</span>, 
-                    <span>Innova</span>,  <span>philippines</span>, <span>rent a car</span>, <span>rental</span>, 
-                    <span>Toyota Hilux</span>
-                </p>
-            </section>
+            </div>
+        </div>
 
-            <section class="section">
-                <a href="/">Back to Car Rental Home</a>
-            </section>
+        <p class="tags">
+            Tagged: <span>Davao Car Rental</span>, <span>SUV Rental</span>, <span>VAN Rental</span>
+            ,<span>Sedan Rental</span>, <span>MPV Rental</span>, <span>Car Rental Davao</span>
+            ,<span>Digos Kapatagan Tour rent a car</span>, <span>Digos City rent a car</span>
+        </p>
+    </section>
         </article>
     </main>
-</body>
-</html>
+
