@@ -53,3 +53,14 @@ body {
     background-color: #e2e6ea;
     border-color: #dae0e5;
 }
+
+/* CTA box */
+.cta-box {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border-color: #1a3b5d;
+    border-width: 1px;
+    border-style: solid;
+    color: #1a3b5d;
+}

@@ -1,0 +1,37 @@
+{
+  "sectionTitle": "Ready to Rent a Car with Tour in Davao?",
+  "sectionIntro": "Rent a Car with Tour in Davao? We offer reliable vehicles at great prices. Reserve your ride today and hit the road!",
+  "showChat": true,
+  "showMobile": true,
+  "showEmail": true,
+  "showFacebook": true,
+  "contactInfo": {
+    "contactTitle": "Contact Information",
+    "chat": "Viber / WhatsApp (+63) 926-733-5449",
+    "mobile": "Globe (+63) 926-733-5449 • Smart (+63) 998-959-1074",
+    "email": "AJDavao88@gmail.com",
+    "facebook": "AJDavao Car Rentals"
+  },
+  "actions": [
+    {
+      "text": "Reserve Now",
+      "icon": "calendar-check",
+      "url": "/PortalReservation/ReservationForm?itemId=0&transactionType=Booking"
+    },
+    {
+      "text": "Request Quote",
+      "icon": "clipboard-check",
+      "url": "/PortalReservation/ReservationForm?itemId=0&transactionType=Quote"
+    }
+  ],
+  "tags": [
+    "Davao Car Rental",
+    "SUV Rental",
+    "VAN Rental",
+    "Sedan Rental",
+    "MPV Rental",
+    "Car Rental Davao",
+    "Davao rent a car",
+    "Davao City rent a car"
+  ]
+}
