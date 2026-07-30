@@ -7,6 +7,8 @@
         public string? ImageUrl { get; set; }
         public string? ImageAlt { get; set; }
         public string? PageUrl { get; set; }
+        public string? SeoTitle { get; set; }
+        public string? SeoDescription { get; set; }
     }
 
 }

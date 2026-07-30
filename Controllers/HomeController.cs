@@ -58,8 +58,11 @@ namespace Portal.Controllers
         public async Task<IActionResult> ItemsByCategory(string category)
         {
             var results = await _portalItemService.GetItemsByCategory(category,"Product");
+            var catResult = await _portalCategoryService.GetByName(category);
+            ViewBag.PageTitle = catResult?.SeoTitle ?? $"Items in category: {category}";
+            ViewBag.PageDescription = catResult?.SeoDescription ?? $"Items in category: {category}";
+
             ViewBag.Category = category;
-            ViewBag.PageTitle = "Car Rental Items by Category";
             ViewBag.PageMessage = $"Items in category: {category}";
 
             // Pass compare list to view

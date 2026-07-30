@@ -7,5 +7,6 @@ namespace Portal.DBServices
     {
         Task<List<ItemCategoryDTO>> GetAllByStatusAsync(string? status);
         Task<PortalCategory?> GetByIdAsync(int id);
+        Task<ItemCategoryDTO?> GetByName(string name);
     }
 }

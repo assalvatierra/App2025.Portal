@@ -1,7 +1,8 @@
 @model IEnumerable<Portal.Models.ItemDto>
 
 @{
-    ViewData["Title"] = "Search Results";
+    ViewData["Title"] = ViewBag.PageTitle;
+    ViewData["Description"] = ViewBag.PageDescription;
     var searchTerm = ViewBag.SearchTerm as string;
     var compareList = ViewBag.CompareList as List<int> ?? new List<int>();
 }

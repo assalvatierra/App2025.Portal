@@ -1,5 +1,4 @@
 ﻿using Erp.Domain.Models;
-using Newtonsoft.Json.Linq;
 using System.Text.Json;
 
 namespace Portal.Models
