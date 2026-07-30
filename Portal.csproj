@@ -23,12 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Views\Articles\Digos-Kapatagan-tour.cshtml" />
-    <None Include="Views\Articles\Mpv-Rental-Davao.cshtml" />
-    <None Include="Views\Articles\Rent-A-Car-For-Tour-Davao.cshtml" />
-    <None Include="Views\Articles\Self-Drive-What-to-Know.cshtml" />
-    <None Include="Views\Articles\Short-Term-Car-Rental.cshtml" />
-    <None Include="Views\Articles\SUV-Rental-Davao.cshtml" />
     <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJ-Car-Rental-Davao-Group-Tavel-cost-effective-group.webp" />
     <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJ-Davao-Car-Rental-Fortuner-Davao-freedom-to-explore.webp" />
     <None Include="wwwroot\Pages\Articles\Rent-A-Car-For-Tour-Davao\images\AJ-Davao-Car-Rental-Kapatagan-freedom-to-explore.webp" />
