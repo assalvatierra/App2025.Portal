@@ -15,6 +15,13 @@ namespace Portal.DBLayer
         {
             return await _context.PortalContent.ToListAsync();
         }
+
+        public async Task<List<PortalContent>> GetContentsByStatusAsync(string status)
+        {
+            return await _context.PortalContent
+                .Where(c => c.Status == status)
+                .ToListAsync();
+        }
         public async Task<List<PortalContent>> GetContentsByCategoryAsync(List<string> category, string? type)
         {
             var query = _context.PortalContent

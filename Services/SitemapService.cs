@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Xml;
 using Microsoft.AspNetCore.Http;
+using Portal.DBServices;
 
 
 namespace Portal.Services
@@ -12,10 +13,19 @@ namespace Portal.Services
     public class SitemapService : ISitemapService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPortalCategoryServices _categoryServices;
+        private readonly IPortalContentService _contentService;
 
-        public SitemapService(IHttpContextAccessor httpContextAccessor)
+
+        public SitemapService(
+            IHttpContextAccessor httpContextAccessor,
+            IPortalCategoryServices portalCategoryServices,
+            IPortalContentService portalContentService
+            )
         {
             _httpContextAccessor = httpContextAccessor;
+            _categoryServices = portalCategoryServices;
+            _contentService = portalContentService;
         }
 
         public string GetSitemapXml()
@@ -86,8 +96,36 @@ namespace Portal.Services
             items.Add("/Home/OurProducts");
             items.Add("/Home/OurServices");
             items.Add("/Home/Articles");
+            items.Add("/Home/FaqList");
 
             return items;
+        }
+        public List<string> GetItemCategories()
+        {
+            const string categoryStatus = "Active";
+            const string categoryType = "Product";
+            const string categoryEndpoint = "/Home/ItemsByCategory";
+
+            var categories = _categoryServices.GetAllByStatusAsync(categoryStatus);
+            var result = categories.Result
+                .Where(c => c.PortalCategory.CategoryType == categoryType)
+                .Select(c => categoryEndpoint + "?category=" + c.PortalCategory.Name)
+                .ToList();
+            return result;
+        }
+
+        public List<string> GetPortalContents()
+        {
+            List<string> categories =["Services","Articles"];
+
+
+            var contents = _contentService.GetContentsByCategoryAsync(categories, null).Result
+                .Where(c => !string.IsNullOrEmpty(c.PageUrl))
+                .Select(c => c.PageUrl)
+                .ToList();
+            
+            return contents;
+
         }
 
         public IReadOnlyCollection<SitemapNode> GetSitemapNodes(string _website)
@@ -95,7 +133,10 @@ namespace Portal.Services
             List<SitemapNode> nodes = new List<SitemapNode>();
 
             //root items
-            List<string> itemroot = this.GetItemPages();
+            List<string> itemroot = new List<string>();
+            itemroot.AddRange(this.GetItemPages() ?? []);
+            itemroot.AddRange(this.GetItemCategories() ?? []);
+            itemroot.AddRange(this.GetPortalContents() ?? []);
             foreach (var item in itemroot)
             {
                 nodes.Add(

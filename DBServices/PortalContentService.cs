@@ -24,6 +24,24 @@ namespace Portal.DBServices
             _portalContentDbLayer = portalContentDbLayer;
             _configuration = configuration;
         }
+
+        public async Task<List<ContentDto>> GetAllActiveContentsAsync()
+        {
+            var contents = await _portalContentDbLayer.GetContentsByStatusAsync("Active");
+            return contents.Select(c =>
+            {
+                JObject jObject = JsonSerializer.Deserialize<JObject>(c.JsonData ?? "{}") ?? new JObject();
+                return new ContentDto
+                {
+                    Content = c,
+                    Title = jObject.Title,
+                    Description = jObject.Description,
+                    ImageUrl = jObject.ImageUrl,
+                    PageUrl = jObject.PageUrl
+                };
+            }).ToList();
+        }
+
         public async Task<List<ContentDto>> GetContentsByCategoryAsync(List<string> category, string? type)
         {
             var TemporaryContents = _configuration["TemporaryContents:Enabled"];
