@@ -69,11 +69,11 @@ namespace Portal.Services
             foreach (var page in pages)
             {
                 // format the date
-                var date = DateTime.Parse(page.LastModified.GetValueOrDefault().ToString(CultureInfo.CurrentCulture)).ToString("yyyy-MM-ddTHH:mm:sszzz");
+                var date = page.LastModified.GetValueOrDefault().ToString("yyyy-MM-dd");
                 writer.WriteStartElement("url");
                 // write the url, you can change this to match your website url structure
                 writer.WriteElementString("loc", page.Url);
-                writer.WriteElementString("lastmod", page.LastModified.GetValueOrDefault().ToString());
+                writer.WriteElementString("lastmod", date);
                 writer.WriteElementString("changefreq", page.Frequency.GetValueOrDefault().ToString().ToLower());
                 writer.WriteElementString("priority", page.Priority.GetValueOrDefault().ToString());
 
