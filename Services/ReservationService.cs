@@ -68,7 +68,7 @@ namespace Portal.Services
             {
                 string subject = "Your reservation is in progress";
                 string body = $"Dear {reservation.CustomerName},<br/><br/>" +
-                              $"We have received your reservation (ID: {reservation.Id}) on {reservation.DateReceived:G}. " +
+                              $"We have received your reservation (Ref#:  {reservation.Id.ToString("D6")}) on {reservation.DateReceived:G}. " +
                               "It is now in progress and our team will contact you if any additional information is required.<br/><br/>" +
                               "Thank you for choosing us.<br/><br/>" +
                               "Regards,<br/>Portal Team";
