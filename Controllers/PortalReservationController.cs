@@ -42,7 +42,7 @@ namespace Portal.Controllers
             {
                 PortalItemId = itemId,
                 DateReceived = DateTime.Now,
-                Status = "Pending",
+                Status = "New",
                 TransactionType = transactionType ?? "Reservation",
                 JsonData = "{}"
             };
@@ -80,7 +80,7 @@ namespace Portal.Controllers
         {
             var reservation = viewModel.Reservation;
             reservation.DateReceived = DateTime.Now;
-            reservation.Status = "Pending";
+            reservation.Status = "New";
 
             if (ModelState.IsValid)
             {
@@ -246,6 +246,7 @@ namespace Portal.Controllers
         [Route("api/[controller]/ProcessPendingReservations")]
         public async Task<IActionResult> ProcessPendingReservations()
         {
+            // to be called by a cron job(cron-job.org) or scheduled task to process pending reservations
             _logger.LogInformation("ProcessPendingReservations endpoint called at {Time} from {RemoteIp}", 
                 DateTime.Now, 
                 HttpContext.Connection.RemoteIpAddress);

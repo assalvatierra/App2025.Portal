@@ -75,8 +75,8 @@ namespace Portal.Services
                     body
                 );
 
-                reservation.Status = "In Progress";
-                await _reservationDbService.UpdateAsync(reservation);
+                //reservation.Status = "In Progress";
+                //await _reservationDbService.UpdateAsync(reservation);
                 _logger.LogInformation("Sent customer notification for reservation {ReservationId} and updated status to In Progress", reservation.Id);
             }
             catch (Exception ex)
