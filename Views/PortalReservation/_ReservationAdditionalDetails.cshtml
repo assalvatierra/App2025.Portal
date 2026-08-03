@@ -27,7 +27,7 @@
 
         <div class="col-md-6 mb-3">
             <label asp-for="ReservationAdditionalInfo.PickupInfo" class="form-label">Pickup Info</label>
-            <input asp-for="ReservationAdditionalInfo.PickupInfo" class="form-control" placeholder="Enter pickup info" />
+            <input asp-for="ReservationAdditionalInfo.PickupInfo" class="form-control" placeholder="Airline Flight Number/Hotel Name/Address" />
             <span asp-validation-for="ReservationAdditionalInfo.PickupInfo" class="text-danger"></span>
         </div>
     </div>
@@ -61,7 +61,7 @@
 
         <div class="col-md-6 mb-3">
             <label asp-for="ReservationAdditionalInfo.DestinationInfo" class="form-label">Destination Info</label>
-            <input asp-for="ReservationAdditionalInfo.DestinationInfo" class="form-control" placeholder="Enter destination info" />
+            <input asp-for="ReservationAdditionalInfo.DestinationInfo" class="form-control" placeholder="City/Town Location or itineraries" />
             <span asp-validation-for="ReservationAdditionalInfo.DestinationInfo" class="text-danger"></span>
         </div>
     </div>
@@ -88,20 +88,42 @@
                         <small class="text-muted">Base Rate: @basePrice.ToString("N2") @baseCurrency / Day</small>
                     </div>
                 </div>
+                <!-- Out of Town Notification -->
+                <div id="outOfTownNotification" class="alert alert-warning" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Additional Cost Applies</strong> for out of town locations.
+                </div>
             </div>
         </div>
     }
 </div>
 
 <script>
-   
+
     (function() {
 
         const basePrice = @basePrice;
         const currency = '@Html.Raw(baseCurrency)';
         const numberOfDaysInput = document.getElementById('numberOfDays');
         const estimatedCostDisplay = document.getElementById('estimatedCost');
+        const outOfTownNotification = document.getElementById('outOfTownNotification');
+        const pickupLocationSelect = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupLocation)');
+        const destinationAreaSelect = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.DestinationArea)');
         let totalCost = 0.00;
+
+        // Function to check if out-of-town notification should be shown
+        function checkOutOfTownCondition() {
+            const isPickupOthers = pickupLocationSelect?.value === 'Others (Outside Downtown/Outside the City)';
+            const isDestinationOutOfTown = destinationAreaSelect?.value === 'Out of Town';
+
+            if (outOfTownNotification) {
+                if (isPickupOthers || isDestinationOutOfTown) {
+                    outOfTownNotification.style.display = 'block';
+                } else {
+                    outOfTownNotification.style.display = 'none';
+                }
+            }
+        }
 
         // Function to calculate and display the estimated cost
         function calculateEstimatedCost() {
@@ -125,6 +147,16 @@
             }
         }
 
+        // Add event listeners to check out-of-town condition
+        if (pickupLocationSelect) {
+            pickupLocationSelect.addEventListener('change', checkOutOfTownCondition);
+        }
+        if (destinationAreaSelect) {
+            destinationAreaSelect.addEventListener('change', checkOutOfTownCondition);
+        }
+
+        // Check on page load in case values are already set
+        checkOutOfTownCondition();
 
     // Serialize reservation additional details to JSON on form submission
         // Get the form element
@@ -142,7 +174,7 @@
                 // const numberOfDaysInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.NumberOfDays)');
                 const numberOfDaysInput = document.getElementById('numberOfDays');
                 const jsonDataInput = document.getElementById('@Html.IdFor(m => m.Reservation.JsonData)');
-                
+
                 // Calculate the estimated cost based on the number of days and base price
                 const numberOfDays = parseInt(numberOfDaysInput.value) || 0;
                 // const totalCost = basePrice * numberOfDays;
