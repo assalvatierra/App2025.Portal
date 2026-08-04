@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="@ViewData["Description"]" />
     @RenderSection("HeadMeta", required: false)
-    <title>@ViewData["Title"] - AJ Davao Car Rental</title>
+    <title>@ViewData["Title"] - @(string.IsNullOrEmpty((string)ViewData["PortalName"]) ? "AJ Davao Car Rental" : ViewData["PortalName"]) </title>
     <script type="importmap"></script>
     @{
         var canonicalHost = Context.Request.Host.Host;
@@ -41,7 +41,7 @@
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center logo-pill" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-speedometer2 brand-icon me-2" aria-hidden="true"></i>
-                    <span class="fw-bold">AJ Davao Car Rental</span>
+                    <span class="fw-bold">@(string.IsNullOrEmpty((string)ViewData["PortalName"]) ? "AJ Davao Car Rental" : ViewData["PortalName"])</span>
                 </a>
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -77,9 +77,9 @@
 
     <footer class="border-top footer text-muted">
         <div class="container" style="color: #ecf0f1;">
-            &copy; 2026 - AJ Davao Car Rental - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - @(string.IsNullOrEmpty((string)ViewData["PortalName"]) ? "AJ Davao Car Rental" : ViewData["PortalName"]) - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
-    </footer> 
+    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
