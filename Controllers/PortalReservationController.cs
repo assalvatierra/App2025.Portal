@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portal.DBServices;
-using Portal.Services;
 using Portal.Models;
+using Portal.Services;
 using Portal.ViewModels;
+using System.Text.Json;
 
 namespace Portal.Controllers
 {
@@ -133,8 +134,8 @@ namespace Portal.Controllers
             if(config.Any())
             {
                 string jsonsetting = config.First().Settings;
-                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonsetting);
-                ViewBag.ProceedToPayment = settings.ContainsKey("ProceedToPayment") && bool.TryParse(settings["ProceedToPayment"], out var proceed) ? proceed : false;  
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                ViewBag.ProceedToPayment = settings.ProceedToPayment != null && bool.TryParse(settings.ProceedToPayment, out var proceed) ? proceed : false;  
             }
             return View(reservations);
         }
@@ -255,5 +256,6 @@ namespace Portal.Controllers
             return Ok(new { message = "Pending reservations processed successfully" });
         }
 
+       
     }
 }

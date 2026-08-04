@@ -1,6 +1,10 @@
 ﻿using Erp.Domain.Models;
+using Microsoft.IdentityModel.Tokens;
 using Portal.DBServices;
+using Portal.Models;
 using System.Net.Mail;
+using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace Portal.Services
 {
@@ -97,20 +101,25 @@ namespace Portal.Services
             if(config != null)
             {
                 string jsonsetting = config.First().Settings;
-                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonsetting);
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
 
-                string notificationEmail = settings.ContainsKey("InternalNotificationEmail") ? settings["InternalNotificationEmail"] : string.Empty;
-                EmailRecipient = new[] { notificationEmail };
+                string notificationEmail = !settings.InternalNotificationEmails.IsNullOrEmpty() ? 
+                                    Regex.Replace(settings.InternalNotificationEmails, @"[\r\n\t]", string.Empty)
+                                    .Replace("[", string.Empty).Replace("]", string.Empty).Replace("\"", "") : string.Empty;
 
-                emailSubject = settings.ContainsKey("InternalNotificationEmailSubject") ? settings["InternalNotificationEmailSubject"] : "New Reservation";
-                emailTitle = settings.ContainsKey("InternalNotificationEmailTitle") ? settings["InternalNotificationEmailTitle"] : "Reservation";
-                emailMessage = settings.ContainsKey("InternalNotificationEmailMessage") ? settings["InternalNotificationEmailMessage"] : "A new reservation has been made.";
+                EmailRecipient =  notificationEmail.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                   .Select(e => e.Trim()).ToArray();
+
+                emailSubject = !settings.InternalNotificationEmailSubject.IsNullOrEmpty() ? settings.InternalNotificationEmailSubject : "New Reservation";
+                emailTitle = !settings.InternalNotificationEmailTitle.IsNullOrEmpty() ? settings.InternalNotificationEmailTitle : "Reservation";
+                emailMessage = !settings.InternalNotificationEmailMessage.IsNullOrEmpty() ? settings.InternalNotificationEmailMessage : "A new reservation has been made.";
             }
 
             // make list of reservation details
             string reservationDetails = string.Join("<br/>", 
                 reservations.Select(r => 
                     $"Reservation ID: {r.Id}, Customer: {r.CustomerName}, Email: {r.ContactEmail}, Date Received: {r.DateReceived}"));
+
 
             if(EmailRecipient.Length > 0 && !string.IsNullOrEmpty(EmailRecipient[0]))
             {
