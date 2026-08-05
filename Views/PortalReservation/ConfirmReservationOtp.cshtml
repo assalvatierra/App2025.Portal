@@ -46,7 +46,7 @@
     var timeLeft = startTime;
     
     function countdown() {
-        console.log(timeLeft);
+        
         if (timeLeft > 0) {
             timeLeft--;
 
@@ -62,7 +62,7 @@
         } else {
             // clearInterval(countdownInterval);
             // Optionally, you can disable the submit button or show a message here
-            console.log('reload page for new OTP');
+            // console.log('reload page for new OTP');
             removeSession();
             stopCountdown();
 
