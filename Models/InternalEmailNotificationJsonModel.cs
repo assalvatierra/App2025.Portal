@@ -13,6 +13,7 @@ namespace Portal.Models
         public string ProceedToPayment { get; set; }
 
         public string OtpTimeout { get; set; }
+        public string OtpMaxAttempts { get; set; }
 
         [JsonConverter(typeof(InternalEmailNotificationJsonModelStringConverter))]
         public string InternalNotificationEmails { get; set; }

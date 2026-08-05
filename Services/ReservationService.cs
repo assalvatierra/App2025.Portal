@@ -28,19 +28,21 @@ namespace Portal.Services
         }
         public async Task ProcessPendingReservations()
         {
+            string StatusToProcess= "Verified";
             _logger.LogInformation("ProcessPendingReservations called at {Time}", DateTime.Now);
 
-            var pendingReservations = _reservationDbService.GetByStatusAsync("New").Result;
+            var pendingReservations = _reservationDbService.GetByStatusAsync(StatusToProcess).Result;
 
             if(pendingReservations != null && pendingReservations.Any())
             {
                 _logger.LogInformation("Found {Count} pending reservations", pendingReservations.Count);
                 await this.SendInternalReservationNotification(pendingReservations);
 
-                foreach (var reservation in pendingReservations)
-                {
-                    await this.SendCustomerNotification(reservation);
-                }
+                // no need to inform client, since they have already been informed when they verified the OTP
+                //foreach (var reservation in pendingReservations)
+                //{
+                //    await this.SendCustomerNotification(reservation);
+                //}
             }
             else
             {

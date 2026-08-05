@@ -177,8 +177,9 @@ namespace Portal.Controllers
             otp.id = id;
             otp.Otp = string.Empty;
             otp.Message = string.Empty;
+            otp.MaxAttempts = 3; // Default max attempts
 
-            //get OTP Timeout from configuration
+            //get OTP Timeout and MaxAttempts from configuration
             var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
             if (config.Any())
             {
@@ -186,13 +187,46 @@ namespace Portal.Controllers
                 var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
                 int otpTimeout = 0;
                 int.TryParse(settings.OtpTimeout, out otpTimeout);
-                otp.Timeout = otpTimeout; // 5 minutes (default)
+                otp.Timeout = otpTimeout > 0 ? otpTimeout : 300; // 5 minutes (default)
+
+                int maxAttempts = 0;
+                int.TryParse(settings.OtpMaxAttempts, out maxAttempts);
+                otp.MaxAttempts = maxAttempts > 0 ? maxAttempts : 3; // Default to 3 if not set
             }
 
             var reservations = await _service.GetByIdAsync(id);
             if (reservations == null)
             {
                 return NotFound();
+            }
+
+            // Check if timeout flag is set (OTP expired)
+            string timeoutKey = $"OTPTimeout_{id}";
+            string timeoutFlag = HttpContext.Session.GetString(timeoutKey);
+            if (!string.IsNullOrEmpty(timeoutFlag) && timeoutFlag == "true")
+            {
+                otp.Message = "OTP Verification Failed - Maximum timeout exceeded. Your reservation could not be verified and will be discarded.";
+                HttpContext.Session.Remove(timeoutKey);
+
+                // Mark reservation as discarded
+                reservations.Status = "Discarded";
+                await _service.UpdateAsync(reservations);
+
+                return View(otp);
+            }
+
+            // Check if max attempts already exceeded
+            string attemptKey = $"OTPAttempts_{id}";
+            string attemptCountStr = HttpContext.Session.GetString(attemptKey);
+            if (int.TryParse(attemptCountStr, out int attempts) && attempts >= otp.MaxAttempts)
+            {
+                otp.Message = $"Maximum OTP attempts ({otp.MaxAttempts}) exceeded. Your reservation could not be verified and will be discarded.";
+
+                // Mark reservation as discarded
+                reservations.Status = "Discarded";
+                await _service.UpdateAsync(reservations);
+
+                return View(otp);
             }
 
             var OTP = await _reservationService.GenerateOTP();// 6 digit OTP
@@ -202,6 +236,9 @@ namespace Portal.Controllers
             }
 
             ViewBag.Message = "Generating OTP!";
+
+            // Reset attempts counter for new OTP generation
+            HttpContext.Session.Remove(attemptKey);
 
             //save OTP to session
             HttpContext.Session.SetString("OTP", OTP);
@@ -217,26 +254,76 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmReservationOtp(OTPViewModel viewModel)
         {
-            var isOtpValid = false;
             var reservations = await _service.GetByIdAsync(viewModel.id);
             if (reservations == null)
             {
                 return NotFound();
             }
-            //save OTP to session
+
+            // Get max attempts from configuration
+            int maxAttempts = 3; // Default
+            var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
+            if (config.Any())
+            {
+                string jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                int configMaxAttempts = 0;
+                int.TryParse(settings.OtpMaxAttempts, out configMaxAttempts);
+                maxAttempts = configMaxAttempts > 0 ? configMaxAttempts : 3;
+            }
+
+            // Track OTP verification attempts using session key with reservation ID
+            string attemptKey = $"OTPAttempts_{viewModel.id}";
+            int attempts = 0;
+            string attemptCountStr = HttpContext.Session.GetString(attemptKey);
+            if (int.TryParse(attemptCountStr, out int storedAttempts))
+            {
+                attempts = storedAttempts;
+            }
+
+            // Check if max attempts exceeded
+            if (attempts >= maxAttempts)
+            {
+                viewModel.Message = $"Maximum OTP attempts ({maxAttempts}) exceeded. Please request a new OTP.";
+                viewModel.MaxAttempts = maxAttempts;
+                return View("ConfirmReservationOtp", viewModel);
+            }
+
+            // Get stored OTP from session
             var sessionOTP = HttpContext.Session.GetString("OTP");
 
-            //check user input and OTP
-            //OTP is valid
+            // Verify OTP
             if (string.Equals(sessionOTP, viewModel.Otp))
             {
-                //send client email notification
+                // OTP is valid - update reservation status to Verified
+                reservations.Status = "Verified";
+                await _service.UpdateAsync(reservations);
+
+                // Send client email notification
                 await this._reservationService.SendCustomerNotification(reservations);
+
+                // Clear OTP and attempt tracking from session
+                HttpContext.Session.Remove("OTP");
+                HttpContext.Session.Remove(attemptKey);
 
                 return RedirectToAction("Success", new { id = viewModel.id });
             }
 
-            viewModel.Message = "Invalid OTP. Please try again.";
+            // Invalid OTP - increment attempt counter
+            attempts++;
+            HttpContext.Session.SetString(attemptKey, attempts.ToString());
+
+            int remainingAttempts = maxAttempts - attempts;
+            if (remainingAttempts > 0)
+            {
+                viewModel.Message = $"Invalid OTP. Please try again. ({remainingAttempts} attempt{(remainingAttempts != 1 ? "s" : "")} remaining)";
+            }
+            else
+            {
+                viewModel.Message = $"Maximum OTP attempts ({maxAttempts}) exceeded. Please request a new OTP.";
+            }
+
+            viewModel.MaxAttempts = maxAttempts;
             return View("ConfirmReservationOtp", viewModel);
         }
 
@@ -343,6 +430,17 @@ namespace Portal.Controllers
             HttpContext.Session.SetString("OTP", String.Empty);
 
             return Ok(new { message = "Pending reservations processed successfully" });
+        }
+
+        [HttpPost]
+        [Route("api/[controller]/SetOTPTimeout/{id}")]
+        public IActionResult SetOTPTimeout(int id)
+        {
+            // Set timeout flag in session
+            string timeoutKey = $"OTPTimeout_{id}";
+            HttpContext.Session.SetString(timeoutKey, "true");
+
+            return Ok(new { message = "OTP timeout flag set successfully" });
         }
 
 

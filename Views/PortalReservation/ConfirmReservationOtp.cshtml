@@ -12,25 +12,43 @@
                     <h2> Confirm Reservation Otp </h2>
                 </div>
                  <div class="card-body p-4">
-                  <form asp-action="ConfirmReservationOtp" method="post">
-                      <div class="mb-3">
-                            <label class="form-label">Please enter the OTP sent to your email for Reservation : @Model.id </label>
-                            <input hidden asp-for="id" />
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="Otp" class="form-label">OTP (One-Time Pin)</label>
-                            <input asp-for="Otp" class="form-control" placeholder="Enter the OTP sent to your email" />
-                            <span asp-validation-for="Otp" class="text-danger"> @Model.Message </span>
+                  @{
+                      bool isMaxAttemptsExceeded = Model.Message != null && (Model.Message.Contains("Maximum OTP attempts") || Model.Message.Contains("Maximum timeout"));
+                  }
+                  @if (isMaxAttemptsExceeded)
+                  {
+                      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                          <strong>Verification Failed</strong>
+                          <p>@Model.Message</p>
+                          <p>You will need to create a new reservation request.</p>
+                      </div>
 
-                            <p> <span> Time Left: </span> <span id="timer" >  0:00 </span> </p>
-                            <input type="hidden" id="timeout" value="@Model.Timeout"  asp-for="Timeout"/>
-                        </div>
+                      <div class="mt-4">
+                          <input class="btn btn-warning" type="button" value="Create New Reservation" onclick="redirectToHome()" id="newreservationbtn" />
+                      </div>
+                  }
+                  else
+                  {
+                      <form asp-action="ConfirmReservationOtp" method="post">
+                          <div class="mb-3">
+                                <label class="form-label">Please enter the OTP sent to your email for Reservation : @Model.id </label>
+                                <input hidden asp-for="id" />
+                            </div>
+                            <div class="mb-3">
+                                 <label asp-for="Otp" class="form-label">OTP (One-Time Pin)</label>
+                                 <input asp-for="Otp" class="form-control" placeholder="Enter the OTP sent to your email" />
+                                 <span asp-validation-for="Otp" class="text-danger"> @Model.Message </span>
 
-                        <div>
-                            <input type="submit" class="btn btn-primary" name="submit" value="Submit"  id="submitbtn"  />
-                            <input class="btn btn-primary" name="resend" value="Resend" onclick="reloadpage()" id="resendbtn" width="100" />
-                        </div>
-                  </form>
+                                 <p id="timerSection"> <span> Time Left: </span> <span id="timer" >  0:00 </span> </p>
+                                 <input type="hidden" id="timeout" value="@Model.Timeout"  asp-for="Timeout"/>
+                             </div>
+
+                            <div>
+                                <input type="submit" class="btn btn-primary" name="submit" value="Verify OTP"  id="submitbtn"  />
+                                <input class="btn btn-secondary" name="resend" value="Request New OTP" onclick="reloadpage()" id="resendbtn" style="display:none;" />
+                            </div>
+                      </form>
+                  }
                   </div>
               </div>
          </div>
@@ -44,50 +62,65 @@
     const startTime = parseInt($('#timeout').val());
     var timerElement = document.getElementById('timer');
     var timeLeft = startTime;
-    
+
     function countdown() {
-        
+
         if (timeLeft > 0) {
             timeLeft--;
 
             let minutes = Math.floor(timeLeft / 60);
             let seconds = timeLeft % 60;
 
-            seconds = seconds < 10 ? '0' + seconds : seconds; // Add leading zero if seconds is less than 10
+            seconds = seconds < 10 ? '0' + seconds : seconds;
 
             timerElement.textContent = `${minutes}:${seconds}`;
 
             //update timer
             $("#timeout").val(timeLeft);
         } else {
-            // clearInterval(countdownInterval);
-            // Optionally, you can disable the submit button or show a message here
-            // console.log('reload page for new OTP');
-            removeSession();
+            removeSessionAndSetTimeout();
             stopCountdown();
-
-            $('#submitbtn').hide();
-            $('#resendbtn').show();
         }
     }
 
-    function removeSession() {
+    function removeSessionAndSetTimeout() {
         $.ajax({
             url: '/api/PortalReservation/PostRemoveSessionOTP',
             type: 'POST',
             success: function (response) {
                 console.log('Session removed successfully.');
+                // Set timeout flag and reload page to show timeout message
+                setTimeoutFlag();
             },
             error: function (xhr, status, error) {
                 console.error('Error removing session:', error);
+                setTimeoutFlag();
             }
         });
     }
 
-
+    function setTimeoutFlag() {
+        $.ajax({
+            url: '/api/PortalReservation/SetOTPTimeout/' + @Model.id,
+            type: 'POST',
+            success: function (response) {
+                console.log('Timeout flag set.');
+                // Reload page to show timeout message
+                location.href = '/PortalReservation/ConfirmReservationOtp/' + @Model.id;
+            },
+            error: function (xhr, status, error) {
+                console.error('Error setting timeout flag:', error);
+                location.href = '/PortalReservation/ConfirmReservationOtp/' + @Model.id;
+            }
+        });
+    }
 
     function reloadpage() {
         location.href = '/PortalReservation/ConfirmReservationOtp/' + @Model.id;
+    }
+
+    function redirectToHome() {
+        location.href = '/';
     }
 
     function stopCountdown() {
@@ -97,8 +130,6 @@
     function startCountdown() {
         countdownInterval = setInterval(countdown, 1000);
     }
-
-    //startCountdown();
 
     $(function() {
          $('#resendbtn').hide();
