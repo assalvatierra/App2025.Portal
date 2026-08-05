@@ -148,5 +148,40 @@ namespace Portal.Services
             }
 
         }
+
+        public async Task<string> GenerateOTP()
+        {
+            var random = new Random();
+            return await Task.FromResult(random.Next(100000, 999999).ToString()); // Generates a 6-digit OTP
+        }
+
+        public async Task SendCustomerOTP(PortalReservation reservation, string otp)
+        {
+            try
+            {
+                string subject = "Your reservation One Time Password";
+                string body = $"Dear {reservation.CustomerName},<br/><br/>" +
+                              $"We have received your reservation (ID: {reservation.Id}) on {reservation.DateReceived:G}. " +
+                              $"Your One Time Password is: {otp} <br/><br/>" +
+                              "Thank you for choosing us.<br/><br/>" +
+                              "Regards,<br/>Portal Team";
+
+                await _emailService.SendEmailAsync(
+                    new[] { reservation.ContactEmail },
+                    Array.Empty<string>(),
+                    Array.Empty<string>(),
+                    subject,
+                    body
+                );
+
+
+                _logger.LogInformation("Sent customer notification for OTP for reservation {ReservationId} ", reservation.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send customer notification for OTP for reservation {ReservationId}", reservation.Id);
+            }
+        }
+
     }
 }

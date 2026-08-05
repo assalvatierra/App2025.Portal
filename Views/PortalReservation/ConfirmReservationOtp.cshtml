@@ -1,0 +1,108 @@
+﻿@model Portal.ViewModels.OTPViewModel
+
+@{
+    ViewData["Title"] = "Confirm Reservation Otp";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header text-white">
+                    <h2> Confirm Reservation Otp </h2>
+                </div>
+                 <div class="card-body p-4">
+                  <form asp-action="ConfirmReservationOtp" method="post">
+                      <div class="mb-3">
+                            <label class="form-label">Please enter the OTP sent to your email for Reservation : @Model.id </label>
+                            <input hidden asp-for="id" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Otp" class="form-label">OTP (One-Time Pin</label>
+                            <input asp-for="Otp" class="form-control" placeholder="Enter the OTP sent to your email" />
+                            <span asp-validation-for="Otp" class="text-danger"> @Model.Message </span>
+
+                            <p> <span> Time Left: </span> <span id="timer" >  0:00 </span> </p>
+                            <input type="hidden" id="timeout" value="@Model.Timeout"  asp-for="Timeout"/>
+                        </div>
+
+                        <div>
+                            <input type="submit" class="btn btn-primary" name="submit" value="Submit"  id="submitbtn"  />
+                            <input class="btn btn-primary" name="resend" value="Resend" onclick="reloadpage()" id="resendbtn" width="100" />
+                        </div>
+                  </form>
+                  </div>
+              </div>
+         </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    const startTime = parseInt($('#timeout').val());
+    var timerElement = document.getElementById('timer');
+    var timeLeft = startTime;
+    
+    function countdown() {
+        console.log(timeLeft);
+        if (timeLeft > 0) {
+            timeLeft--;
+
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+
+            seconds = seconds < 10 ? '0' + seconds : seconds; // Add leading zero if seconds is less than 10
+
+            timerElement.textContent = `${minutes}:${seconds}`;
+
+            //update timer
+            $("#timeout").val(timeLeft);
+        } else {
+            // clearInterval(countdownInterval);
+            // Optionally, you can disable the submit button or show a message here
+            console.log('reload page for new OTP');
+            removeSession();
+            stopCountdown();
+
+            $('#submitbtn').hide();
+            $('#resendbtn').show();
+        }
+    }
+
+    function removeSession() {
+        $.ajax({
+            url: '/api/PortalReservation/PostRemoveSessionOTP',
+            type: 'POST',
+            success: function (response) {
+                console.log('Session removed successfully.');
+            },
+            error: function (xhr, status, error) {
+                console.error('Error removing session:', error);
+            }
+        });
+    }
+
+
+
+    function reloadpage() {
+        location.href = '/PortalReservation/ConfirmReservationOtp/' + @Model.id;
+    }
+
+    function stopCountdown() {
+        clearInterval(countdownInterval);
+    }
+
+    function startCountdown() {
+        countdownInterval = setInterval(countdown, 1000);
+    }
+
+    //startCountdown();
+
+    $(function() {
+         $('#resendbtn').hide();
+        startCountdown();
+    });
+
+</script>

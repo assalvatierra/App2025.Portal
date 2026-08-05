@@ -12,6 +12,8 @@ namespace Portal.Models
         public string InternalNotificationEmailMessage { get; set; }
         public string ProceedToPayment { get; set; }
 
+        public string OtpTimeout { get; set; }
+
         [JsonConverter(typeof(InternalEmailNotificationJsonModelStringConverter))]
         public string InternalNotificationEmails { get; set; }
     }

@@ -2,11 +2,13 @@ using Erp.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Portal.DBServices;
 using Portal.Models;
 using Portal.Services;
 using Portal.ViewModels;
 using System.Text.Json;
+using static System.Net.WebRequestMethods;
 
 namespace Portal.Controllers
 {
@@ -99,12 +101,14 @@ namespace Portal.Controllers
                     return View(viewModel);
                 }
 
-                await this._reservationService.SendCustomerNotification(addedReservation);
+                //transfer to After otp confirmation
+                //await this._reservationService.SendCustomerNotification(addedReservation);
 
                 //this._reservationService.
                 TempData["SuccessMessage"] = "Reservation submitted successfully!";
                 TempData["TransactionType"] = addedReservation.TransactionType;
-                return RedirectToAction("Success", new { id = addedReservation.Id });
+                //return RedirectToAction("Success", new { id = addedReservation.Id });
+                return RedirectToAction("ConfirmReservationOtp", new { id = addedReservation.Id });
             }
 
             // Reload the item on validation failure
@@ -163,6 +167,80 @@ namespace Portal.Controllers
             // Default fallback to home page if no valid return URL
             return RedirectToAction("Index", "Home");
         }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmReservationOtp(int id)
+        {
+            OTPViewModel otp = new OTPViewModel();
+            otp.id = id;
+            otp.Otp = string.Empty;
+            otp.Message = string.Empty;
+
+            //get OTP Timeout from configuration
+            var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
+            if (config.Any())
+            {
+                string jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                int otpTimeout = 0;
+                int.TryParse(settings.OtpTimeout, out otpTimeout);
+                otp.Timeout = otpTimeout; // 5 minutes (default)
+            }
+
+            var reservations = await _service.GetByIdAsync(id);
+            if (reservations == null)
+            {
+                return NotFound();
+            }
+
+            var OTP = await _reservationService.GenerateOTP();// 6 digit OTP
+            if (OTP.IsNullOrEmpty())
+            {
+                return NotFound();
+            }
+
+            ViewBag.Message = "Generating OTP!";
+
+            //save OTP to session
+            HttpContext.Session.SetString("OTP", OTP);
+
+            //send OTP to user email
+            await _reservationService.SendCustomerOTP(reservations, OTP);
+
+            return View(otp);
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmReservationOtp(OTPViewModel viewModel)
+        {
+            var isOtpValid = false;
+            var reservations = await _service.GetByIdAsync(viewModel.id);
+            if (reservations == null)
+            {
+                return NotFound();
+            }
+            //save OTP to session
+            var sessionOTP = HttpContext.Session.GetString("OTP");
+
+            //check user input and OTP
+            //OTP is valid
+            if (string.Equals(sessionOTP, viewModel.Otp))
+            {
+                //send client email notification
+                await this._reservationService.SendCustomerNotification(reservations);
+
+                return RedirectToAction("Success", new { id = viewModel.id });
+            }
+
+            viewModel.Message = "Invalid OTP. Please try again.";
+            return View("ConfirmReservationOtp", viewModel);
+        }
+
+
 
         // API ENDPOINTS
         // GET: api/PortalReservation
@@ -256,6 +334,18 @@ namespace Portal.Controllers
             return Ok(new { message = "Pending reservations processed successfully" });
         }
 
-       
+
+        [HttpPost]
+        [Route("api/[controller]/PostRemoveSessionOTP")]
+        public async Task<IActionResult> PostRemoveSessionOTP()
+        {
+            //clear OTP
+            HttpContext.Session.SetString("OTP", String.Empty);
+
+            return Ok(new { message = "Pending reservations processed successfully" });
+        }
+
+
+
     }
 }
