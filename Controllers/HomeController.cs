@@ -26,17 +26,20 @@ namespace Portal.Controllers
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
         private readonly IPortalConfigurationService _portalConfigurationService;
+        private readonly ICtaBoxService _ctaBoxService;
 
         public HomeController(
             IPortalItemService portalItemService, 
             IPortalCategoryServices portalCategoryService,
             IPortalContentService portalContentService,
-            IPortalConfigurationService portalConfigurationService)
+            IPortalConfigurationService portalConfigurationService,
+            ICtaBoxService ctaBoxService)
         {
             _portalItemService = portalItemService;
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;
             _portalConfigurationService = portalConfigurationService;
+            _ctaBoxService = ctaBoxService;
         }
 
         public async Task<IActionResult> Index()
@@ -65,6 +68,10 @@ namespace Portal.Controllers
             ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "WhyUs" }, "WhyUs");
             ViewBag.Faq = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Faq" }, "Faq");
             ViewBag.FeaturedArticles = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "FeaturedBlog" }, "FeaturedBlog");
+
+            var ctaBoxInfo = await _ctaBoxService.GetCtaBoxInfoAsync();
+            ViewBag.CtaBox = ctaBoxInfo;
+
 
             return View();
         }
