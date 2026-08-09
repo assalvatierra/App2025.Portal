@@ -6,6 +6,22 @@
     var searchTerm = ViewBag.SearchTerm as string;
     var compareList = ViewBag.CompareList as List<int> ?? new List<int>();
 }
+@section HeadMeta {
+    @if (!string.IsNullOrEmpty(searchTerm))
+    {
+        <meta name="robots" content="noindex, follow" />
+    }
+    else if (!string.IsNullOrEmpty(ViewBag.Category))
+    {
+        <meta name="robots" content="index, follow" />
+    }
+    
+    else
+    {
+        <meta name="robots" content="index, follow" />
+    }
+}
+
 
 @* Include the Compare Toast Component *@
 @await Html.PartialAsync("_CompareToast")

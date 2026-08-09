@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = Model.Reservation.TransactionType == "Quote" ? "Request Quote" : "Reservation Form";
 }
+@section HeadMeta {
+    <meta name="robots" content="noindex, follow" />
+}
 
 <div class="container my-5">
     <div class="row justify-content-center">
