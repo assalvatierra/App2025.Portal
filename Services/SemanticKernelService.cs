@@ -4,12 +4,13 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Portal.Services.SemanticKernelPlugins;
 using Portal.DBServices;
+using Portal.Controllers;
 
 namespace Portal.Services
 {
     public interface ISemanticKernelService
     {
-        Task<string> ProcessUserMessageAsync(string userMessage);
+        Task<string> ProcessUserMessageAsync(string userMessage, List<ChatMessage> chatHistory = null);
     }
 
     public class SemanticKernelService : ISemanticKernelService
@@ -50,7 +51,7 @@ namespace Portal.Services
             _logger.LogInformation($"Semantic Kernel initialized with Ollama endpoint: {ollamaEndpoint}, model: {ollamaModel}");
         }
 
-        public async Task<string> ProcessUserMessageAsync(string userMessage)
+        public async Task<string> ProcessUserMessageAsync(string userMessage, List<ChatMessage> chatHistory = null)
         {
             try
             {
@@ -72,16 +73,32 @@ namespace Portal.Services
                 };
 
                 // Create a chat history with system context about the car rental company
-                var chatHistory = new ChatHistory();
-                chatHistory.AddSystemMessage(@"You are an AI assistant for a car rental company. 
+                var chatHistoryObj = new ChatHistory();
+                chatHistoryObj.AddSystemMessage(@"You are an AI assistant for a car rental company. 
 You provide helpful, accurate, and friendly responses about car rental services, pricing, fleet information, policies, and bookings.
 Keep responses concise and professional.");
 
-                chatHistory.AddUserMessage(userMessage);
+                // Add previous chat history if provided
+                if (chatHistory != null && chatHistory.Count > 0)
+                {
+                    foreach (var msg in chatHistory)
+                    {
+                        if (msg.Role?.ToLower() == "user")
+                        {
+                            chatHistoryObj.AddUserMessage(msg.Content);
+                        }
+                        else if (msg.Role?.ToLower() == "assistant")
+                        {
+                            chatHistoryObj.AddAssistantMessage(msg.Content);
+                        }
+                    }
+                }
+
+                chatHistoryObj.AddUserMessage(userMessage);
 
                 // Get response from Ollama
                 var response = await _chatCompletionService.GetChatMessageContentAsync(
-                    chatHistory,
+                    chatHistoryObj,
                     executionSettings: openAIPromptExecutionSettings,
                     kernel: _kernel);
 
