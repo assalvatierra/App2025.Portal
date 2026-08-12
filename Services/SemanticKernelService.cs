@@ -19,16 +19,19 @@ namespace Portal.Services
         private readonly ILogger<SemanticKernelService> _logger;
         private readonly IPortalItemService _portalItemService;
         private readonly IPortalCategoryServices _portalCategoryService;
+        private readonly IPortalContentService _portalContentService;
 
         public SemanticKernelService(IConfiguration configuration, 
             ILogger<SemanticKernelService> logger, 
             IPortalItemService portalItemService,
-            IPortalCategoryServices portalCategoryService
+            IPortalCategoryServices portalCategoryService,
+            IPortalContentService portalContentService  
             )
         {
             _logger = logger;
             _portalItemService = portalItemService;
             _portalCategoryService = portalCategoryService;
+            _portalContentService = portalContentService;   
 
             // Get Ollama configuration from appsettings
             var ollamaEndpoint = configuration["Ollama:Endpoint"] ?? "http://localhost:11434";
@@ -54,6 +57,7 @@ namespace Portal.Services
                 // Prepare the agent tools/plugins
                 EnvInfoPlugin envInfo = new EnvInfoPlugin();
                 ProductsPlugin productsPlugin = new ProductsPlugin(_portalItemService, _portalCategoryService);
+                ContentsPlugin contentPlugin = new ContentsPlugin(_portalContentService);
 
                 //string temp = await productsPlugin.GetProducts();
                 //return temp;
@@ -61,6 +65,7 @@ namespace Portal.Services
 
                 _kernel.Plugins.AddFromObject(envInfo);
                 _kernel.Plugins.AddFromObject(productsPlugin);
+                _kernel.Plugins.AddFromObject(contentPlugin);
                 OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
                 {
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()

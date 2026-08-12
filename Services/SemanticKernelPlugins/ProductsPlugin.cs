@@ -29,19 +29,33 @@ namespace Portal.Services.SemanticKernelPlugins
 
             // fetch categories for Product
             var productCategories = categories
-                .Where(c => c.PortalCategory.CategoryType == "Product");
+                .Where(c => c.PortalCategory.CategoryType == "Product")
+                .Select(c => new
+                {
+                    CategoryName = c.PortalCategory.Name,
+                    CategoryType = c.PortalCategory.CategoryType,
+                    Title = c.Title,
+                    Description = c.Description,
+                    SeoTitle = c.SeoTitle,
+                    SeoDescription = c.SeoDescription,
+                    PageUrl = c.PageUrl
+                });
 
             return JsonSerializer.Serialize(productCategories);
         }
 
         [KernelFunction("get_products")]
-        [Description("Gets a list of available products along with prices and passenger and cargo/luggage capacities")]
-        public async Task<string> GetProducts()
+        [Description(
+            "Gets a list of available products along with prices and passenger and cargo/luggage capacities." +
+            "Use optional parameter (CategoryName) to filter the results, by Category or Type, if needed."
+            )]
+        public async Task<string> GetProducts(string? CategoryName)
         {
+            string sCat = CategoryName ?? "";
             try
             {
                 // Implementation to retrieve products
-                var items = (await _portalItemService.GetItemsByCategory("", "Product"));
+                var items = (await _portalItemService.GetItemsByCategory(sCat, "Product"));
 
                 var products = items.Select(p=>
                         new { 
