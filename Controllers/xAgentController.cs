@@ -29,7 +29,7 @@ namespace Portal.Controllers
 
             try
             {
-                var response = await _semanticKernelService.ProcessUserMessageAsync(request.Message);
+                var response = await _semanticKernelService.ProcessUserMessageAsync(request.Message, request.History);
                 return Json(new { response = response });
             }
             catch (Exception ex)
@@ -43,5 +43,12 @@ namespace Portal.Controllers
     public class ChatRequest
     {
         public string Message { get; set; }
+        public List<ChatMessage> History { get; set; } = new();
+    }
+
+    public class ChatMessage
+    {
+        public string Role { get; set; } // "user" or "assistant"
+        public string Content { get; set; }
     }
 }

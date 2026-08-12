@@ -526,7 +526,24 @@
             chatMessages.appendChild(messageDiv);
             scrollToBottom();
 
-            // Send message to xAgent controller via AJAX
+            // Collect chat history from messages
+            const history = [];
+            const allMessages = chatMessages.querySelectorAll('.chat-message');
+            allMessages.forEach(msg => {
+                if (msg.id === 'loadingMessage') return; // Skip loading indicator
+
+                const isUserMessage = msg.classList.contains('user-message');
+                const contentElement = msg.querySelector('.message-content p');
+
+                if (contentElement) {
+                    history.push({
+                        role: isUserMessage ? 'user' : 'assistant',
+                        content: contentElement.textContent
+                    });
+                }
+            });
+
+            // Send message to xAgent controller via AJAX with chat history
             fetch('/xAgent/GetResponse', {
                 method: 'POST',
                 headers: {
@@ -534,7 +551,8 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
-                    message: message
+                    message: message,
+                    history: history
                 })
             })
             .then(response => {
