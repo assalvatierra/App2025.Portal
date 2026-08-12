@@ -39,6 +39,12 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> AskAI()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public async Task<IActionResult> SearchItems([FromQuery] SearchDto search)
         {
             var results = await _portalItemService.SearchItemsAsync(search);
