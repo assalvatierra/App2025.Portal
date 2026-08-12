@@ -3,6 +3,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Portal.Services.SemanticKernelPlugins;
+using Portal.DBServices;
 
 namespace Portal.Services
 {
@@ -16,10 +17,18 @@ namespace Portal.Services
         private readonly Kernel _kernel;
         private readonly IChatCompletionService _chatCompletionService;
         private readonly ILogger<SemanticKernelService> _logger;
+        private readonly IPortalItemService _portalItemService;
+        private readonly IPortalCategoryServices _portalCategoryService;
 
-        public SemanticKernelService(IConfiguration configuration, ILogger<SemanticKernelService> logger)
+        public SemanticKernelService(IConfiguration configuration, 
+            ILogger<SemanticKernelService> logger, 
+            IPortalItemService portalItemService,
+            IPortalCategoryServices portalCategoryService
+            )
         {
             _logger = logger;
+            _portalItemService = portalItemService;
+            _portalCategoryService = portalCategoryService;
 
             // Get Ollama configuration from appsettings
             var ollamaEndpoint = configuration["Ollama:Endpoint"] ?? "http://localhost:11434";
@@ -44,7 +53,14 @@ namespace Portal.Services
             {
                 // Prepare the agent tools/plugins
                 EnvInfoPlugin envInfo = new EnvInfoPlugin();
+                ProductsPlugin productsPlugin = new ProductsPlugin(_portalItemService, _portalCategoryService);
+
+                //string temp = await productsPlugin.GetProducts();
+                //return temp;
+
+
                 _kernel.Plugins.AddFromObject(envInfo);
+                _kernel.Plugins.AddFromObject(productsPlugin);
                 OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
                 {
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
