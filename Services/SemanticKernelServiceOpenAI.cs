@@ -9,7 +9,7 @@ using Portal.SemanticKernelModel;
 
 namespace Portal.Services
 {
-    public class SemanticKernelService : ISemanticKernelService
+    public class SemanticKernelServiceOpenAI : ISemanticKernelService
     {
         private readonly Kernel _kernel;
         private readonly IChatCompletionService _chatCompletionService;
@@ -18,7 +18,7 @@ namespace Portal.Services
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
 
-        public SemanticKernelService(IConfiguration configuration, 
+        public SemanticKernelServiceOpenAI(IConfiguration configuration, 
             ILogger<SemanticKernelService> logger, 
             IPortalItemService portalItemService,
             IPortalCategoryServices portalCategoryService,
@@ -30,21 +30,41 @@ namespace Portal.Services
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;   
 
-            // Get Ollama configuration from appsettings
-            var ollamaEndpoint = configuration["Ollama:Endpoint"] ?? "http://localhost:11434";
-            var ollamaModel = configuration["Ollama:Model"] ?? "llama2";
+            // Get OpenAI configuration from appsettings
+            var openAIApiKey = configuration["OpenAI:ApiKey"];
+            var openAIModel = configuration["OpenAI:Model"] ?? "gpt-4o-mini";
+            var openAIEndpoint = configuration["OpenAI:Endpoint"]; // Optional: for vLLM or other OpenAI-compatible endpoints
 
-            // Initialize Semantic Kernel with Ollama chat completion
+            if (string.IsNullOrEmpty(openAIApiKey))
+            {
+                throw new InvalidOperationException("OpenAI API Key is not configured. Please set OpenAI:ApiKey in appsettings.");
+            }
+
+            // Initialize Semantic Kernel with OpenAI chat completion
             IKernelBuilder builder = Kernel.CreateBuilder();
-            builder.AddOllamaChatCompletion(
-                modelId: ollamaModel,
-                endpoint: new Uri(ollamaEndpoint)
-                );
+
+            // If endpoint is provided, use custom OpenAI-compatible API (e.g., vLLM on RunPod)
+            if (!string.IsNullOrEmpty(openAIEndpoint))
+            {
+                builder.AddOpenAIChatCompletion(
+                    modelId: openAIModel,
+                    apiKey: openAIApiKey,
+                    endpoint: new Uri(openAIEndpoint)
+                    );
+                _logger.LogInformation($"Semantic Kernel initialized with custom OpenAI endpoint: {openAIEndpoint}, model: {openAIModel}");
+            }
+            else
+            {
+                // Use official OpenAI API
+                builder.AddOpenAIChatCompletion(
+                    modelId: openAIModel,
+                    apiKey: openAIApiKey
+                    );
+                _logger.LogInformation($"Semantic Kernel initialized with OpenAI API, model: {openAIModel}");
+            }
 
             _kernel = builder.Build();
             _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
-
-            _logger.LogInformation($"Semantic Kernel initialized with Ollama endpoint: {ollamaEndpoint}, model: {ollamaModel}");
         }
 
         public async Task<string> ProcessUserMessageAsync(string userMessage, List<ChatMessage> chatHistory = null)
@@ -92,7 +112,7 @@ Keep responses concise and professional.Maintain a chat friendly format in the r
 
                 chatHistoryObj.AddUserMessage(userMessage);
 
-                // Get response from Ollama
+                // Get response from OpenAI
                 var response = await _chatCompletionService.GetChatMessageContentAsync(
                     chatHistoryObj,
                     executionSettings: openAIPromptExecutionSettings,
@@ -102,7 +122,7 @@ Keep responses concise and professional.Maintain a chat friendly format in the r
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError($"Connection error with Ollama: {ex.Message}");
+                _logger.LogError($"Connection error with OpenAI: {ex.Message}");
                 return "I'm unable to connect to the AI service right now. Please try again later or contact our support team.";
             }
             catch (Exception ex)
