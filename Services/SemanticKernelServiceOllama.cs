@@ -9,17 +9,17 @@ using Portal.SemanticKernelModel;
 
 namespace Portal.Services
 {
-    public class SemanticKernelService : ISemanticKernelService
+    public class SemanticKernelServiceOllama : ISemanticKernelService
     {
         private readonly Kernel _kernel;
         private readonly IChatCompletionService _chatCompletionService;
-        private readonly ILogger<SemanticKernelService> _logger;
+        private readonly ILogger<SemanticKernelServiceOllama> _logger;
         private readonly IPortalItemService _portalItemService;
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
 
-        public SemanticKernelService(IConfiguration configuration, 
-            ILogger<SemanticKernelService> logger, 
+        public SemanticKernelServiceOllama(IConfiguration configuration, 
+            ILogger<SemanticKernelServiceOllama> logger, 
             IPortalItemService portalItemService,
             IPortalCategoryServices portalCategoryService,
             IPortalContentService portalContentService  
@@ -42,6 +42,19 @@ namespace Portal.Services
                 );
 
             _kernel = builder.Build();
+            // Prepare the agent tools/plugins
+            EnvInfoPlugin envInfo = new EnvInfoPlugin();
+            ProductsPlugin productsPlugin = new ProductsPlugin(_portalItemService, _portalCategoryService);
+            ContentsPlugin contentPlugin = new ContentsPlugin(_portalContentService);
+
+            //string temp = await productsPlugin.GetProducts();
+            //return temp;
+
+
+            _kernel.Plugins.AddFromObject(envInfo);
+            _kernel.Plugins.AddFromObject(productsPlugin);
+            _kernel.Plugins.AddFromObject(contentPlugin);
+
             _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
 
             _logger.LogInformation($"Semantic Kernel initialized with Ollama endpoint: {ollamaEndpoint}, model: {ollamaModel}");
@@ -51,18 +64,6 @@ namespace Portal.Services
         {
             try
             {
-                // Prepare the agent tools/plugins
-                EnvInfoPlugin envInfo = new EnvInfoPlugin();
-                ProductsPlugin productsPlugin = new ProductsPlugin(_portalItemService, _portalCategoryService);
-                ContentsPlugin contentPlugin = new ContentsPlugin(_portalContentService);
-
-                //string temp = await productsPlugin.GetProducts();
-                //return temp;
-
-
-                _kernel.Plugins.AddFromObject(envInfo);
-                _kernel.Plugins.AddFromObject(productsPlugin);
-                _kernel.Plugins.AddFromObject(contentPlugin);
                 OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
                 {
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()

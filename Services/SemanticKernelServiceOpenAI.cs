@@ -13,13 +13,13 @@ namespace Portal.Services
     {
         private readonly Kernel _kernel;
         private readonly IChatCompletionService _chatCompletionService;
-        private readonly ILogger<SemanticKernelService> _logger;
+        private readonly ILogger<SemanticKernelServiceOpenAI> _logger;
         private readonly IPortalItemService _portalItemService;
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
 
         public SemanticKernelServiceOpenAI(IConfiguration configuration, 
-            ILogger<SemanticKernelService> logger, 
+            ILogger<SemanticKernelServiceOpenAI> logger, 
             IPortalItemService portalItemService,
             IPortalCategoryServices portalCategoryService,
             IPortalContentService portalContentService  

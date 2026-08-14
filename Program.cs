@@ -33,7 +33,7 @@ builder.Services.AddScoped<IEmailService, EmailServiceV2>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<ISitemapService, SitemapService>();
 builder.Services.AddScoped<ICtaBoxService, CtaBoxService>();
-builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOpenAI>();
+builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOllama>();
 
 // Add session support
 builder.Services.AddDistributedMemoryCache();
