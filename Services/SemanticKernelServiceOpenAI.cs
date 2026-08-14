@@ -64,6 +64,16 @@ namespace Portal.Services
             }
 
             _kernel = builder.Build();
+
+            // Prepare the agent tools/plugins
+            EnvInfoPlugin envInfo = new EnvInfoPlugin();
+            ProductsPlugin productsPlugin = new ProductsPlugin(_portalItemService, _portalCategoryService);
+            ContentsPlugin contentPlugin = new ContentsPlugin(_portalContentService);
+
+            _kernel.Plugins.AddFromObject(envInfo);
+            _kernel.Plugins.AddFromObject(productsPlugin);
+            _kernel.Plugins.AddFromObject(contentPlugin);
+
             _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
         }
 
@@ -71,18 +81,6 @@ namespace Portal.Services
         {
             try
             {
-                // Prepare the agent tools/plugins
-                EnvInfoPlugin envInfo = new EnvInfoPlugin();
-                ProductsPlugin productsPlugin = new ProductsPlugin(_portalItemService, _portalCategoryService);
-                ContentsPlugin contentPlugin = new ContentsPlugin(_portalContentService);
-
-                //string temp = await productsPlugin.GetProducts();
-                //return temp;
-
-
-                _kernel.Plugins.AddFromObject(envInfo);
-                _kernel.Plugins.AddFromObject(productsPlugin);
-                _kernel.Plugins.AddFromObject(contentPlugin);
                 OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
                 {
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
