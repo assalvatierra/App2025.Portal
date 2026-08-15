@@ -1,7 +1,7 @@
 @model Portal.ViewModels.ReservationFormViewModel
 
 @{
-    ViewData["Title"] = Model.Reservation.TransactionType == "Quote" ? "Request Quote" : "Reservation Form";
+    ViewData["Title"] = Model.Reservation.TransactionType == "Quote" ? "Request Quote" : "Reservation Request Form";
 }
 @section HeadMeta {
     <meta name="robots" content="noindex, follow" />
@@ -35,7 +35,7 @@
                         }
                         else
                         {
-                            @:Reservation Form
+                            @:Reservation Request Form
                         }
                     </h2>
                 </div>
