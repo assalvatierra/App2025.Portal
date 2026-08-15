@@ -1,7 +1,7 @@
 @model Erp.Domain.Models.PortalReservation
 
 @{
-    ViewData["Title"] = Model.TransactionType == "Quote" ? "Quote Request Successful" : "Reservation Successful";
+    ViewData["Title"] = Model.TransactionType == "Quote" ? "Quote Request Successful" : "Reservation Request Successful";
 }
 
 <div class="container my-5">
@@ -18,7 +18,7 @@
                             }
                             else
                             {
-                                @:Reservation Successful!
+                                @:Reservation Request Successful!
                             }
                         </h2>
                     </div>
@@ -33,16 +33,16 @@
                             }
                             else
                             {
-                                @:Thank you for your reservation!
+                                @:Thank you for your reservation request!
                             }
                         </strong> We've received your request and will process it shortly.
                     </div>
 
-                    <h5 class="mb-3">Reservation Details</h5>
+                    <h5 class="mb-3">Request Details</h5>
                     <div class="mb-4">
                         <div class="row mb-3">
                             <div class="col-sm-4 text-muted">
-                                <strong>Reservation ID:</strong>
+                                <strong>Request ID:</strong>
                             </div>
                             <div class="col-sm-8">
                                 <span class="badge bg-primary">#@Model.Id</span>
