@@ -91,11 +91,20 @@
                 <!-- Out of Town Notification -->
                 <div id="outOfTownNotification" class="alert alert-warning" style="display: none;">
                     <i class="bi bi-exclamation-triangle-fill"></i>
-                    <strong>Additional Cost Applies</strong> for out of town locations.
+                    <strong>Additional P1,000 per day</strong> for out of town locations.
                 </div>
             </div>
         </div>
     }
+
+    <div id="TermsAndCondition">
+        <h6 class="mb-2">Terms and Conditions</h6>
+        <ul class="mb-0">
+            <li>Rental is With-driver</li>
+            <li>Fuel by Renter</li>
+            <li>Additional Charges will be applied for out of town trips</li>
+        </ul>
+    </div>
 </div>
 
 <script>
@@ -110,18 +119,26 @@
         const pickupLocationSelect = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupLocation)');
         const destinationAreaSelect = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.DestinationArea)');
         let totalCost = 0.00;
+        let isPickupOthers;
+        let isDestinationOutOfTown;
+        let additionalCost = 1000.00;
 
         // Function to check if out-of-town notification should be shown
         function checkOutOfTownCondition() {
-            const isPickupOthers = pickupLocationSelect?.value === 'Others (Outside Downtown/Outside the City)';
-            const isDestinationOutOfTown = destinationAreaSelect?.value === 'Out of Town';
+            isPickupOthers = pickupLocationSelect?.value === 'Others (Outside Downtown/Outside the City)';
+            isDestinationOutOfTown = destinationAreaSelect?.value === 'Out of Town';
 
             if (outOfTownNotification) {
                 if (isPickupOthers || isDestinationOutOfTown) {
                     outOfTownNotification.style.display = 'block';
+
                 } else {
                     outOfTownNotification.style.display = 'none';
                 }
+            }
+
+            if (numberOfDaysInput.value) {
+                calculateEstimatedCost();
             }
         }
 
@@ -129,7 +146,9 @@
         function calculateEstimatedCost() {
             const numberOfDays = parseInt(numberOfDaysInput.value) || 0;
             totalCost = basePrice * numberOfDays;
-
+            if (isPickupOthers || isDestinationOutOfTown) {
+                totalCost += additionalCost * numberOfDays;
+            }
             if (estimatedCostDisplay) {
                 const formattedCost = totalCost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 estimatedCostDisplay.textContent = currency + ' ' + formattedCost;
