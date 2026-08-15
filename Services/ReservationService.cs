@@ -71,7 +71,7 @@ namespace Portal.Services
                               $"We have received your reservation request (Ref#:  {reservation.Id.ToString("D6")}) on {reservation.DateReceived:G}. " +
                               "<strong>This is not yet your booking confirmation.</strong><br/>" +
                               "The request is now in progress and our team will contact you if there are any additional information required.<br/>" +
-                              "We will send your booking confirmation once the unit and driver is arranged and confirmed.<br/><br/>" +
+                              "Our team will send your booking confirmation once the unit and driver is arranged and confirmed.<br/><br/>" +
                               "Thank you for choosing us.<br/><br/>" +
                               "Regards,<br/>Portal Team";
 
@@ -165,7 +165,7 @@ namespace Portal.Services
             {
                 string subject = "Your reservation One Time Password";
                 string body = $"Dear {reservation.CustomerName},<br/><br/>" +
-                              $"We have received your reservation (ID: {reservation.Id}) on {reservation.DateReceived:G}. " +
+                              $"We have received your request (ID: {reservation.Id}) on {reservation.DateReceived:G}. " +
                               $"Your One Time Password is: {otp} <br/><br/>" +
                               "Thank you for choosing us.<br/><br/>" +
                               "Regards,<br/>Portal Team";
