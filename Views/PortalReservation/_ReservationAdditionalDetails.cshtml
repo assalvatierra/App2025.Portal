@@ -118,10 +118,56 @@
         const outOfTownNotification = document.getElementById('outOfTownNotification');
         const pickupLocationSelect = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupLocation)');
         const destinationAreaSelect = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.DestinationArea)');
+        const pickupDateInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupDate)');
         let totalCost = 0.00;
         let isPickupOthers;
         let isDestinationOutOfTown;
         let additionalCost = 1000.00;
+
+        // Calculate the minimum allowed pickup date: 3 working days in advance (Saturday and Sunday not counted)
+        function calculateMinPickupDate() {
+            let date = new Date();
+            let addedDays = 0;
+            while (addedDays < 3) {
+                date.setDate(date.getDate() + 1);
+                const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    addedDays++;
+                }
+            }
+            return date;
+        }
+
+        function formatDateForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        const minPickupDate = calculateMinPickupDate();
+        const minPickupDateString = formatDateForInput(minPickupDate);
+
+        if (pickupDateInput) {
+            pickupDateInput.setAttribute('min', minPickupDateString);
+
+            function validatePickupDate() {
+                if (pickupDateInput.value && pickupDateInput.value < minPickupDateString) {
+                    pickupDateInput.setCustomValidity('Pickup date must be at least 3 working days in advance (Saturdays and Sundays are not counted).');
+                } else {
+                    pickupDateInput.setCustomValidity('');
+                }
+                pickupDateInput.reportValidity();
+            }
+
+            pickupDateInput.addEventListener('input', validatePickupDate);
+            pickupDateInput.addEventListener('change', validatePickupDate);
+
+            // Validate on page load in case a value is already set
+            if (pickupDateInput.value) {
+                validatePickupDate();
+            }
+        }
 
         // Function to check if out-of-town notification should be shown
         function checkOutOfTownCondition() {
@@ -186,13 +232,21 @@
                 // Get the additional details field values
                 const pickupLocationInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupLocation)');
                 const pickupInfoInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupInfo)');
-                const pickupDateInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupDate)');
                 const pickupTimeInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.PickupTime)');
                 const destinationAreaInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.DestinationArea)');
                 const destinationInfoInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.DestinationInfo)');
                 // const numberOfDaysInput = document.getElementById('@Html.IdFor(m => m.ReservationAdditionalInfo.NumberOfDays)');
                 const numberOfDaysInput = document.getElementById('numberOfDays');
                 const jsonDataInput = document.getElementById('@Html.IdFor(m => m.Reservation.JsonData)');
+
+                // Prevent submission if the pickup date does not meet the 3 working-day advance requirement
+                if (pickupDateInput && pickupDateInput.value && pickupDateInput.value < minPickupDateString) {
+                    pickupDateInput.setCustomValidity('Pickup date must be at least 3 working days in advance (Saturdays and Sundays are not counted).');
+                    pickupDateInput.reportValidity();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
 
                 // Calculate the estimated cost based on the number of days and base price
                 const numberOfDays = parseInt(numberOfDaysInput.value) || 0;
