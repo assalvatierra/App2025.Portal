@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, CarRental-Portal ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, CarRental-Portal ]
 
 jobs:
   build-and-test:
