@@ -85,7 +85,16 @@
                             <strong>Estimated Total Cost:</strong>
                             <span id="estimatedCost" class="fs-5 text-primary">@baseCurrency 0.00</span>
                         </div>
-                        <small class="text-muted">Base Rate: @basePrice.ToString("N2") @baseCurrency / Day</small>
+                        <div>
+                        <small class="text-muted">
+                            Base Rate: @basePrice.ToString("N2") @baseCurrency / Day
+                                <!-- Out of Town Notification -->
+                                <div id="outOfTownNotification">
+                                    Additional P1,000 for out of town locations.
+                                </div>
+
+                            </small>
+                        </div>
                     </div>
                 </div>
                 <!-- Out of Town Notification -->
