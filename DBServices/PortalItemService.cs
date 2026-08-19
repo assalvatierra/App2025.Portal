@@ -12,7 +12,7 @@ namespace Portal.DBServices
         public PortalItemService(IPortalItemDbLayer db, IPortalItemSpecDbLayer db2 )
         {
             _db = db;
-            _dbItemSpecs = db2;
+            _dbItemSpecs = db2;  
         }
 
         public async Task<List<PortalItem>> GetAllAsync()
