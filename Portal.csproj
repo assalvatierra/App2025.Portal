@@ -8,9 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Azure\**" />
     <Compile Remove="Tests\**" />
+    <Content Remove="Azure\**" />
     <Content Remove="Tests\**" />
+    <EmbeddedResource Remove="Azure\**" />
     <EmbeddedResource Remove="Tests\**" />
+    <None Remove="Azure\**" />
     <None Remove="Tests\**" />
   </ItemGroup>
 

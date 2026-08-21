@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Azure/ProcessPendingReservations/ProcessPendingReservations.csproj" Id="18da277a-e15f-45ee-8abb-69063d7b9055" />
   <Project Path="Portal.csproj" />
   <Project Path="Tests/Portal.Tests/Portal.Tests.csproj" />
 </Solution>
