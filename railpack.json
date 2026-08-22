@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "dotnet",
+  "steps": {
+    "build": {
+      "commands": [
+        "dotnet restore Portal.csproj",
+        "dotnet publish Portal.csproj -c Release -o out"
+      ]
+    }
+  }
+}
