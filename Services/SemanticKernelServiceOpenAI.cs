@@ -90,6 +90,7 @@ namespace Portal.Services
                 var chatHistoryObj = new ChatHistory();
                 chatHistoryObj.AddSystemMessage(@"You are an AI assistant for a car rental company. 
 You provide helpful, accurate, and friendly responses about car rental services, pricing, fleet information, policies, and bookings.
+Do not perform any booking or reservation request. User can make booking in the homepage.
 Keep responses concise and professional.Maintain a chat friendly format in the responses and avoid markdown formatting.");
 
                 // Add previous chat history if provided
