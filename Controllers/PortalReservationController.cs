@@ -268,14 +268,17 @@ namespace Portal.Controllers
                 string jsonsetting = config.First().Settings;
                 var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
                 int configMaxAttempts = 0;
-                int.TryParse(settings.OtpMaxAttempts, out configMaxAttempts);
+                if (settings != null)
+                {
+                    int.TryParse(settings.OtpMaxAttempts, out configMaxAttempts);
+                }
                 maxAttempts = configMaxAttempts > 0 ? configMaxAttempts : 3;
             }
 
             // Track OTP verification attempts using session key with reservation ID
             string attemptKey = $"OTPAttempts_{viewModel.id}";
             int attempts = 0;
-            string attemptCountStr = HttpContext.Session.GetString(attemptKey);
+            string? attemptCountStr = HttpContext.Session.GetString(attemptKey);
             if (int.TryParse(attemptCountStr, out int storedAttempts))
             {
                 attempts = storedAttempts;
@@ -340,7 +343,6 @@ namespace Portal.Controllers
 
         // GET: api/PortalReservation/5
         [HttpGet("{id}")]
-        [Route("api/[controller]/{id}")]
         public async Task<ActionResult<PortalReservation>> GetPortalReservation(int id)
         {
             var portalReservation = await _service.GetByIdAsync(id);
@@ -355,7 +357,6 @@ namespace Portal.Controllers
 
         // PUT: api/PortalReservation/5
         [HttpPut("{id}")]
-        [Route("api/[controller]/{id}")]
         public async Task<IActionResult> PutPortalReservation(int id, PortalReservation portalReservation)
         {
             if (id != portalReservation.Id)
@@ -394,7 +395,6 @@ namespace Portal.Controllers
 
         // DELETE: api/PortalReservation/5
         [HttpDelete("{id}")]
-        [Route("api/[controller]/{id}")]
         public async Task<IActionResult> DeletePortalReservation(int id)
         {
             var portalReservation = await _service.GetByIdAsync(id);
