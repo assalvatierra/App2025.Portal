@@ -21,6 +21,11 @@
             After landing at Francisco Bangoy International Airport (DVO), you're only minutes from Davao City. What you choose next can affect the rest of your trip. Airport taxis might mean long lines, fixed routes, or unwanted stops. Public transport is harder with luggage, children, or a late arrival. Renting a car puts you in control and lets you explore Davao on your own schedule.
         </p>
 
+        @if (ViewBag.CtaBox != null)
+        {
+            @await Html.PartialAsync("_CtaBox", (App2025.Portal.Models.CtaBoxViewModel)ViewBag.CtaBox)
+        }
+
     </div>
 </section>
 
