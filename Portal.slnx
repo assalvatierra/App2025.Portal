@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="Portal.csproj" />
-  <Project Path="Tests/Portal.Tests/Portal.Tests.csproj" />
 </Solution>
