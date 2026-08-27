@@ -85,13 +85,12 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html>
 
     <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
   "@@type": "AutoRental",
+  "@@id": "https://www.ajdavaocarrental.com/#business",
   "name": "AJ Davao Car Rental",
   "url": "https://www.ajdavaocarrental.com/",
   "image": "https://www.ajdavaocarrental.com/images/logo.png",
@@ -109,7 +108,6 @@
     "latitude": "7.06105410620412",
     "longitude": "125.57030671698767"
   },
-  
   "openingHours": "Mo-Su 08:00-20:00",
   "sameAs": [
     "https://www.facebook.com/AjDavaoCarRentals",
@@ -130,4 +128,7 @@
     }
   ]
 }
-</script>
+    </script>
+    @await RenderSectionAsync("StructuredData", required: false)
+</body>
+</html>
