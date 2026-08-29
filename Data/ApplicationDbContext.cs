@@ -15,6 +15,7 @@ namespace Portal.Data
         public DbSet<PortalItemCategory> PortalItemCategory { get; set; } = default!;
         public DbSet<PortalContent> PortalContent { get; set; } = default!;
         public DbSet<PortalContentCategory> PortalContentCategory { get; set; } = default!;
+        public DbSet<PortalContentData> PortalContentData { get; set; } = default!;
         public DbSet<PortalItemPrice> PortalItemPrice { get; set; } = default!;
     }
 }

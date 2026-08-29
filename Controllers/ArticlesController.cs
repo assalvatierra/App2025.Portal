@@ -50,6 +50,21 @@ namespace Portal.Controllers
             return View("Services/" + viewName);
         }
 
+        [HttpGet]
+        [Route("Contents/{contentTitle}")]
+        public async Task<IActionResult> Contents(string contentTitle)
+        {
+            string viewName = "HtmlContent";
+            if (string.IsNullOrWhiteSpace(contentTitle))
+            {
+                return BadRequest("Content title is required.");
+            }
+
+            await SetCtaBoxViewBag();
+            return View("Contents/" + viewName);
+        }
+
+
         private async Task SetCtaBoxViewBag()
         {
             var ctaBoxInfo = await _ctaBoxService.GetCtaBoxInfoAsync();
