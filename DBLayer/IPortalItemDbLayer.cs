@@ -9,6 +9,7 @@ namespace Portal.DBLayer
         Task<List<PortalItem>> GetItemsByCategoryAsync(string category, string? type);
         Task<List<PortalItem>> GetByIdListAsync(List<int> IdList);
         Task<PortalItem?> GetByIdAsync(int id);
+        Task<PortalItem?> GetByNameAsync(string name);
         Task UpdateAsync(PortalItem portalItem);
         Task<PortalItem> AddAsync(PortalItem portalItem);
         Task DeleteAsync(PortalItem portalItem);

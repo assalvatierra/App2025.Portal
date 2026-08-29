@@ -1,3 +1,4 @@
+using Erp.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Portal.DBServices;
 
@@ -6,10 +7,13 @@ namespace Portal.Controllers
     public class ArticlesController : Controller
     {
         private readonly ICtaBoxService _ctaBoxService;
+        private readonly IPortalContentDataService _portalContentDataService;
 
-        public ArticlesController(ICtaBoxService ctaBoxService)
+        public ArticlesController(ICtaBoxService ctaBoxService, 
+            IPortalContentDataService portalContentDataService)
         {
             _ctaBoxService = ctaBoxService;
+            _portalContentDataService = portalContentDataService;
         }
 
         [HttpGet]
@@ -51,13 +55,40 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
-        [Route("Contents/{contentTitle}")]
-        public async Task<IActionResult> Contents(string contentTitle)
+        [Route("Contents/{contentName}")]
+        public async Task<IActionResult> Contents(string contentName)
         {
             string viewName = "HtmlContent";
-            if (string.IsNullOrWhiteSpace(contentTitle))
+            if (string.IsNullOrWhiteSpace(contentName))
             {
-                return BadRequest("Content title is required.");
+                return BadRequest("Content name is required.");
+            }
+
+            PortalContentData contentData = await _portalContentDataService.GetByContentNameAsync(contentName);
+            if (contentData != null)
+            {
+                ViewBag.ContentData = contentData.DataValue;
+            }
+
+            await SetCtaBoxViewBag();
+            return View("Contents/" + viewName);
+        }
+
+
+        [HttpGet]
+        [Route("Items/{itemName}")]
+        public async Task<IActionResult> Items(string itemName)
+        {
+            string viewName = "HtmlContent";
+            if (string.IsNullOrWhiteSpace(itemName))
+            {
+                return BadRequest("Item name is required.");
+            }
+
+            PortalContentData contentData = await _portalContentDataService.GetByItemNameAsync(itemName);
+            if (contentData != null)
+            {
+                ViewBag.ContentData = contentData.DataValue;
             }
 
             await SetCtaBoxViewBag();

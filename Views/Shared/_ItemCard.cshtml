@@ -23,6 +23,23 @@
             }
         </div>
 
+        @if (cardMode == "List")
+        {
+            <div class="btn-group" role="group">
+                @if (item.ContentDataID.HasValue && item.ContentDataID.Value > 0)
+                {
+                    <a asp-controller="Articles"
+                       asp-action="Items"
+                       asp-route-itemName="@item.PortalItem.Name"
+                       class="btn btn-sm btn-outline-info"
+                       style="margin-left: 8px;margin-right: 10px;">
+                        <i class="bi bi-file-text"></i> Item Details
+                    </a>
+                }
+            </div>
+        }
+
+
         <!-- Section: Specifications -->
         @await Html.PartialAsync("_ItemSpecifications_CarRental", item.PortalItem.PortalItemSpecs)
         @await Html.PartialAsync("_ItemPrice", item.PortalItem.PortalItemPrices)
@@ -32,14 +49,16 @@
             <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
                 @if (cardMode == "List")
                 {
-                    <a asp-controller="PortalReservation" 
-                       asp-action="ReservationForm" 
-                       asp-route-itemId="@item.PortalItem.Id"
-                       asp-route-transactionType="@transactionType"
-                       class="btn btn-sm btn-primary">
-                        <i class="bi bi-calendar-check"></i> Reserve
-                    </a>
-
+                    <div class="btn-group" role="group">
+                        <a asp-controller="PortalReservation" 
+                           asp-action="ReservationForm" 
+                           asp-route-itemId="@item.PortalItem.Id"
+                           asp-route-transactionType="@transactionType"
+                           class="btn btn-sm btn-primary">
+                            <i class="bi bi-calendar-check"></i> Reserve
+                        </a>
+                    </div>
+                
                     @if (compareList.Contains(item.PortalItem.Id))
                     {
                         <button type="button" 

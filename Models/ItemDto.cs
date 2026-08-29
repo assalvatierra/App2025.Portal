@@ -11,6 +11,7 @@ namespace Portal.Models
         public string? ImageUrl { get; set; }
         public string? ImageAlt { get; set; }
         public string? PageUrl { get; set; }
+        public int? ContentDataID { get; set; }
 
     }
 
@@ -27,7 +28,8 @@ namespace Portal.Models
                 Description = jObject.Description,
                 ImageUrl = jObject.ImageUrl,
                 ImageAlt = jObject.ImageAlt,
-                PageUrl = jObject.PageUrl
+                PageUrl = jObject.PageUrl,
+                ContentDataID = jObject.ContentDataID
             };
 
         }

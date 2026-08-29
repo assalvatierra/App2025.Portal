@@ -9,6 +9,7 @@
         public string? PageUrl { get; set; }
         public string? SeoTitle { get; set; }
         public string? SeoDescription { get; set; }
+        public int? ContentDataID { get; set; }
     }
 
 }

@@ -43,6 +43,12 @@ namespace Portal.DBLayer
         {
             return await _context.PortalContent.FindAsync(id);
         }
+
+        public async Task<PortalContent?> GetByNameAsync(string name)
+        {
+            return await _context.PortalContent
+                .FirstOrDefaultAsync(c => c.Name == name);
+        }
         public async Task UpdateAsync(PortalContent portalContent)
         {
             _context.Entry(portalContent).State = EntityState.Modified;

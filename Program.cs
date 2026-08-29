@@ -29,6 +29,8 @@ builder.Services.AddScoped<IPortalCategoryDbLayer, PortalCategoryDbLayer>();
 builder.Services.AddScoped<IPortalCategoryServices, PortalCategoryServices>();
 builder.Services.AddScoped<IPortalContentDbLayer, PortalContentDbLayer>();
 builder.Services.AddScoped<IPortalContentService, PortalContentService>();
+builder.Services.AddScoped<IPortalContentDataDbLayer, PortalContentDataDbLayer>();
+builder.Services.AddScoped<IPortalContentDataService, PortalContentDataService>();
 builder.Services.AddScoped<IEmailService, EmailServiceV2>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<ISitemapService, SitemapService>();

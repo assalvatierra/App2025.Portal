@@ -1,15 +1,28 @@
 using Erp.Domain.Models;
 using Portal.DBLayer;
+using System.Text.Json;
 
 namespace Portal.DBServices
 {
     public class PortalContentDataService : IPortalContentDataService
     {
-        private readonly IPortalContentDataDbLayer _portalContentDataDbLayer;
+        private class JsonContentData
+        {
+            public int? ContentDataID { get; set; }
+        }
 
-        public PortalContentDataService(IPortalContentDataDbLayer portalContentDataDbLayer)
+        private readonly IPortalContentDataDbLayer _portalContentDataDbLayer;
+        private readonly IPortalContentDbLayer _portalContentDbLayer;
+        private readonly IPortalItemDbLayer _portalItemDbLayer;
+
+        public PortalContentDataService(
+            IPortalContentDataDbLayer portalContentDataDbLayer,
+            IPortalContentDbLayer portalContentDbLayer,
+            IPortalItemDbLayer portalItemDbLayer)
         {
             _portalContentDataDbLayer = portalContentDataDbLayer;
+            _portalContentDbLayer = portalContentDbLayer;
+            _portalItemDbLayer = portalItemDbLayer;
         }
 
         public async Task<List<PortalContentData>> GetAllAsync()
@@ -25,6 +38,50 @@ namespace Portal.DBServices
         public async Task<PortalContentData?> GetByIdAsync(int id)
         {
             return await _portalContentDataDbLayer.GetByIdAsync(id);
+        }
+
+        public async Task<PortalContentData?> GetByContentNameAsync(string contentName)
+        {
+            // Get the PortalContent by name
+            var portalContent = await _portalContentDbLayer.GetByNameAsync(contentName);
+
+            if (portalContent == null || string.IsNullOrEmpty(portalContent.JsonData))
+            {
+                return null;
+            }
+
+            // Extract ContentDataID from JsonData
+            var jsonData = JsonSerializer.Deserialize<JsonContentData>(portalContent.JsonData);
+
+            if (jsonData?.ContentDataID == null)
+            {
+                return null;
+            }
+
+            // Get and return the PortalContentData using the extracted ID
+            return await _portalContentDataDbLayer.GetByIdAsync(jsonData.ContentDataID.Value);
+        }
+
+        public async Task<PortalContentData?> GetByItemNameAsync(string itemName)
+        {
+            // Get the PortalItem by name
+            var portalItem = await _portalItemDbLayer.GetByNameAsync(itemName);
+
+            if (portalItem == null || string.IsNullOrEmpty(portalItem.JsonData))
+            {
+                return null;
+            }
+
+            // Extract ContentDataID from JsonData
+            var jsonData = JsonSerializer.Deserialize<JsonContentData>(portalItem.JsonData);
+
+            if (jsonData?.ContentDataID == null)
+            {
+                return null;
+            }
+
+            // Get and return the PortalContentData using the extracted ID
+            return await _portalContentDataDbLayer.GetByIdAsync(jsonData.ContentDataID.Value);
         }
 
         public async Task UpdateAsync(PortalContentData portalContentData)

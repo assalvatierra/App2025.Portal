@@ -99,6 +99,17 @@ namespace Portal.DBLayer
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        public async Task<PortalItem?> GetByNameAsync(string name)
+        {
+            return await _context.PortalItem
+                .Include(pi => pi.PortalItemSpecs)
+                .Include(portalItemPrices => portalItemPrices.PortalItemPrices
+                    .Where(p => p.Status == "Active")
+                    .OrderByDescending(p => p.ValidFrom)
+                )
+                .FirstOrDefaultAsync(p => p.Name == name);
+        }
+
         public async Task UpdateAsync(PortalItem portalItem)
         {
             _context.Entry(portalItem).State = EntityState.Modified;

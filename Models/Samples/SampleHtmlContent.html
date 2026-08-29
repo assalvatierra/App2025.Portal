@@ -1,0 +1,117 @@
+<style>
+  .sample-container {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+  }
+
+  .sample-header {
+    background: #333;
+    color: #fff;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 2rem;
+  }
+
+  .sample-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+  }
+
+  .sample-section {
+    margin-bottom: 2rem;
+  }
+
+  .sample-section h2 {
+    color: #0078d4;
+    border-bottom: 2px solid #0078d4;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+  }
+
+  .sample-section p {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+  }
+
+  .sample-list {
+    margin: 1rem 0;
+    padding-left: 2rem;
+  }
+
+  .sample-list li {
+    margin: 0.5rem 0;
+    padding-left: 0.5rem;
+  }
+
+  .sample-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #0078d4;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: background 0.3s;
+  }
+
+  .sample-button:hover {
+    background: #106ebe;
+  }
+
+  .sample-footer {
+    background: #f5f5f5;
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 0 0 4px 4px;
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 2rem;
+  }
+</style>
+
+<div class="sample-container">
+  <div class="sample-header">
+    <h1>Welcome to Our Portal</h1>
+  </div>
+
+  <div class="sample-section">
+    <h2>About This Content</h2>
+    <p>
+      This is a dynamically rendered HTML content page served from the Portal application. 
+      The content is stored in the database and rendered with full styling support.
+    </p>
+  </div>
+
+  <div class="sample-section">
+    <h2>Key Features</h2>
+    <ul class="sample-list">
+      <li>Dynamic HTML content from database</li>
+      <li>Full CSS styling support</li>
+      <li>Responsive design</li>
+      <li>Easy to manage and update</li>
+    </ul>
+  </div>
+
+  <div class="sample-section">
+    <h2>Getting Started</h2>
+    <p>
+      To create your own custom content pages:
+    </p>
+    <ol class="sample-list">
+      <li>Create a PortalContent entry with a name and reference</li>
+      <li>Create corresponding PortalContentData entries with HTML content</li>
+      <li>Add the ContentDataID reference to the PortalContent JSON data</li>
+      <li>Access the content through the portal viewer</li>
+    </ol>
+  </div>
+
+  <div class="sample-section">
+    <a href="javascript:void(0);" class="sample-button">Learn More</a>
+  </div>
+
+  <div class="sample-footer">
+    &copy; 2026 App Portal. All rights reserved.
+  </div>
+</div>
