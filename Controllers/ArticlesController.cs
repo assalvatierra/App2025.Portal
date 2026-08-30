@@ -9,6 +9,13 @@ namespace Portal.Controllers
         private readonly ICtaBoxService _ctaBoxService;
         private readonly IPortalContentDataService _portalContentDataService;
 
+        private class SeoMetadata
+        {
+            public string? Title { get; set; }
+            public string? Description { get; set; }
+            public string? Keywords { get; set; }
+        }
+
         public ArticlesController(ICtaBoxService ctaBoxService, 
             IPortalContentDataService portalContentDataService)
         {
@@ -93,7 +100,17 @@ namespace Portal.Controllers
             {
                 ViewBag.ContentData = contentData.DataValue;
             }
-            if(item != null)
+            if(contentData != null && !string.IsNullOrWhiteSpace(contentData.SeoData))
+            {
+                SeoMetadata seo = System.Text.Json.JsonSerializer.Deserialize<SeoMetadata>(contentData.SeoData);
+                if(seo != null)
+                {
+                    ViewBag.SeoTitle = seo.Title?? item.Name;
+                    ViewBag.SeoDescription = seo.Description??item.Description;
+                    ViewBag.SeoKeywords = seo.Keywords??"";
+                }
+            }
+            if (item != null)
             {
                 ViewBag.ItemId = item.Id;
             }

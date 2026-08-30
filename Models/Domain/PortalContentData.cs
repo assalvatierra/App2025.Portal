@@ -10,4 +10,6 @@ public partial class PortalContentData
     public string DataType { get; set; } = null!;
 
     public string? DataValue { get; set; } = null!;
+
+    public string? SeoData { get; set; } = null;
 }

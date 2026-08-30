@@ -1,5 +1,6 @@
 ﻿@{
-    ViewData["Title"] = "Html Content";
+    ViewData["Title"] = !string.IsNullOrWhiteSpace(ViewBag.SeoTitle) ? ViewBag.SeoTitle : "";
+    ViewData["Description"] = !string.IsNullOrWhiteSpace(ViewBag.SeoDescription) ? ViewBag.SeoDescription : string.Empty;
 }
 
 <main id="primary" class="content-area">

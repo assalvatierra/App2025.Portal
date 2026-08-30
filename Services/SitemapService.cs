@@ -15,17 +15,20 @@ namespace Portal.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IPortalCategoryServices _categoryServices;
         private readonly IPortalContentService _contentService;
+        private readonly IPortalItemService _portalItemService;
 
 
         public SitemapService(
             IHttpContextAccessor httpContextAccessor,
             IPortalCategoryServices portalCategoryServices,
-            IPortalContentService portalContentService
+            IPortalContentService portalContentService,
+            IPortalItemService portalItemService
             )
         {
             _httpContextAccessor = httpContextAccessor;
             _categoryServices = portalCategoryServices;
             _contentService = portalContentService;
+            _portalItemService = portalItemService;
         }
 
         public string GetSitemapXml()
@@ -123,9 +126,19 @@ namespace Portal.Services
                 .Where(c => !string.IsNullOrEmpty(c.PageUrl))
                 .Select(c => c.PageUrl)
                 .ToList();
-            
+
             return contents;
 
+        }
+
+        public List<string> GetPortalItemPages()
+        {
+            var items = _portalItemService.GetAllAsync().Result
+                .Where(item => item.IsActive && !item.IsArchived)
+                .Select(item => $"/Items/{GenerateSlug(item.Name)}")
+                .ToList();
+
+            return items;
         }
 
         public IReadOnlyCollection<SitemapNode> GetSitemapNodes(string _website)
@@ -137,6 +150,7 @@ namespace Portal.Services
             itemroot.AddRange(this.GetItemPages() ?? []);
             itemroot.AddRange(this.GetItemCategories() ?? []);
             itemroot.AddRange(this.GetPortalContents() ?? []);
+            itemroot.AddRange(this.GetPortalItemPages() ?? []);
             foreach (var item in itemroot)
             {
                 nodes.Add(
@@ -149,6 +163,26 @@ namespace Portal.Services
                     });
             }
             return nodes;
+        }
+
+        private string GenerateSlug(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "item";
+
+            // Convert to lowercase
+            var slug = name.ToLowerInvariant();
+
+            // Replace spaces and special characters with hyphens
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\-]", "-");
+
+            // Replace multiple consecutive hyphens with a single hyphen
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-+", "-");
+
+            // Trim hyphens from start and end
+            slug = slug.Trim('-');
+
+            return string.IsNullOrEmpty(slug) ? "item" : slug;
         }
 
     }
