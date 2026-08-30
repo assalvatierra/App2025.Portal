@@ -8,10 +8,12 @@
     var showMobile = Model?.ShowMobile ?? false;
     var showEmail = Model?.ShowEmail ?? false;
     var showFacebook = Model?.ShowFacebook ?? false;
+    var itemId = Model?.ItemId;
 }
 
 <section class="section">
     <h2>@title</h2>
+
     <p>
         @description
     </p>
@@ -25,7 +27,27 @@
                     <div style="display: flex; gap: 10px;">
                         @foreach (var action in Model.Actions)
                         {
-                            <a href="@action.Url" class="btn btn-primary" style="flex: 1; text-align: center; height: 4rem; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                            var actionUrl = action.Url;
+                            if (!string.IsNullOrEmpty(actionUrl) && !string.IsNullOrEmpty(itemId))
+                            {
+                                // Replace existing itemId parameter if present, otherwise append it
+                                if (actionUrl.Contains("itemId="))
+                                {
+                                    // Replace itemId parameter value using regex
+                                    actionUrl = System.Text.RegularExpressions.Regex.Replace(
+                                        actionUrl, 
+                                        @"itemId=[\d]+", 
+                                        $"itemId={Uri.EscapeDataString(itemId)}"
+                                    );
+                                }
+                                else
+                                {
+                                    // Append itemId if not present
+                                    var separator = actionUrl.Contains("?") ? "&" : "?";
+                                    actionUrl = $"{actionUrl}{separator}itemId={Uri.EscapeDataString(itemId)}";
+                                }
+                            }
+                            <a href="@actionUrl" class="btn btn-primary" style="flex: 1; text-align: center; height: 4rem; display: flex; align-items: center; justify-content: center; flex-direction: column;">
                                 @if (!string.IsNullOrEmpty(action.Icon))
                                 {
                                     <i class="bi bi-@action.Icon"></i>

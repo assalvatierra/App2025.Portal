@@ -13,6 +13,9 @@ namespace App2025.Portal.Models
         public bool ShowMobile { get; set; }
         public bool ShowEmail { get; set; }
         public bool ShowFacebook { get; set; }
+
+        // Optional item ID for booking or quote requests
+        public string ItemId { get; set; }
     }
 
     public class ContactInfoViewModel

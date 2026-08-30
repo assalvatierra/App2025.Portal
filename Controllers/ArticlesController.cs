@@ -85,10 +85,17 @@ namespace Portal.Controllers
                 return BadRequest("Item name is required.");
             }
 
-            PortalContentData contentData = await _portalContentDataService.GetByItemNameAsync(itemName);
+            var result = await _portalContentDataService.GetByItemNameAsync(itemName);
+            var contentData = result.Item1;
+            var item = result.Item2;
+
             if (contentData != null)
             {
                 ViewBag.ContentData = contentData.DataValue;
+            }
+            if(item != null)
+            {
+                ViewBag.ItemId = item.Id;
             }
 
             await SetCtaBoxViewBag();

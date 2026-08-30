@@ -4,4 +4,14 @@
 
 <main id="primary" class="content-area">
     @Html.Raw(ViewBag.ContentData)
+    @if (ViewBag.CtaBox != null)
+    {
+        var ctaBoxModel = (App2025.Portal.Models.CtaBoxViewModel)ViewBag.CtaBox;
+        if (ViewBag.ItemId != null)
+        {
+            ctaBoxModel.ItemId = ViewBag.ItemId.ToString();
+        }
+        @await Html.PartialAsync("_CtaBox", ctaBoxModel)
+    }
+
 </main>
