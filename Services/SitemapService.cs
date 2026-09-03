@@ -119,12 +119,11 @@ namespace Portal.Services
 
         public List<string> GetPortalContents()
         {
-            List<string> categories =["Services","Articles"];
+            List<string> categories = new List<string> { "Services", "Articles" };
 
 
             var contents = _contentService.GetContentsByCategoryAsync(categories, null).Result
-                .Where(c => !string.IsNullOrEmpty(c.PageUrl))
-                .Select(c => c.PageUrl)
+                .Select(c => string.IsNullOrEmpty(c.PageUrl) ? $"/Contents/{GenerateSlug(c.Content.Name)}" : c.PageUrl)
                 .ToList();
 
             return contents;
@@ -147,10 +146,10 @@ namespace Portal.Services
 
             //root items
             List<string> itemroot = new List<string>();
-            itemroot.AddRange(this.GetItemPages() ?? []);
-            itemroot.AddRange(this.GetItemCategories() ?? []);
-            itemroot.AddRange(this.GetPortalContents() ?? []);
-            itemroot.AddRange(this.GetPortalItemPages() ?? []);
+            itemroot.AddRange(this.GetItemPages() ?? new List<string>());
+            itemroot.AddRange(this.GetItemCategories() ?? new List<string>());
+            itemroot.AddRange(this.GetPortalContents() ?? new List<string>());
+            itemroot.AddRange(this.GetPortalItemPages() ?? new List<string>());
             foreach (var item in itemroot)
             {
                 nodes.Add(
