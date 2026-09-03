@@ -7,7 +7,7 @@ namespace Portal.DBServices
         Task<List<PortalContentData>> GetAllAsync();
         Task<List<PortalContentData>> GetByTypeAsync(string dataType);
         Task<PortalContentData?> GetByIdAsync(int id);
-        Task<PortalContentData?> GetByContentNameAsync(string contentName);
+        Task<(PortalContentData?, PortalContent?)> GetByContentNameAsync(string contentName);
         Task<(PortalContentData?, PortalItem?)> GetByItemNameAsync(string itemName);
         Task UpdateAsync(PortalContentData portalContentData);
         Task<PortalContentData> AddAsync(PortalContentData portalContentData);

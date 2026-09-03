@@ -71,10 +71,26 @@ namespace Portal.Controllers
                 return BadRequest("Content name is required.");
             }
 
-            PortalContentData contentData = await _portalContentDataService.GetByContentNameAsync(contentName);
+            var result = await _portalContentDataService.GetByContentNameAsync(contentName);
+            var contentData = result.Item1;
+            var content = result.Item2;
             if (contentData != null)
             {
                 ViewBag.ContentData = contentData.DataValue;
+            }
+            if (contentData != null && !string.IsNullOrWhiteSpace(contentData.SeoData))
+            {
+                SeoMetadata seo = System.Text.Json.JsonSerializer.Deserialize<SeoMetadata>(contentData.SeoData);
+                if (seo != null)
+                {
+                    ViewBag.SeoTitle = seo.Title ?? content.Name;
+                    ViewBag.SeoDescription = seo.Description ?? content.Name;
+                    ViewBag.SeoKeywords = seo.Keywords ?? "";
+                }
+            }
+            if (content != null)
+            {
+                ViewBag.ItemId = content.Id;
             }
 
             await SetCtaBoxViewBag();

@@ -13,6 +13,7 @@ namespace Portal.DBServices
             public string? Description { get; set; }
             public string? ImageUrl { get; set; }
             public string? PageUrl { get; set; }
+            public int? ContentDataID { get; set; }
         }
 
         private readonly IConfiguration _configuration;
@@ -61,7 +62,8 @@ namespace Portal.DBServices
                         Title = jObject.Title,
                         Description = jObject.Description,
                         ImageUrl = jObject.ImageUrl,
-                        PageUrl = jObject.PageUrl
+                        PageUrl = jObject.PageUrl,
+                        ContentDataID = jObject.ContentDataID
                     };
                 }).ToList();
         }

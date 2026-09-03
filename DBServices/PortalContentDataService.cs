@@ -40,14 +40,14 @@ namespace Portal.DBServices
             return await _portalContentDataDbLayer.GetByIdAsync(id);
         }
 
-        public async Task<PortalContentData?> GetByContentNameAsync(string contentName)
+        public async Task<(PortalContentData?, PortalContent?)> GetByContentNameAsync(string contentName)
         {
             // Get the PortalContent by name
             var portalContent = await _portalContentDbLayer.GetByNameAsync(contentName);
 
             if (portalContent == null || string.IsNullOrEmpty(portalContent.JsonData))
             {
-                return null;
+                return (null, null);
             }
 
             // Extract ContentDataID from JsonData
@@ -55,11 +55,12 @@ namespace Portal.DBServices
 
             if (jsonData?.ContentDataID == null)
             {
-                return null;
+                return (null, portalContent);
             }
 
             // Get and return the PortalContentData using the extracted ID
-            return await _portalContentDataDbLayer.GetByIdAsync(jsonData.ContentDataID.Value);
+            var contentData = await _portalContentDataDbLayer.GetByIdAsync(jsonData.ContentDataID.Value);
+            return (contentData, portalContent);
         }
 
         public async Task<(PortalContentData?, PortalItem?)> GetByItemNameAsync(string itemName)

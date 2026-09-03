@@ -46,6 +46,19 @@
                                         <a href="@content.PageUrl" class="btn btn-primary btn-sm w-100">Learn More</a>
                                     </div>
                                 }
+
+                                @if (content.ContentDataID.HasValue && content.ContentDataID.Value > 0)
+                                {
+                                    <div class="card-footer bg-transparent">
+                                        <a asp-controller="Articles"
+                                           asp-action="Contents"
+                                           asp-route-contentName="@content.Content.Name"
+                                           class="btn btn-primary btn-sm w-100">
+                                             <i class="bi bi-file-text"></i> Learn More
+                                        </a>
+                                    </div>
+                                }
+
                             </div>
                         </div>
                     }

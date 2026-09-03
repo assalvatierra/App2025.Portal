@@ -8,6 +8,7 @@ namespace Portal.Models
         public string? Title { get; set; }
         public string? Description { get; set; }
         public string? ImageUrl { get; set; } = null;
+        public int? ContentDataID { get; set; } = null;
         public string? PageUrl { get; set; } = null;
     }
 }
