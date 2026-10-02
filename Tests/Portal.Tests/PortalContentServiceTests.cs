@@ -3,6 +3,7 @@ using Portal.DBLayer;
 using Portal.DBServices;
 using Erp.Domain.Models;
 using Portal.Models;
+using Portal.Services;
 using Xunit;
 using Microsoft.Extensions.Configuration;
 
@@ -12,13 +13,15 @@ namespace Portal.Tests.DBServices
     {
         private readonly Mock<IConfiguration> _mockConfiguration;
         private readonly Mock<IPortalContentDbLayer> _mockContentDbLayer;
+        private readonly Mock<ICache> _mockCache;
         private readonly PortalContentService _service;
 
         public PortalContentServiceTests()
         {
             _mockConfiguration = new Mock<IConfiguration>();
             _mockContentDbLayer = new Mock<IPortalContentDbLayer>();
-            _service = new PortalContentService(_mockConfiguration.Object, _mockContentDbLayer.Object);
+            _mockCache = new Mock<ICache>();
+            _service = new PortalContentService(_mockConfiguration.Object, _mockContentDbLayer.Object, _mockCache.Object);
         }
 
         [Fact]

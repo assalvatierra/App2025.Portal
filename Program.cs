@@ -4,6 +4,7 @@ using Portal.Data;
 using Portal.DBLayer;
 using Portal.DBServices;
 using Portal.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,18 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+// Register CacheService
+// using StackExchange.Redis;
+//string redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+//builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+//    ConnectionMultiplexer.Connect(redisConnectionString));
+//builder.Services.AddScoped<ICache, RedisCache>();
+
+// use inMemory cache for now, can switch to Redis later
+builder.Services.AddSingleton<ICache, InMemoryCache>();
+
 
 // Register 3-layer architecture dependencies
 builder.Services.AddScoped<IPortalConfigurationDbLayer, PortalConfigurationDbLayer>();

@@ -1,6 +1,7 @@
 using Erp.Domain.Models;
 using Portal.DBLayer;
 using Portal.Models;
+using Portal.Services;
 
 namespace Portal.DBServices
 {
@@ -8,11 +9,13 @@ namespace Portal.DBServices
     {
         private readonly IPortalItemDbLayer _db;
         private readonly IPortalItemSpecDbLayer _dbItemSpecs;
+        private readonly ICache _cache;
 
-        public PortalItemService(IPortalItemDbLayer db, IPortalItemSpecDbLayer db2 )
+        public PortalItemService(IPortalItemDbLayer db, IPortalItemSpecDbLayer db2, ICache cache)
         {
             _db = db;
-            _dbItemSpecs = db2;  
+            _dbItemSpecs = db2;
+            _cache = cache;
         }
 
         public async Task<List<PortalItem>> GetAllAsync()
@@ -37,14 +40,29 @@ namespace Portal.DBServices
 
         public async Task<List<ItemDto>> GetItemsByCategory(string category, string? type)
         {
+            // Create a cache key based on category and type
+            var cacheKey = $"items_category_{category}_{type ?? "all"}";
+
+            // Try to get from cache first
+            var cachedItems = await _cache.GetAsync<List<ItemDto>>(cacheKey);
+            if (cachedItems != null)
+            {
+                return cachedItems;
+            }
+
+            // If not in cache, get from database
             var items = await _db.GetItemsByCategoryAsync(category, type);
 
-            return items.Select( item =>
+            var result = items.Select(item =>
             {
                 ItemDto dto = item.MapToDto();
                 return dto;
             }).ToList();
 
+            // Cache the result for 1 hour
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
+
+            return result;
         }
 
         public async Task<List<ItemDto>> GetByIdListAsync(List<int> IdList)

@@ -1,5 +1,6 @@
 using Erp.Domain.Models;
 using Portal.DBLayer;
+using Portal.Services;
 using System.Text.Json;
 
 namespace Portal.DBServices
@@ -14,15 +15,18 @@ namespace Portal.DBServices
         private readonly IPortalContentDataDbLayer _portalContentDataDbLayer;
         private readonly IPortalContentDbLayer _portalContentDbLayer;
         private readonly IPortalItemDbLayer _portalItemDbLayer;
+        private readonly ICache _cache;
 
         public PortalContentDataService(
             IPortalContentDataDbLayer portalContentDataDbLayer,
             IPortalContentDbLayer portalContentDbLayer,
-            IPortalItemDbLayer portalItemDbLayer)
+            IPortalItemDbLayer portalItemDbLayer,
+            ICache cache)
         {
             _portalContentDataDbLayer = portalContentDataDbLayer;
             _portalContentDbLayer = portalContentDbLayer;
             _portalItemDbLayer = portalItemDbLayer;
+            _cache = cache;
         }
 
         public async Task<List<PortalContentData>> GetAllAsync()
@@ -42,6 +46,16 @@ namespace Portal.DBServices
 
         public async Task<(PortalContentData?, PortalContent?)> GetByContentNameAsync(string contentName)
         {
+            // Create a cache key for this content
+            var cacheKey = $"contentdata_content_{contentName}";
+
+            // Try to get from cache first
+            var cachedResult = await _cache.GetAsync<(PortalContentData?, PortalContent?)>(cacheKey);
+            if (cachedResult != default)
+            {
+                return cachedResult;
+            }
+
             // Get the PortalContent by name
             var portalContent = await _portalContentDbLayer.GetByNameAsync(contentName);
 
@@ -60,11 +74,26 @@ namespace Portal.DBServices
 
             // Get and return the PortalContentData using the extracted ID
             var contentData = await _portalContentDataDbLayer.GetByIdAsync(jsonData.ContentDataID.Value);
-            return (contentData, portalContent);
+            var result = (contentData, portalContent);
+
+            // Cache the result for 1 hour
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
+
+            return result;
         }
 
         public async Task<(PortalContentData?, PortalItem?)> GetByItemNameAsync(string itemName)
         {
+            // Create a cache key for this item
+            var cacheKey = $"contentdata_item_{itemName}";
+
+            // Try to get from cache first
+            var cachedResult = await _cache.GetAsync<(PortalContentData?, PortalItem?)>(cacheKey);
+            if (cachedResult != default)
+            {
+                return cachedResult;
+            }
+
             // Get the PortalItem by name
             var portalItem = await _portalItemDbLayer.GetByNameAsync(itemName);
 
@@ -83,7 +112,12 @@ namespace Portal.DBServices
 
             // Get and return the PortalContentData and PortalItem
             var contentData = await _portalContentDataDbLayer.GetByIdAsync(jsonData.ContentDataID.Value);
-            return (contentData, portalItem);
+            var result = (contentData, portalItem);
+
+            // Cache the result for 1 hour
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
+
+            return result;
         }
 
         public async Task UpdateAsync(PortalContentData portalContentData)

@@ -1,6 +1,7 @@
 ﻿using Erp.Domain.Models;
 using Portal.DBLayer;
 using Portal.Models;
+using Portal.Services;
 using System.Text.Json;
 
 namespace Portal.DBServices
@@ -18,12 +19,16 @@ namespace Portal.DBServices
 
         private readonly IConfiguration _configuration;
         private readonly IPortalContentDbLayer _portalContentDbLayer;
+        private readonly ICache _cache;
+
         public PortalContentService(
             IConfiguration configuration,
-            IPortalContentDbLayer portalContentDbLayer)
+            IPortalContentDbLayer portalContentDbLayer,
+            ICache cache)
         {
             _portalContentDbLayer = portalContentDbLayer;
             _configuration = configuration;
+            _cache = cache;
         }
 
         public async Task<List<ContentDto>> GetAllActiveContentsAsync()
@@ -45,6 +50,17 @@ namespace Portal.DBServices
 
         public async Task<List<ContentDto>> GetContentsByCategoryAsync(List<string> category, string? type)
         {
+            // Create a cache key based on categories and type
+            var categoryKey = string.Join("_", category.OrderBy(c => c));
+            var cacheKey = $"content_category_{categoryKey}_{type ?? "all"}";
+
+            // Try to get from cache first
+            var cachedContents = await _cache.GetAsync<List<ContentDto>>(cacheKey);
+            if (cachedContents != null)
+            {
+                return cachedContents;
+            }
+
             var TemporaryContents = _configuration["TemporaryContents:Enabled"];
             if (bool.Parse(TemporaryContents))
             {
@@ -53,7 +69,7 @@ namespace Portal.DBServices
             }
 
             var content = await _portalContentDbLayer.GetContentsByCategoryAsync(category, type);
-            return content.Select(c =>
+            var result = content.Select(c =>
                 {
                     JObject jObject = JsonSerializer.Deserialize<JObject>(c.JsonData ?? "{}") ?? new JObject();
                     return new ContentDto
@@ -66,6 +82,11 @@ namespace Portal.DBServices
                         ContentDataID = jObject.ContentDataID
                     };
                 }).ToList();
+
+            // Cache the result for 1 hour
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
+
+            return result;
         }
         public async Task<PortalContent?> GetByIdAsync(int id)
         {

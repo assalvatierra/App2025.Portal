@@ -4,6 +4,7 @@ using Erp.Domain.Models;
 using Portal.DBLayer;
 using Portal.DBServices;
 using Portal.Models;
+using Portal.Services;
 
 namespace Portal.Tests.DBServices
 {
@@ -11,13 +12,15 @@ namespace Portal.Tests.DBServices
     {
         private readonly Mock<IPortalItemDbLayer> _mockDbLayer;
         private readonly Mock<IPortalItemSpecDbLayer> _mockItemSpecsDbLayer;
+        private readonly Mock<ICache> _mockCache;
         private readonly PortalItemService _service;
 
         public PortalItemServiceTests()
         {
             _mockDbLayer = new Mock<IPortalItemDbLayer>();
             _mockItemSpecsDbLayer = new Mock<IPortalItemSpecDbLayer>();
-            _service = new PortalItemService(_mockDbLayer.Object, _mockItemSpecsDbLayer.Object);
+            _mockCache = new Mock<ICache>();
+            _service = new PortalItemService(_mockDbLayer.Object, _mockItemSpecsDbLayer.Object, _mockCache.Object);
         }
 
         #region GetAllAsync Tests
