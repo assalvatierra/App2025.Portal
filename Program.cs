@@ -18,15 +18,31 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
-// Register CacheService
-// using StackExchange.Redis;
-//string redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
-//builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-//    ConnectionMultiplexer.Connect(redisConnectionString));
-//builder.Services.AddScoped<ICache, RedisCache>();
+// Register CacheService with StackExchange.Redis
+// Read Redis configuration from appsettings
+var redisEnabled = builder.Configuration.GetValue<bool>("Caching:Redis:enabled");
 
-// use inMemory cache for now, can switch to Redis later
-builder.Services.AddSingleton<ICache, InMemoryCache>();
+if (redisEnabled)
+{
+    var redisHost = builder.Configuration.GetValue<string>("Caching:Redis:https") 
+        ?? throw new InvalidOperationException("Redis host not configured in Caching:Redis:https");
+    var redisPort = builder.Configuration.GetValue<string>("Caching:Redis:port") ?? "6379";
+    var redisToken = builder.Configuration.GetValue<string>("Caching:Redis:token") 
+        ?? throw new InvalidOperationException("Redis token not configured in Caching:Redis:token");
+
+    // Build Redis connection string with authentication
+    var redisConnectionString = $"{redisHost}:{redisPort},password={redisToken},ssl=true";
+
+    builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        ConnectionMultiplexer.Connect(redisConnectionString));
+    builder.Services.AddScoped<ICache, RedisCache>();
+}
+else
+{
+    // Fallback to in-memory cache if Redis is disabled
+    builder.Services.AddSingleton<ICache, InMemoryCache>();
+}
+
 
 
 // Register 3-layer architecture dependencies

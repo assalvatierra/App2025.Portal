@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Erp.Domain.Models;
 
@@ -15,5 +16,6 @@ public partial class PortalItemSpec
 
     public string? Remarks { get; set; }
 
+    [JsonIgnore]
     public virtual PortalItem? PortalItem { get; set; }
 }

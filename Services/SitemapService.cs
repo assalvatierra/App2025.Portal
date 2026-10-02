@@ -123,7 +123,7 @@ namespace Portal.Services
 
 
             var contents = _contentService.GetContentsByCategoryAsync(categories, null).Result
-                .Select(c => string.IsNullOrEmpty(c.PageUrl) ? $"/Contents/{GenerateSlug(c.Content.Name)}" : c.PageUrl)
+                .Select(c => string.IsNullOrEmpty(c.PageUrl) ? $"/Contents/{GenerateSlug(c.ContentName)}" : c.PageUrl)
                 .ToList();
 
             return contents;

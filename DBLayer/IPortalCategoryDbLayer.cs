@@ -6,6 +6,7 @@ namespace Portal.DBLayer
     {
         Task<List<PortalCategory>> GetAllAsync();
         Task<List<PortalCategory>> GetAllByStatusAsync(string? status);
+        Task<List<PortalCategory>> GetByTypeAsync(string categoryType);
 
         Task<PortalCategory?> GetByIdAsync(int id);
         Task UpdateAsync(PortalCategory portalCategory);

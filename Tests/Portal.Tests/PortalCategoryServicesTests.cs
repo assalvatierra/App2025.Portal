@@ -15,7 +15,7 @@ namespace Portal.Tests.DBServices
         public PortalCategoryServicesTests()
         {
             _mockDbLayer = new Mock<IPortalCategoryDbLayer>();
-            _service = new PortalCategoryServices(_mockDbLayer.Object);
+            new PortalCategoryServices(_mockDbLayer.Object, new Moq.Mock<Portal.Services.ICache>().Object);
         }
 
         [Fact]

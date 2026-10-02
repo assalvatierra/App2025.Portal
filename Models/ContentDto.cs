@@ -4,7 +4,9 @@ namespace Portal.Models
 {
     public class ContentDto
     {
-        public PortalContent Content{ get; set; }
+        //public PortalContent Content{ get; set; }
+        public int Id { get; set; }
+        public string? ContentName { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
         public string? ImageUrl { get; set; } = null;

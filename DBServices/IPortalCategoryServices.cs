@@ -6,6 +6,7 @@ namespace Portal.DBServices
     public interface IPortalCategoryServices
     {
         Task<List<ItemCategoryDTO>> GetAllByStatusAsync(string? status);
+        Task<List<ItemCategoryDTO>> GetCategoriesByTypeAsync(string categoryType);
         Task<PortalCategory?> GetByIdAsync(int id);
         Task<ItemCategoryDTO?> GetByName(string name);
     }

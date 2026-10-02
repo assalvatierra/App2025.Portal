@@ -26,6 +26,12 @@ namespace Portal.DBLayer
             return categories;
         }
 
+        public async Task<List<PortalCategory>> GetByTypeAsync(string categoryType)
+        {
+            var categories = await _context.PortalCategory.ToListAsync();
+            return categories.Where(c => c.CategoryType == categoryType).ToList();
+        }
+
         public async Task<PortalCategory?> GetByIdAsync(int id)
         {
             return await _context.PortalCategory.FindAsync(id);

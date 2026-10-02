@@ -39,7 +39,8 @@ namespace Portal.DBServices
                 JObject jObject = JsonSerializer.Deserialize<JObject>(c.JsonData ?? "{}") ?? new JObject();
                 return new ContentDto
                 {
-                    Content = c,
+                    Id = c.Id,
+                    ContentName = c.Name,
                     Title = jObject.Title,
                     Description = jObject.Description,
                     ImageUrl = jObject.ImageUrl,
@@ -74,7 +75,8 @@ namespace Portal.DBServices
                     JObject jObject = JsonSerializer.Deserialize<JObject>(c.JsonData ?? "{}") ?? new JObject();
                     return new ContentDto
                     {
-                        Content = c,
+                        Id = c.Id,
+                        ContentName = c.Name,
                         Title = jObject.Title,
                         Description = jObject.Description,
                         ImageUrl = jObject.ImageUrl,

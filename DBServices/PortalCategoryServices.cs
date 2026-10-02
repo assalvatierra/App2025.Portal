@@ -1,6 +1,7 @@
 ﻿using Erp.Domain.Models;
 using Portal.DBLayer;
 using Portal.Models;
+using Portal.Services;
 using System.Text.Json;
 
 namespace Portal.DBServices
@@ -18,14 +19,25 @@ namespace Portal.DBServices
 
 
         private readonly IPortalCategoryDbLayer _dbLayer;
-        public PortalCategoryServices(IPortalCategoryDbLayer dbLayer)
+        private readonly ICache _cache;
+
+        public PortalCategoryServices(IPortalCategoryDbLayer dbLayer, ICache cache)
         {
             _dbLayer = dbLayer;
+            _cache = cache;
         }
         public async Task<List<ItemCategoryDTO>> GetAllByStatusAsync(string? status)
         {
+            var cacheKey = $"categories_status_{status ?? "all"}";
+
+            var cached = await _cache.GetAsync<List<ItemCategoryDTO>>(cacheKey);
+            if (cached != null)
+            {
+                return cached;
+            }
+
             var categories = await _dbLayer.GetAllByStatusAsync(status);
-            //return categories.Select(c =>
+            //return
             //{
             //    JObject jObject = JsonSerializer.Deserialize<JObject>(c.JsonData ?? "{}") ?? new JObject();
             //    return new ItemCategoryDTO
@@ -40,9 +52,11 @@ namespace Portal.DBServices
             //    };
             //}).ToList();
 
-            return categories.Select(c => c.MapToDto()).ToList();
+            var result = categories.Select(c => c.MapToDto()).ToList();
 
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
 
+            return result;
         }
         public async Task<PortalCategory?> GetByIdAsync(int id)
         {
@@ -53,6 +67,24 @@ namespace Portal.DBServices
         {
             var categories = await _dbLayer.GetAllAsync();
             return categories.FirstOrDefault(c => c.Name == name)?.MapToDto();
+        }
+
+        public async Task<List<ItemCategoryDTO>> GetCategoriesByTypeAsync(string categoryType)
+        {
+            var cacheKey = $"categories_type_{categoryType}";
+
+            var cached = await _cache.GetAsync<List<ItemCategoryDTO>>(cacheKey);
+            if (cached != null)
+            {
+                return cached;
+            }
+
+            var categories = await _dbLayer.GetByTypeAsync(categoryType);
+            var result = categories.Select(c => c.MapToDto()).ToList();
+
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
+
+            return result;
         }
     }
 }

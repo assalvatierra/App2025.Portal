@@ -50,7 +50,7 @@ namespace Portal.Tests.DBServices
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            Assert.Equal("Content 1", result[0].Content.Name);
+            Assert.Equal("Content 1", result[0].ContentName);
             _mockContentDbLayer.Verify(
                 x => x.GetContentsByStatusAsync("Active"),
                 Times.Once);
