@@ -4,11 +4,25 @@ using Portal.Data;
 using Portal.DBLayer;
 using Portal.DBServices;
 using Portal.Services;
+using Serilog;
 using StackExchange.Redis;
 
-var builder = WebApplication.CreateBuilder(args);
+// Configure Serilog before building the host
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json")
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+        .Build())
+    .CreateLogger();
+
+try
+{
+    Log.Information("Application starting up");
+    var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+    builder.Host.UseSerilog();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -110,4 +124,14 @@ app.MapControllerRoute(
 app.MapRazorPages()
    .WithStaticAssets();
 
-app.Run();
+    app.Run();
+    Log.Information("Application terminated normally");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
