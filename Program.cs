@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
@@ -38,17 +39,64 @@ var redisEnabled = builder.Configuration.GetValue<bool>("Caching:Redis:enabled")
 
 if (redisEnabled)
 {
-    var redisHost = builder.Configuration.GetValue<string>("Caching:Redis:https") 
+    var redisHostRaw = builder.Configuration.GetValue<string>("Caching:Redis:https") 
         ?? throw new InvalidOperationException("Redis host not configured in Caching:Redis:https");
     var redisPort = builder.Configuration.GetValue<string>("Caching:Redis:port") ?? "6379";
     var redisToken = builder.Configuration.GetValue<string>("Caching:Redis:token") 
         ?? throw new InvalidOperationException("Redis token not configured in Caching:Redis:token");
 
-    // Build Redis connection string with authentication
-    var redisConnectionString = $"{redisHost}:{redisPort},password={redisToken},ssl=true";
+    // Normalize host: remove scheme if the value includes https:// or http://
+    var redisHost = redisHostRaw;
+    if (redisHostRaw.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+    {
+        try
+        {
+            redisHost = new Uri(redisHostRaw).Host;
+        }
+        catch
+        {
+            // If parsing fails, keep the raw value and let the connection attempt fail gracefully
+            redisHost = redisHostRaw;
+        }
+    }
+
+    // Read optional connection options from config (fallback to safe defaults)
+    var redisOptions = builder.Configuration.GetValue<string>("Caching:Redis:options")
+        ?? "abortConnect=false,connectTimeout=5000,syncTimeout=5000";
+
+    // Build Redis connection string with authentication and resilience options
+    var redisConnectionString = $"{redisHost}:{redisPort},password={redisToken},ssl=true,{redisOptions}";
+
+    Log.Information("Redis configuration loaded: Host={Host}, Port={Port}, Options={Options}", 
+        redisHost, redisPort, redisOptions);
 
     builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-        ConnectionMultiplexer.Connect(redisConnectionString));
+    {
+        try
+        {
+            Log.Information("Attempting Redis connection to {Host}:{Port}", redisHost, redisPort);
+            var mux = ConnectionMultiplexer.Connect(redisConnectionString);
+
+            if (mux.IsConnected)
+            {
+                Log.Information("Redis connected successfully to {Host}:{Port}", redisHost, redisPort);
+            }
+            else
+            {
+                Log.Warning("Redis multiplexer created but not yet connected to {Host}:{Port}. " +
+                    "Connection will retry in background (abortConnect=false)", redisHost, redisPort);
+            }
+
+            return mux;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to create Redis connection multiplexer for {Host}:{Port}. " + 
+                "Application will continue but caching will be unavailable until Redis connects.", 
+                redisHost, redisPort);
+            throw;
+        }
+    });
     builder.Services.AddScoped<ICache, RedisCache>();
 }
 else
