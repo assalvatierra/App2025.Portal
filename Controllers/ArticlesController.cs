@@ -25,6 +25,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> Index(string viewName)
         {
             if (string.IsNullOrWhiteSpace(viewName))
@@ -52,6 +53,7 @@ namespace Portal.Controllers
 
         [HttpGet]
         [Route("Services/{viewName}")]
+        [RateLimit]
         public async Task<IActionResult> Services(string viewName)
         {
             if (string.IsNullOrWhiteSpace(viewName))
@@ -65,6 +67,7 @@ namespace Portal.Controllers
 
         [HttpGet]
         [Route("Contents/{contentName}")]
+        [RateLimit]
         public async Task<IActionResult> Contents(string contentName)
         {
             string viewName = "HtmlContent";

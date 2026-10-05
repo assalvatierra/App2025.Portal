@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Portal.DBServices;
 using Portal.Models;
 using Portal.Services;
+using Portal.Controllers.Attributes;
 using System.Globalization;
 using System.Text;
 using System.Xml;
@@ -22,6 +23,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet("/sitemap.xml")]
+        [RateLimit]
         public IActionResult GetSitemap()
         {
             var xml = _sitemapservice.GetSitemapXml();

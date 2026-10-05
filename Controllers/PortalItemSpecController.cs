@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portal.DBServices;
+using Portal.Controllers.Attributes;
 
 namespace Portal.Controllers
 {
@@ -27,6 +28,7 @@ namespace Portal.Controllers
 
         // GET: api/PortalItemSpec/ByPortalItem/5
         [HttpGet("ByPortalItem/{portalItemId}")]
+        [RateLimit]
         public async Task<ActionResult<IEnumerable<PortalItemSpec>>> GetByPortalItem(int portalItemId)
         {
             return await _service.GetByPortalItemIdAsync(portalItemId);

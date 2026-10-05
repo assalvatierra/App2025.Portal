@@ -9,6 +9,7 @@ using Portal.Services;
 using Portal.ViewModels;
 using System.Text.Json;
 using static System.Net.WebRequestMethods;
+using Portal.Controllers.Attributes;
 
 namespace Portal.Controllers
 {
@@ -37,6 +38,7 @@ namespace Portal.Controllers
 
         // GET: PortalReservation/ReservationForm
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> ReservationForm(int? itemId, string? transactionType)
         {
             string returnUrl = Request.Headers["Referer"].ToString();
@@ -125,6 +127,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> Success(int id)
         {
             var reservations = await _service.GetByIdAsync(id);
@@ -146,6 +149,7 @@ namespace Portal.Controllers
 
         // GET: PortalReservation/CancelReservationForm
         [HttpGet]
+        [RateLimit]
         public IActionResult CancelReservationForm(string? returnUrl)
         {
             // Try to get returnUrl from session if not provided
@@ -171,6 +175,7 @@ namespace Portal.Controllers
 
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> ConfirmReservationOtp(int id)
         {
             OTPViewModel otp = new OTPViewModel();
@@ -336,6 +341,7 @@ namespace Portal.Controllers
         // GET: api/PortalReservation
         [HttpGet]
         [Route("api/[controller]")]
+        [RateLimit]
         public async Task<ActionResult<IEnumerable<PortalReservation>>> GetPortalReservations()
         {
             return await _service.GetAllAsync();
@@ -343,6 +349,7 @@ namespace Portal.Controllers
 
         // GET: api/PortalReservation/5
         [HttpGet("{id}")]
+        [RateLimit]
         public async Task<ActionResult<PortalReservation>> GetPortalReservation(int id)
         {
             var portalReservation = await _service.GetByIdAsync(id);
@@ -410,6 +417,7 @@ namespace Portal.Controllers
 
         [HttpGet]
         [Route("api/[controller]/ProcessPendingReservations")]
+        [RateLimit]
         public async Task<IActionResult> ProcessPendingReservations()
         {
             // to be called by a cron job(cron-job.org) or scheduled task to process pending reservations

@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Portal.Controllers.Attributes;
 using Portal.DBServices;
-using Portal.Models;
 using Portal.Helpers;
+using Portal.Models;
 using System.Diagnostics;
 
 namespace Portal.Controllers
@@ -39,6 +40,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> AskAI()
         {
             return View();
@@ -61,6 +63,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> ItemsByCategory(string category)
         {
             var results = await _portalItemService.GetItemsByCategory(category,"Product");
@@ -80,6 +83,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> OurProducts()
         {
             var results = await _portalItemService.GetItemsByCategory("", "Product");
@@ -96,6 +100,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> BrowseProducts(string? transactionType)
         {
             var results = await _portalItemService.GetItemsByCategory("", "Product");
@@ -107,6 +112,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> OurServices()
         {
             ViewBag.PageTitle = "Car Rental Services";
@@ -117,6 +123,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> Articles()
         {
             ViewBag.PageTitle = "Car Rental Articles";
@@ -126,6 +133,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> FeaturedBlog()
         {
             ViewBag.PageTitle = "Car Rental Featured";
@@ -135,6 +143,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> FaqList()
         {
             ViewBag.PageTitle = "Car Rental FAQs";
@@ -144,6 +153,7 @@ namespace Portal.Controllers
         }
 
         [HttpGet]
+        [RateLimit]
         public async Task<IActionResult> ItemsToCompare()
         {
             var compareList = HttpContext.Session.GetObject<List<int>>("CompareList") ?? new List<int>();
@@ -261,3 +271,4 @@ namespace Portal.Controllers
         }
     }
 }
+
