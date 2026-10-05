@@ -1,0 +1,18 @@
+// Add this to your appsettings.json file to configure rate limiting:
+// {
+//   "RateLimit": {
+//     "Enabled": true,
+//     "DefaultRequestsPerWindow": 10,
+//     "DefaultWindowSeconds": 60,
+//     "EndpointOverrides": {
+//       "Articles:Articles": {
+//         "RequestsPerWindow": 20,
+//         "WindowSeconds": 120
+//       },
+//       "articles:index": {
+//         "RequestsPerWindow": 5,
+//         "WindowSeconds": 60
+//       }
+//     }
+//   }
+// }

@@ -1,5 +1,6 @@
 using Erp.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using Portal.Controllers.Attributes;
 using Portal.DBServices;
 
 namespace Portal.Controllers
@@ -37,6 +38,7 @@ namespace Portal.Controllers
 
         [HttpGet]
         [Route("Articles/{viewName}")]
+        [RateLimit]
         public async Task<IActionResult> Articles(string viewName)
         {
             if (string.IsNullOrWhiteSpace(viewName))
@@ -100,6 +102,7 @@ namespace Portal.Controllers
 
         [HttpGet]
         [Route("Items/{itemName}")]
+        [RateLimit]
         public async Task<IActionResult> Items(string itemName)
         {
             string viewName = "HtmlContent";

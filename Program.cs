@@ -105,7 +105,8 @@ else
     builder.Services.AddSingleton<ICache, InMemoryCache>();
 }
 
-
+// Register RateLimitSettings configuration
+builder.Services.Configure<RateLimitSettings>(builder.Configuration.GetSection("RateLimit"));
 
 // Register 3-layer architecture dependencies
 builder.Services.AddScoped<IPortalConfigurationDbLayer, PortalConfigurationDbLayer>();

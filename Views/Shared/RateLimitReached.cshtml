@@ -1,0 +1,72 @@
+@model Portal.Models.RateLimitViewModel
+
+@{
+    ViewData["Title"] = "Rate Limit Exceeded";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="alert alert-warning" role="alert">
+                <div class="text-center">
+                    <h1 class="display-4">⏱️ Too Many Requests</h1>
+                    <p class="lead text-muted">HTTP 429</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Rate Limit Exceeded</h5>
+                    <p class="card-text">@Model.Message</p>
+
+                    <div class="alert alert-info mt-3" role="alert">
+                        <strong>Limit Details:</strong>
+                        <ul class="mb-0">
+                            <li>Allowed Requests: <strong>@Model.RequestsPerWindow</strong> per <strong>@Model.WindowSeconds</strong> second(s)</li>
+                            <li>Your limit will reset at: <strong>@Model.ResetTime:g</strong></li>
+                        </ul>
+                    </div>
+
+                    <p class="text-muted small">
+                        Please wait a moment before trying again. If you continue to experience issues, 
+                        please contact support.
+                    </p>
+
+                    <div class="mt-4">
+                        @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+                        {
+                            <a href="@Model.ReturnUrl" class="btn btn-primary me-2">
+                                <i class="bi bi-arrow-left"></i> Try Again
+                            </a>
+                        }
+                        <a href="/" class="btn btn-secondary">
+                            <i class="bi bi-house"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 p-3 bg-light rounded">
+                <h6>What happened?</h6>
+                <p class="small text-muted mb-0">
+                    Your request was rate limited because too many requests were made from your IP address 
+                    in a short amount of time. Rate limiting helps protect our service from abuse and ensures 
+                    fair access for all users.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+    }
+
+    .card {
+        border: none;
+        border-top: 4px solid #ffc107;
+    }
+</style>

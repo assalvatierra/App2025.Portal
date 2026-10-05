@@ -1,0 +1,70 @@
+@model Portal.Models.RateLimitViewModel
+
+@{
+    ViewData["Title"] = "Rate Limit Exceeded";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rate Limit Exceeded</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body { padding-top: 20px; background-color: #f8f9fa; }
+        .display-4 { font-size: 2.5rem; font-weight: 300; margin-bottom: 0.5rem; }
+        .card { border: none; border-top: 4px solid #ffc107; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="alert alert-warning">
+                    <div class="text-center">
+                        <h1 class="display-4">⏱️ Too Many Requests</h1>
+                        <p class="lead text-muted">HTTP 429</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Rate Limit Exceeded</h5>
+
+                        @if (Model == null)
+                        {
+                            <p class="text-danger"><strong>Error:</strong> No model data</p>
+                        }
+                        else
+                        {
+                            <p class="card-text">@Model.Message</p>
+
+                            <div class="alert alert-info mt-3">
+                                <strong>Limit Details:</strong>
+                                <ul class="mb-0">
+                                    <li>Allowed: <strong>@Model.RequestsPerWindow</strong> per <strong>@Model.WindowSeconds</strong> second(s)</li>
+                                    <li>Reset at: <strong>@Model.ResetTime.ToString("g")</strong></li>
+                                </ul>
+                            </div>
+
+                            <p class="text-muted small mt-3">
+                                Your request was rate limited. Please wait before trying again.
+                            </p>
+
+                            <div class="mt-4">
+                                @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+                                {
+                                    <a href="@Html.Raw(Model.ReturnUrl)" class="btn btn-primary me-2">Try Again</a>
+                                }
+                                <a href="/" class="btn btn-secondary">Home</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
