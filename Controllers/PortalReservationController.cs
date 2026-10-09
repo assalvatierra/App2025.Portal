@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using Portal.DBServices;
 using Portal.Models;
 using Portal.Services;
+using Portal.Services.MessageBroker;
+using Portal.Services.MessageBroker.Events;
 using Portal.ViewModels;
 using System.Text.Json;
 using static System.Net.WebRequestMethods;
@@ -20,6 +22,7 @@ namespace Portal.Controllers
         private readonly IPortalReservationService _service;
         private readonly IPortalItemService _portalItemService;
         private readonly IReservationService _reservationService;
+        private readonly IOutboxPublisher _outboxPublisher;
         private readonly ILogger<PortalReservationController> _logger;
 
         public PortalReservationController(
@@ -27,12 +30,14 @@ namespace Portal.Controllers
             IPortalReservationService service, 
             IPortalItemService portalItemService,
             IReservationService reservationService,
+            IOutboxPublisher outboxPublisher,
             ILogger<PortalReservationController> logger)
         {
             _Configuration = portalConfigurationService;
             _service = service;
             _portalItemService = portalItemService;
             _reservationService = reservationService;
+            _outboxPublisher = outboxPublisher;
             _logger = logger;
         }
 
@@ -309,6 +314,18 @@ namespace Portal.Controllers
 
                 // Send client email notification
                 await this._reservationService.SendCustomerNotification(reservations);
+
+                // Publish event through the outbox
+                await _outboxPublisher.PublishAsync(
+                    new ReservationVerified
+                    {
+                        ReservationId = reservations.Id,
+                        CustomerName = reservations.CustomerName,
+                        ContactEmail = reservations.ContactEmail,
+                        TransactionType = reservations.TransactionType,
+                        DateReceived = reservations.DateReceived
+                    },
+                    saveChanges: true);
 
                 // Clear OTP and attempt tracking from session
                 HttpContext.Session.Remove("OTP");

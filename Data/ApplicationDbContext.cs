@@ -17,5 +17,21 @@ namespace Portal.Data
         public DbSet<PortalContentCategory> PortalContentCategory { get; set; } = default!;
         public DbSet<PortalContentData> PortalContentData { get; set; } = default!;
         public DbSet<PortalItemPrice> PortalItemPrice { get; set; } = default!;
+        public DbSet<Portal.Services.MessageBroker.OutboxMessage> OutboxMessage { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Portal.Services.MessageBroker.OutboxMessage>(entity =>
+            {
+                entity.ToTable("OutboxMessage");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasFilter("[ProcessedAt] IS NULL")
+                    .HasDatabaseName("IX_OutboxMessage_Pending");
+            });
+        }
     }
 }

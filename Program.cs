@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.DBLayer;
 using Portal.DBServices;
+using MassTransit;
 using Portal.Services;
+using Portal.Services.MessageBroker;
 using Serilog;
 using StackExchange.Redis;
 
@@ -128,6 +130,17 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<ISitemapService, SitemapService>();
 builder.Services.AddScoped<ICtaBoxService, CtaBoxService>();
 builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOpenAI>();
+
+// MessageBroker: MassTransit (in-memory transport by default; swap for RabbitMQ/Azure Service Bus later) and outbox
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<BrokerMessageConsumer>();
+    x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+});
+builder.Services.AddMessageConsumers();
+builder.Services.AddScoped<IOutboxService, OutboxService>();
+builder.Services.AddScoped<IOutboxPublisher, OutboxPublisher>();
+builder.Services.AddHostedService<OutboxPollingService>();
 
 // Add session support
 builder.Services.AddDistributedMemoryCache();
