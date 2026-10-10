@@ -29,9 +29,14 @@ namespace Portal.Data
                 entity.ToTable("OutboxMessage");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedNever();
-                entity.HasIndex(e => e.CreatedAt)
-                    .HasFilter("[ProcessedAt] IS NULL")
-                    .HasDatabaseName("IX_OutboxMessage_Pending");
+
+                // Ensure Status column exists and has a default value (Pending)
+                entity.Property(e => e.Status)
+                    .HasDefaultValue(Portal.Services.MessageBroker.OutboxMessageStatus.Pending);
+
+                // Composite index on status and created time for efficient pending and dead-letter queries
+                entity.HasIndex(e => new { e.Status, e.CreatedAt })
+                    .HasDatabaseName("IX_OutboxMessage_Status_CreatedAt");
             });
 
             builder.Entity<Portal.Services.MessageBroker.ProcessedMessage>(entity =>

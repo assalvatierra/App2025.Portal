@@ -36,5 +36,10 @@ namespace Portal.Services.MessageBroker
         public int RetryCount { get; set; }
 
         public string? Exception { get; set; }
+
+        /// <summary>
+        /// Lifecycle status for the outbox message. Defaults to Pending.
+        /// </summary>
+        public OutboxMessageStatus Status { get; set; } = OutboxMessageStatus.Pending;
     }
 }

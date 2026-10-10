@@ -12,6 +12,14 @@ namespace Portal.Services.MessageBroker
 
         Task MarkAsProcessedAsync(Guid id, CancellationToken cancellationToken = default);
 
-        Task MarkAsFailedAsync(Guid id, string error, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Increment retry count and persist the error. Returns the updated RetryCount.
+        /// </summary>
+        Task<int> MarkAsFailedAsync(Guid id, string error, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Mark the outbox message as dead-lettered (final state).
+        /// </summary>
+        Task MarkAsDeadLetterAsync(Guid id, string error, CancellationToken cancellationToken = default);
     }
 }

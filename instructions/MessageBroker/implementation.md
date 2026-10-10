@@ -122,6 +122,39 @@ Files in `Services/MessageBroker/`:
 - `Controllers/PortalReservationController.cs` - publishes `ReservationVerified` through `IOutboxPublisher` after OTP verification (with `saveChanges: true`). The existing direct email call remains unchanged, so multiple consumers can handle the same event independently.
 
 
+## Dead Letter Handling (Implemented)
+
+When outbox messages fail to publish after the maximum number of retries (default 5), they are moved to **dead-letter** status for investigation and alerting.
+
+### Files (all in `Services/MessageBroker/`)
+- `OutboxMessageStatus.cs` - Enum with states: Pending, Failed, Processed, DeadLetter
+- `IDeadLetterNotificationService.cs` / `DeadLetterNotificationService.cs` - Logging-only implementation
+- `DeadLetterEmailNotificationService.cs` - Email alerts with HTML formatting
+- Modified: `OutboxMessage.cs` - Added `Status` property
+- Modified: `OutboxService.cs` - Added `MarkAsDeadLetterAsync()`, updated `GetPendingAsync()` to filter by Status
+- Modified: `OutboxPollingService.cs` - Detects max retries, marks as DeadLetter, triggers notification
+- Modified: `ApplicationDbContext.cs` - Added Status default and composite index (Status, CreatedAt)
+
+### Behavior
+1. When a message fails, `RetryCount` is incremented and `Status` is set to Failed
+2. When `RetryCount >= MaxRetries`, the message is marked as DeadLetter and `ProcessedAt` is set
+3. `IDeadLetterNotificationService` is invoked (logging or email based on registered implementation)
+4. Dead-lettered messages are retained indefinitely for audit and investigation
+
+### Configuration
+- **Logging only (default)**: No configuration needed; critical errors are logged
+- **Email alerts**: 
+  - Register `DeadLetterEmailNotificationService` in `Program.cs`
+  - Configure `MessageBroker:DeadLetterNotification:EmailRecipients` in `appsettings.json`
+  - See `instructions/MessageBroker/DeadLetterEmailNotification.md` for details
+
+### Database Schema
+- Added `Status` column (INT, default 0 = Pending)
+- Created index: `IX_OutboxMessage_Status_CreatedAt`
+- Run SQL script: `instructions/MessageBroker/DeadLetterIndex.sql`
+
+See `instructions/MessageBroker/DeadLetterHandling.md` and `DeadLetterEmailNotification.md` for detailed behavior and troubleshooting.
+
 ## Next Steps
 - [x] Implement outbox (entity, service, publisher, polling service)
 - [x] Add MassTransit and register it
@@ -133,7 +166,7 @@ Files in `Services/MessageBroker/`:
 - [x] Add ReservationVerifiedInternalEmailSender consumer to send internal emails via event-driven architecture
 - [ ] Add more consumers (e.g., additional transformations or notifications)
 - [x] Add idempotency for message consumption (track processed message IDs to prevent duplicate handling)
+- [x] Add dead letter handling for messages that exceed max retries
 - [ ] Replace in-memory transport with RabbitMQ or Azure Service Bus
-- [ ] Add dead letter handling for messages that exceed max retries
 - [ ] Add cleanup job for processed outbox rows
 - [ ] Handle multiple app instances (row locking) before scaling out

@@ -377,3 +377,14 @@ _db.PortalReservation.Add(reservation);
 await _outboxPublisher.PublishAsync(new { reservation.Id }, messageType: "ReservationCreated");
 await _db.SaveChangesAsync();
 ```
+
+---
+
+## Dead Letter Handling (NEW)
+
+When messages fail to publish after \MaxRetries\ (default 5), they are moved to dead-letter status (\OutboxMessageStatus.DeadLetter\).
+
+See [DeadLetterHandling.md](DeadLetterHandling.md), [DeadLetterEmailNotification.md](DeadLetterEmailNotification.md), and [README.md](README.md) for complete documentation.
+
+Query: `SELECT * FROM dbo.OutboxMessage WHERE Status = 3 ORDER BY ProcessedAt DESC;`
+

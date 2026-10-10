@@ -56,6 +56,7 @@ namespace Portal.Services.MessageBroker
             using var scope = _scopeFactory.CreateScope();
             var outbox = scope.ServiceProvider.GetRequiredService<IOutboxService>();
             var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+            var deadLetterNotifier = scope.ServiceProvider.GetService<IDeadLetterNotificationService>();
 
             var pending = await outbox.GetPendingAsync(BatchSize, MaxRetries, cancellationToken);
 
@@ -87,7 +88,25 @@ namespace Portal.Services.MessageBroker
                 catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
                 {
                     _logger.LogWarning(ex, "Failed to publish outbox message {MessageId}", item.Id);
-                    await outbox.MarkAsFailedAsync(item.Id, ex.ToString(), cancellationToken);
+                    var newRetry = await outbox.MarkAsFailedAsync(item.Id, ex.ToString(), cancellationToken);
+
+                    // If we've reached or exceeded the max retries, move to dead-letter and notify
+                    if (newRetry >= MaxRetries)
+                    {
+                        await outbox.MarkAsDeadLetterAsync(item.Id, ex.ToString(), cancellationToken);
+
+                        if (deadLetterNotifier is not null)
+                        {
+                            // update in-memory item for notification context
+                            item.RetryCount = newRetry;
+                            item.Status = OutboxMessageStatus.DeadLetter;
+                            await deadLetterNotifier.NotifyAsync(item, ex.ToString(), cancellationToken);
+                        }
+                        else
+                        {
+                            _logger.LogCritical("Outbox message {MessageId} reached max retries and was dead-lettered but no IDeadLetterNotificationService is registered.", item.Id);
+                        }
+                    }
                 }
             }
         }

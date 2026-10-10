@@ -142,6 +142,11 @@ builder.Services.AddScoped<IOutboxService, OutboxService>();
 builder.Services.AddScoped<IOutboxPublisher, OutboxPublisher>();
 builder.Services.AddHostedService<OutboxPollingService>();
 
+// Dead-letter notification service (sends email alerts to configured recipients)
+// To use the email notification service, replace with: DeadLetterEmailNotificationService
+// And configure MessageBroker:DeadLetterNotification:EmailRecipients in appsettings.json
+builder.Services.AddScoped<Portal.Services.MessageBroker.IDeadLetterNotificationService, Portal.Services.MessageBroker.DeadLetterEmailNotificationService>();
+
 // Idempotency for message consumption
 builder.Services.Configure<Portal.Services.MessageBroker.IdempotencySettings>(builder.Configuration.GetSection("MessageBroker:Idempotency"));
 builder.Services.AddScoped<Portal.Services.MessageBroker.IIdempotencyService, Portal.Services.MessageBroker.IdempotencyService>();
