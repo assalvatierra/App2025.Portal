@@ -7,5 +7,6 @@ namespace Portal.Services
         Task ProcessPendingReservations(); 
         Task<string> GenerateOTP();
         Task SendCustomerOTP(PortalReservation reservation, string otp);
+        Task SendInternalReservationNotification(List<PortalReservation> reservations);
     }
 }

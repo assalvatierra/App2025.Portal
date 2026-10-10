@@ -142,6 +142,11 @@ builder.Services.AddScoped<IOutboxService, OutboxService>();
 builder.Services.AddScoped<IOutboxPublisher, OutboxPublisher>();
 builder.Services.AddHostedService<OutboxPollingService>();
 
+// Idempotency for message consumption
+builder.Services.Configure<Portal.Services.MessageBroker.IdempotencySettings>(builder.Configuration.GetSection("MessageBroker:Idempotency"));
+builder.Services.AddScoped<Portal.Services.MessageBroker.IIdempotencyService, Portal.Services.MessageBroker.IdempotencyService>();
+builder.Services.AddHostedService<Portal.Services.MessageBroker.IdempotencyCleanupService>();
+
 // Add session support
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

@@ -260,9 +260,9 @@ namespace Portal.Controllers
         }
 
 
-
+        // Version 1 of ConfirmReservationOtp method without outbox event publishing
         [HttpPost]
-        public async Task<IActionResult> ConfirmReservationOtp(OTPViewModel viewModel)
+        public async Task<IActionResult> ConfirmReservationOtpV1(OTPViewModel viewModel)
         {
             var reservations = await _service.GetByIdAsync(viewModel.id);
             if (reservations == null)
@@ -315,6 +315,86 @@ namespace Portal.Controllers
                 // Send client email notification
                 await this._reservationService.SendCustomerNotification(reservations);
 
+                // Clear OTP and attempt tracking from session
+                HttpContext.Session.Remove("OTP");
+                HttpContext.Session.Remove(attemptKey);
+
+                return RedirectToAction("Success", new { id = viewModel.id });
+            }
+
+            // Invalid OTP - increment attempt counter
+            attempts++;
+            HttpContext.Session.SetString(attemptKey, attempts.ToString());
+
+            int remainingAttempts = maxAttempts - attempts;
+            if (remainingAttempts > 0)
+            {
+                viewModel.Message = $"Invalid OTP. Please try again. ({remainingAttempts} attempt{(remainingAttempts != 1 ? "s" : "")} remaining)";
+            }
+            else
+            {
+                viewModel.Message = $"Maximum OTP attempts ({maxAttempts}) exceeded. Please request a new OTP.";
+            }
+
+            viewModel.MaxAttempts = maxAttempts;
+            return View("ConfirmReservationOtp", viewModel);
+        }
+
+        //version 2 of ConfirmReservationOtp method with outbox event publishing
+        [HttpPost]
+        public async Task<IActionResult> ConfirmReservationOtp(OTPViewModel viewModel)
+        {
+            var reservations = await _service.GetByIdAsync(viewModel.id);
+            if (reservations == null)
+            {
+                return NotFound();
+            }
+
+            // Get max attempts from configuration
+            int maxAttempts = 3; // Default
+            var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
+            if (config.Any())
+            {
+                string jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                int configMaxAttempts = 0;
+                if (settings != null)
+                {
+                    int.TryParse(settings.OtpMaxAttempts, out configMaxAttempts);
+                }
+                maxAttempts = configMaxAttempts > 0 ? configMaxAttempts : 3;
+            }
+
+            // Track OTP verification attempts using session key with reservation ID
+            string attemptKey = $"OTPAttempts_{viewModel.id}";
+            int attempts = 0;
+            string? attemptCountStr = HttpContext.Session.GetString(attemptKey);
+            if (int.TryParse(attemptCountStr, out int storedAttempts))
+            {
+                attempts = storedAttempts;
+            }
+
+            // Check if max attempts exceeded
+            if (attempts >= maxAttempts)
+            {
+                viewModel.Message = $"Maximum OTP attempts ({maxAttempts}) exceeded. Please request a new OTP.";
+                viewModel.MaxAttempts = maxAttempts;
+                return View("ConfirmReservationOtp", viewModel);
+            }
+
+            // Get stored OTP from session
+            var sessionOTP = HttpContext.Session.GetString("OTP");
+
+            // Verify OTP
+            if (string.Equals(sessionOTP, viewModel.Otp))
+            {
+                // OTP is valid - update reservation status to Verified
+                reservations.Status = "Verified";
+                await _service.UpdateAsync(reservations);
+
+                //// Send client email notification = version 1 
+                //await this._reservationService.SendCustomerNotification(reservations);
+
                 // Publish event through the outbox
                 await _outboxPublisher.PublishAsync(
                     new ReservationVerified
@@ -324,6 +404,10 @@ namespace Portal.Controllers
                         ContactEmail = reservations.ContactEmail,
                         TransactionType = reservations.TransactionType,
                         DateReceived = reservations.DateReceived
+                        //PortalItem = reservations.PortalItem,
+                        //ContactNo = reservations.ContactNo,
+                        //jsonData = reservations.jsonData,
+                        //Status = reservations.Status
                     },
                     saveChanges: true);
 

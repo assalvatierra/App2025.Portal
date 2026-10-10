@@ -91,7 +91,7 @@ namespace Portal.Services
             }
         }
 
-        private async Task SendInternalReservationNotification(List<PortalReservation> reservations)
+        public async Task SendInternalReservationNotification(List<PortalReservation> reservations)
         {
             string[] EmailRecipient = Array.Empty<string>();
             string emailSubject = string.Empty;

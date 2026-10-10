@@ -10,5 +10,9 @@ namespace Portal.Services.MessageBroker.Events
         public string? ContactEmail { get; set; }
         public string? TransactionType { get; set; }
         public DateTime? DateReceived { get; set; }
+        public int? PortalItem { get; set; }
+        public string? ContactNo { get; set; }
+        public string? jsonData { get; set; }
+        public string? Status { get; set; }
     }
 }

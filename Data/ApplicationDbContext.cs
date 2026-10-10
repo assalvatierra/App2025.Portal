@@ -18,6 +18,7 @@ namespace Portal.Data
         public DbSet<PortalContentData> PortalContentData { get; set; } = default!;
         public DbSet<PortalItemPrice> PortalItemPrice { get; set; } = default!;
         public DbSet<Portal.Services.MessageBroker.OutboxMessage> OutboxMessage { get; set; } = default!;
+        public DbSet<Portal.Services.MessageBroker.ProcessedMessage> ProcessedMessage { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -31,6 +32,15 @@ namespace Portal.Data
                 entity.HasIndex(e => e.CreatedAt)
                     .HasFilter("[ProcessedAt] IS NULL")
                     .HasDatabaseName("IX_OutboxMessage_Pending");
+            });
+
+            builder.Entity<Portal.Services.MessageBroker.ProcessedMessage>(entity =>
+            {
+                entity.ToTable("ProcessedMessage");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.HasIndex(e => new { e.MessageId, e.ConsumerType }).IsUnique().HasDatabaseName("UX_ProcessedMessage_Message_Consumer");
+                entity.HasIndex(e => e.ExpiresAt).HasDatabaseName("IX_ProcessedMessage_ExpiresAt");
             });
         }
     }
