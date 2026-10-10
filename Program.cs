@@ -134,6 +134,7 @@ builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOpenAI>(
 // MessageBroker: MassTransit (in-memory transport by default; swap for RabbitMQ/Azure Service Bus later) and outbox
 builder.Services.AddMassTransit(x =>
 {
+    // MassTransit in-memory transport (free/development)
     x.AddConsumer<BrokerMessageConsumer>();
     x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
 });
@@ -152,8 +153,10 @@ builder.Services.Configure<Portal.Services.MessageBroker.IdempotencySettings>(bu
 builder.Services.AddScoped<Portal.Services.MessageBroker.IIdempotencyService, Portal.Services.MessageBroker.IdempotencyService>();
 builder.Services.AddHostedService<Portal.Services.MessageBroker.IdempotencyCleanupService>();
 
-// Add session support
-builder.Services.AddDistributedMemoryCache();
+// Outbox cleanup for processed messages
+builder.Services.Configure<Portal.Services.MessageBroker.OutboxCleanupSettings>(builder.Configuration.GetSection("MessageBroker:OutboxCleanup"));
+builder.Services.AddHostedService<Portal.Services.MessageBroker.OutboxCleanupService>();
+    builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);

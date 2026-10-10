@@ -58,22 +58,29 @@ var orderData = JsonSerializer.Deserialize<OrderDto>(brokerMessage.Payload);
 Messages are written to the `OutboxMessage` table in the same `SaveChanges` as the business data, then published to MassTransit by a hosted service inside the Portal project. This hosting choice keeps deployment simple. The polling service can be moved to a separate worker project later.
 
 ### Files (all in `Services/MessageBroker/`)
-- `OutboxMessage.cs` - EF entity (Id, MessageType, Payload, CorrelationId, PartitionKey, Headers, CreatedAt, ProcessedAt, RetryCount, Exception)
-- `IOutboxService.cs` / `OutboxService.cs` - AddAsync (no save), GetPendingAsync, MarkAsProcessedAsync, MarkAsFailedAsync
+- `OutboxMessage.cs` - EF entity (Id, MessageType, Payload, CorrelationId, PartitionKey, Headers, CreatedAt, ProcessedAt, RetryCount, Exception, Status)
+- `IOutboxService.cs` / `OutboxService.cs` - AddAsync (no save), GetPendingAsync, MarkAsProcessedAsync, MarkAsFailedAsync, MarkAsDeadLetterAsync
 - `IOutboxPublisher.cs` / `OutboxPublisher.cs` - publish API for application code, writes to the outbox
-- `OutboxPollingService.cs` - BackgroundService; 5s interval, batch of 50, max 5 retries, publishes via `IPublishEndpoint`
+- `OutboxPollingService.cs` - BackgroundService; 15s interval, batch of 50, max 5 retries, publishes via `IPublishEndpoint`
+- `OutboxCleanupSettings.cs` - Configuration class (EnableCleanup, RetentionDays)
+- `OutboxCleanupService.cs` - BackgroundService; runs daily to delete processed messages older than retention period
 
 ### Other changes
-- `Data/ApplicationDbContext.cs` - `DbSet<OutboxMessage>` and mapping (filtered index on pending rows)
-- `Program.cs` - `AddMassTransit` (in-memory transport), scoped `IOutboxService` / `IOutboxPublisher`, `AddHostedService<OutboxPollingService>`
+- `Data/ApplicationDbContext.cs` - `DbSet<OutboxMessage>` and mapping (Status default Pending, composite index on Status + CreatedAt)
+- `Program.cs` - `AddMassTransit` (in-memory transport), scoped `IOutboxService` / `IOutboxPublisher`, `AddHostedService<OutboxPollingService>`, configure `OutboxCleanupSettings`, `AddHostedService<OutboxCleanupService>`
 - `Portal.csproj` - MassTransit package reference
+- `appsettings.json` - `MessageBroker:OutboxCleanup` section (EnableCleanup, RetentionDays)
 - `instructions/MessageBroker/CreateOutboxTable.sql` - MS SQL Server DDL
+- `instructions/MessageBroker/DeadLetterIndex.sql` - SQL script to add Status column and indexes
 
 ### Flow
 1. Business code calls `IOutboxPublisher.PublishAsync(...)`
 2. The caller's `SaveChangesAsync` commits the business data and the outbox row together
 3. `OutboxPollingService` reads unprocessed rows and publishes a `BrokerMessage` to MassTransit
-4. Success sets `ProcessedAt`; failure increments `RetryCount` and stores the exception
+4. Success sets `ProcessedAt` and `Status=Processed`; failure increments `RetryCount` and sets `Status=Failed`
+5. On max retries (default 5), marks as `Status=DeadLetter` and invokes notification service
+6. `OutboxCleanupService` runs daily and deletes `Status=Processed` rows older than the retention period (default 30 days)
+7. Dead-lettered messages are retained indefinitely for audit and investigation
 
 
 ## Idempotency (Implemented)
@@ -84,7 +91,7 @@ Per-consumer idempotency prevents duplicate message processing using a database-
 - `ProcessedMessage.cs` - EF entity (Id, MessageId, ConsumerType, ProcessingStartedAt, ProcessedAt, ExpiresAt)
 - `IIdempotencyService.cs` / `IdempotencyService.cs` - TryReserveAsync, MarkProcessedAsync, ReleaseReservationAsync, CheckIfProcessedAsync
 - `IdempotencySettings.cs` - Configuration class (EnableIdempotency, RetentionDays)
-- `IdempotencyCleanupService.cs` - BackgroundService; runs daily to delete expired records
+- `IdempotencyCleanupService.cs` - BackgroundService; runs daily to delete expired records in batches (1,000 rows at a time) to minimize lock contention
 - `Data/ApplicationDbContext.cs` - `DbSet<ProcessedMessage>` and mapping with unique composite index `(MessageId, ConsumerType)`
 - `instructions/MessageBroker/CreateProcessedMessageTable.sql` - MS SQL Server DDL
 - `instructions/MessageBroker/Idempotency.md` - Detailed documentation on design and behavior
@@ -97,9 +104,9 @@ Per-consumer idempotency prevents duplicate message processing using a database-
 ### How It Works
 1. When a message arrives, `BrokerMessageConsumer` attempts to reserve it for each consumer by inserting a `ProcessedMessage` row
 2. If the INSERT succeeds (first time), processing continues; if it fails (unique constraint violation), the message is a duplicate and is skipped
-3. On success, the record is updated with `ProcessedAt` and `ExpiresAt`
+3. On success, the record is updated with `ProcessedAt` and `ExpiresAt` (set to `ProcessedAt + RetentionDays`)
 4. On failure, the reservation is released (row deleted) so the message can be retried later
-5. A daily cleanup job deletes expired records to reclaim storage
+5. A daily cleanup job deletes expired records (where `ExpiresAt <= now`) in batches to reclaim storage efficiently
 
 See `instructions/MessageBroker/Idempotency.md` for detailed behavior and troubleshooting.
 

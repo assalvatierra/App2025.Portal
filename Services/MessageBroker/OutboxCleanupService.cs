@@ -1,22 +1,35 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Portal.Data;
 
 namespace Portal.Services.MessageBroker
 {
-    public class IdempotencyCleanupService : BackgroundService
+    public class OutboxCleanupService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<IdempotencyCleanupService> _logger;
+        private readonly ILogger<OutboxCleanupService> _logger;
         private readonly TimeSpan _interval = TimeSpan.FromHours(24);
+        private readonly OutboxCleanupSettings _settings;
 
-        public IdempotencyCleanupService(IServiceProvider serviceProvider, ILogger<IdempotencyCleanupService> logger)
+        public OutboxCleanupService(
+            IServiceProvider serviceProvider,
+            ILogger<OutboxCleanupService> logger,
+            IOptions<OutboxCleanupSettings> options)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _settings = options.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Idempotency cleanup service started");
+            if (!_settings.EnableCleanup)
+            {
+                _logger.LogInformation("Outbox cleanup service is disabled");
+                return;
+            }
+
+            _logger.LogInformation("Outbox cleanup service started with {RetentionDays} day(s) retention", _settings.RetentionDays);
 
             // Initial delay to avoid running immediately on startup
             await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
@@ -26,17 +39,18 @@ namespace Portal.Services.MessageBroker
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
-                    var db = scope.ServiceProvider.GetRequiredService<Portal.Data.ApplicationDbContext>();
+                    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                    var now = DateTime.UtcNow;
+                    var cutoffDate = DateTime.UtcNow.AddDays(-_settings.RetentionDays);
                     const int batchSize = 1000;
                     int totalDeleted = 0;
 
-                    // Delete in batches to avoid locking the table for too long
                     while (!stoppingToken.IsCancellationRequested)
                     {
-                        var rowsDeleted = await db.ProcessedMessage
-                            .Where(p => p.ExpiresAt != null && p.ExpiresAt <= now)
+                        var rowsDeleted = await db.OutboxMessage
+                            .Where(m => m.Status == OutboxMessageStatus.Processed 
+                                && m.ProcessedAt != null 
+                                && m.ProcessedAt < cutoffDate)
                             .Take(batchSize)
                             .ExecuteDeleteAsync(stoppingToken);
 
@@ -46,21 +60,21 @@ namespace Portal.Services.MessageBroker
                         }
 
                         totalDeleted += rowsDeleted;
-                        _logger.LogDebug("Deleted {RowCount} expired idempotency records", rowsDeleted);
+                        _logger.LogDebug("Deleted {RowCount} processed outbox messages", rowsDeleted);
                     }
 
                     if (totalDeleted > 0)
                     {
-                        _logger.LogInformation("Idempotency cleanup completed: deleted {TotalCount} expired record(s)", totalDeleted);
+                        _logger.LogInformation("Outbox cleanup completed: deleted {TotalCount} processed message(s)", totalDeleted);
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogInformation("Idempotency cleanup service is stopping");
+                    _logger.LogInformation("Outbox cleanup service is stopping");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error during idempotency cleanup");
+                    _logger.LogError(ex, "Error during outbox cleanup");
                 }
 
                 try
