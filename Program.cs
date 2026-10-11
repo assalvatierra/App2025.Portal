@@ -7,6 +7,7 @@ using Portal.DBServices;
 using MassTransit;
 using Portal.Services;
 using Portal.Services.MessageBroker;
+using Portal.Services.Observability;
 using Serilog;
 using StackExchange.Redis;
 
@@ -17,6 +18,8 @@ Log.Logger = new LoggerConfiguration()
         .AddJsonFile("appsettings.json")
         .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
         .Build())
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "Portal")
     .CreateLogger();
 
 try
@@ -24,7 +27,10 @@ try
     Log.Information("Application starting up");
     var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+    // Add OpenTelemetry - must be called before building the app
+    builder.AddPortalOpenTelemetry();
+
+    // Add services to the container.
     builder.Host.UseSerilog();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
