@@ -47,8 +47,21 @@ namespace Portal.Services.MessageBroker
 
                 try
                 {
-                    await handler.ConsumeAsync(message, context.CancellationToken);
-                    await _idempotencyService.MarkProcessedAsync(message.Id, consumerType, context.CancellationToken);
+                    // ConsumeAsync returns true if processed, false if skipped (e.g., partition key mismatch)
+                    var wasProcessed = await handler.ConsumeAsync(message, context.CancellationToken);
+
+                    if (wasProcessed)
+                    {
+                        // Only mark as processed if the message was actually handled
+                        await _idempotencyService.MarkProcessedAsync(message.Id, consumerType, context.CancellationToken);
+                    }
+                    else
+                    {
+                        // Message was skipped (e.g., partition key mismatch), release reservation
+                        // so other consumers can process it
+                        System.Diagnostics.Debug.WriteLine($"[BrokerMessageConsumer] Message {message.Id}: Released reservation for {consumerType} (skipped due to partition key)");
+                        await _idempotencyService.ReleaseReservationAsync(message.Id, consumerType, context.CancellationToken);
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -13,10 +13,31 @@ namespace Portal.Services.MessageBroker.Consumers
 
         public ReservationVerifiedConsumerEmailSender(
             ILogger<ReservationVerifiedConsumerEmailSender> logger,
-            IReservationService reservationService)
+            IReservationService reservationService,
+            IConfiguration configuration)
+            : base(ParseAssignedKeys(configuration, nameof(ReservationVerifiedConsumerEmailSender)))
         {
             _logger = logger;
             _reservationService = reservationService;
+        }
+
+        private static IEnumerable<string>? ParseAssignedKeys(IConfiguration configuration, string consumerName)
+        {
+            var section = configuration.GetSection("PartitionKeyAssignments");
+            var value = section[consumerName];
+
+            // Debug: Log configuration reading
+            System.Diagnostics.Debug.WriteLine($"[PartitionKeyFilter] {consumerName}: section.Path='{section.Path}', value='{value}'");
+
+            if (string.IsNullOrWhiteSpace(value)) 
+            {
+                System.Diagnostics.Debug.WriteLine($"[PartitionKeyFilter] {consumerName}: No partition key assigned (config value is null/empty)");
+                return null;
+            }
+
+            var keys = value.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+            System.Diagnostics.Debug.WriteLine($"[PartitionKeyFilter] {consumerName}: Assigned keys = {string.Join(",", keys)}");
+            return keys;
         }
 
         protected override async Task HandleAsync(ReservationVerified payload, BrokerMessage message, CancellationToken cancellationToken)

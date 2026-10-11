@@ -409,7 +409,7 @@ namespace Portal.Controllers
                         //jsonData = reservations.jsonData,
                         //Status = reservations.Status
                     },
-                    saveChanges: true);
+                    saveChanges: true, partitionKey: (reservations.Id%2).ToString());
 
                 // Clear OTP and attempt tracking from session
                 HttpContext.Session.Remove("OTP");

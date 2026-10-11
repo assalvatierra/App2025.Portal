@@ -11,6 +11,10 @@ namespace Portal.Services.MessageBroker
         /// </summary>
         string MessageType { get; }
 
-        Task ConsumeAsync(BrokerMessage message, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Consumes the message.
+        /// Returns true if the message was processed, false if it was skipped (e.g., due to partition key mismatch).
+        /// </summary>
+        Task<bool> ConsumeAsync(BrokerMessage message, CancellationToken cancellationToken = default);
     }
 }
