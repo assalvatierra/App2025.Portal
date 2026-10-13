@@ -162,6 +162,10 @@ builder.Services.AddHostedService<Portal.Services.MessageBroker.IdempotencyClean
 // Outbox cleanup for processed messages
 builder.Services.Configure<Portal.Services.MessageBroker.OutboxCleanupSettings>(builder.Configuration.GetSection("MessageBroker:OutboxCleanup"));
 builder.Services.AddHostedService<Portal.Services.MessageBroker.OutboxCleanupService>();
+
+// VectorDB Scheduler for monitoring and triggering search database refreshes
+builder.Services.AddHostedService<Portal.Services.VectorDbSchedulerService>();
+
     builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {

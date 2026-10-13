@@ -1,0 +1,162 @@
+﻿@model Portal.Models.VectorDbScheduleViewDto
+
+@*
+    Vector Database - Scheduling UI
+*@
+<div class="container mt-4">
+    <h1>Vector Database</h1>
+
+    @if (Model?.HasSchedule == true)
+    {
+        <div class="alert alert-info mt-3" role="alert">
+            <h5>Current Schedule Status</h5>
+            <ul class="mb-0">
+                <li><strong>Next Scheduled Update:</strong> @Model.NextScheduleFormatted UTC</li>
+                <li><strong>Refresh Interval:</strong> @Model.IntervalDisplay</li>
+                @if (!string.IsNullOrEmpty(Model.LastUpdateTriggeredFormatted))
+                {
+                    <li><strong>Last Update Triggered:</strong> @Model.LastUpdateTriggeredFormatted UTC</li>
+                }
+                else
+                {
+                    <li><strong>Last Update Triggered:</strong> Never</li>
+                }
+            </ul>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-3" role="alert">
+            No schedule has been set yet. Set a schedule below to enable automatic updates.
+        </div>
+    }
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <form id="vectorDbForm" onsubmit="return false;" class="row g-3">
+                <div class="col-md-6">
+                    <label for="nextSchedule" class="form-label">Next Schedule</label>
+                    <input type="datetime-local" class="form-control" id="nextSchedule" name="nextSchedule" />
+                    <div class="form-text">Select the next date and time for refreshing collections and indexes (future only).</div>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="intervalValue" class="form-label">Interval Value</label>
+                    <input type="number" min="1" class="form-control" id="intervalValue" name="intervalValue" value="1" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="intervalUnit" class="form-label">Interval Unit</label>
+                    <select class="form-select" id="intervalUnit" name="intervalUnit">
+                        <option value="Minutes">Minutes</option>
+                        <option value="Hours">Hours</option>
+                        <option value="Days" selected>Days</option>
+                    </select>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <button id="setScheduleBtn" class="btn btn-primary me-2" onclick="setScheduleValues()">Set Values in Server Application Session</button>
+                    <button id="updateNowBtn" class="btn btn-secondary" onclick="updateNow()">Update Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="vectorDbAlert" class="alert d-none mt-3" role="alert"></div>
+</div>
+
+<script>
+    // Initialize form with saved values if they exist
+    (function initForm() {
+        const nextSchedule = document.getElementById('nextSchedule');
+        const intervalValue = document.getElementById('intervalValue');
+        const intervalUnit = document.getElementById('intervalUnit');
+
+        if (!nextSchedule) return;
+
+        function toLocalDatetimeInputValue(date) {
+            const pad = (n) => n.toString().padStart(2, '0');
+            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+        }
+
+        // Check if we have saved schedule settings from server
+        const hasSavedSchedule = @Html.Raw(Model?.HasSchedule == true ? "true" : "false");
+
+        if (hasSavedSchedule) {
+            // Pre-populate with saved values
+            const savedNextSchedule = new Date("@Model?.NextScheduleDateTime?.ToString("yyyy-MM-ddTHH:mm:ss")Z");
+            if (!isNaN(savedNextSchedule.getTime())) {
+                nextSchedule.value = toLocalDatetimeInputValue(savedNextSchedule);
+            }
+            intervalValue.value = "@Model?.IntervalValue";
+            intervalUnit.value = "@Model?.IntervalUnit";
+        } else {
+            // Set minimum to current time (rounded up to next minute)
+            const now = new Date();
+            now.setSeconds(0, 0);
+            const min = new Date(now.getTime() + 60 * 1000);
+            nextSchedule.min = toLocalDatetimeInputValue(min);
+            // If current value is empty, set to min as a convenience
+            if (!nextSchedule.value) nextSchedule.value = toLocalDatetimeInputValue(min);
+        }
+    })();
+
+    function showAlert(message, type = 'info') {
+        const alertEl = document.getElementById('vectorDbAlert');
+        alertEl.className = 'alert alert-' + type + ' mt-3';
+        alertEl.textContent = message;
+        alertEl.classList.remove('d-none');
+    }
+
+    async function setScheduleValues() {
+        const nextSchedule = document.getElementById('nextSchedule').value;
+        const intervalValue = parseInt(document.getElementById('intervalValue').value, 10);
+        const intervalUnit = document.getElementById('intervalUnit').value;
+
+        if (!nextSchedule) { showAlert('Please select a next schedule datetime.', 'warning'); return; }
+        const selected = new Date(nextSchedule);
+        if (selected <= new Date()) { showAlert('Next schedule must be a future date/time.', 'warning'); return; }
+        if (!Number.isInteger(intervalValue) || intervalValue < 1) { showAlert('Interval value must be a positive integer.', 'warning'); return; }
+
+        // Call server endpoint
+        try {
+            const res = await fetch('/Home/SetVectorDbSchedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nextSchedule: nextSchedule, intervalValue: intervalValue, intervalUnit: intervalUnit })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                showAlert(data.message || 'Schedule values saved.', 'success');
+                // Reload page after 2 seconds to show updated status
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                const data = await res.json().catch(() => null);
+                showAlert(data?.message || 'Server did not accept the schedule values.', 'secondary');
+            }
+        } catch (err) {
+            console.error(err);
+            showAlert('Error sending schedule to server.', 'danger');
+        }
+    }
+
+    async function updateNow() {
+        // Call server endpoint to trigger immediate update
+        try {
+            const res = await fetch('/Home/UpdateVectorDbNow', { method: 'POST' });
+            if (res.ok) {
+                const data = await res.json();
+                showAlert(data.message || 'Update triggered.', 'success');
+                // Reload page after 2 seconds to show updated status
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                const data = await res.json().catch(() => null);
+                showAlert(data?.message || 'Server update not available.', 'secondary');
+            }
+        } catch (err) {
+            console.error(err);
+            showAlert('Error sending update request to server.', 'danger');
+        }
+    }
+</script>

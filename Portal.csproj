@@ -47,6 +47,7 @@
 
   <ItemGroup>
     <Folder Include="instructions\Docker\" />
+    <Folder Include="instructions\VectorDB\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 

@@ -100,3 +100,4 @@ if (activity is not null)
 
 ---
 **Documentation:** See `instructions/OpenTelemetry/MSSQL_INSTRUMENTATION.md` for comprehensive guide
+

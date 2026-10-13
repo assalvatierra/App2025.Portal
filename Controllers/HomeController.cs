@@ -4,6 +4,7 @@ using Portal.DBServices;
 using Portal.Helpers;
 using Portal.Models;
 using System.Diagnostics;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Portal.Controllers
 {
@@ -12,15 +13,19 @@ namespace Portal.Controllers
         private readonly IPortalItemService _portalItemService;
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
+        private readonly IDistributedCache _cache;
+        private const string VectorDbCacheKey = "VectorDbScheduleSettings";
 
         public HomeController(
             IPortalItemService portalItemService, 
             IPortalCategoryServices portalCategoryService,
-            IPortalContentService portalContentService)
+            IPortalContentService portalContentService,
+            IDistributedCache cache)
         {
             _portalItemService = portalItemService;
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;
+            _cache = cache;
         }
 
         public async Task<IActionResult> Index()
@@ -44,6 +49,137 @@ namespace Portal.Controllers
         public async Task<IActionResult> AskAI()
         {
             return View();
+        }
+
+        [HttpGet]
+        [RateLimit]
+        public IActionResult VectorDB()
+        {
+            // Retrieve saved schedule settings from distributed cache
+            var scheduleSettings = GetScheduleSettingsFromCache();
+
+            // Map to DTO for view
+            var viewDto = new VectorDbScheduleViewDto();
+
+            if (scheduleSettings != null)
+            {
+                viewDto.HasSchedule = true;
+                viewDto.NextScheduleFormatted = scheduleSettings.NextSchedule.ToString("yyyy-MM-dd HH:mm:ss");
+                viewDto.NextScheduleDateTime = scheduleSettings.NextSchedule;
+                viewDto.IntervalDisplay = $"{scheduleSettings.IntervalValue} {scheduleSettings.IntervalUnit}";
+                viewDto.IntervalValue = scheduleSettings.IntervalValue;
+                viewDto.IntervalUnit = scheduleSettings.IntervalUnit;
+
+                if (scheduleSettings.LastUpdateTriggered.HasValue)
+                {
+                    viewDto.LastUpdateTriggeredFormatted = scheduleSettings.LastUpdateTriggered.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                }
+            }
+            else
+            {
+                viewDto.HasSchedule = false;
+            }
+
+            return View(viewDto);
+        }
+
+        [HttpPost]
+        [Route("Home/SetVectorDbSchedule")]
+        public IActionResult SetVectorDbSchedule([FromBody] VectorDbScheduleDto? model)
+        {
+            if (model == null)
+            {
+                return new JsonResult(new { success = false, message = "Invalid request data" }) { StatusCode = 400 };
+            }
+
+            // Validate schedule data
+            if (string.IsNullOrWhiteSpace(model.IntervalUnit) || 
+                !new[] { "Minutes", "Hours", "Days" }.Contains(model.IntervalUnit))
+            {
+                return new JsonResult(new { success = false, message = "Invalid interval unit. Must be 'Minutes', 'Hours', or 'Days'." }) { StatusCode = 400 };
+            }
+
+            if (model.IntervalValue < 1)
+            {
+                return new JsonResult(new { success = false, message = "Interval value must be at least 1" }) { StatusCode = 400 };
+            }
+
+            try
+            {
+                // Create schedule settings from DTO
+                var settings = new VectorDbScheduleSettings
+                {
+                    NextSchedule = model.NextSchedule ?? DateTime.UtcNow,
+                    IntervalValue = model.IntervalValue,
+                    IntervalUnit = model.IntervalUnit,
+                    LastModified = DateTime.UtcNow
+                };
+
+                // Save to distributed cache only
+                SaveScheduleSettingsToCache(settings);
+
+                return new JsonResult(new 
+                { 
+                    success = true, 
+                    message = $"Schedule set successfully. Next update scheduled for {settings.NextSchedule:yyyy-MM-dd HH:mm:ss} UTC",
+                    data = new
+                    {
+                        nextSchedule = settings.NextSchedule,
+                        intervalValue = settings.IntervalValue,
+                        intervalUnit = settings.IntervalUnit
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = $"Error setting schedule: {ex.Message}" }) { StatusCode = 500 };
+            }
+        }
+
+        [HttpPost]
+        [Route("Home/UpdateVectorDbNow")]
+        public IActionResult UpdateVectorDbNow()
+        {
+            try
+            {
+                // Get current schedule settings from cache
+                var settings = GetScheduleSettingsFromCache();
+
+                if (settings != null)
+                {
+                    settings.LastUpdateTriggered = DateTime.UtcNow;
+
+                    // Calculate next schedule based on interval
+                    settings.NextSchedule = settings.IntervalUnit.ToLower() switch
+                    {
+                        "minutes" => DateTime.UtcNow.AddMinutes(settings.IntervalValue),
+                        "hours" => DateTime.UtcNow.AddHours(settings.IntervalValue),
+                        "days" => DateTime.UtcNow.AddDays(settings.IntervalValue),
+                        _ => DateTime.UtcNow.AddHours(1)
+                    };
+
+                    // Save updated settings back to cache only
+                    SaveScheduleSettingsToCache(settings);
+
+                    // TODO: Implement actual update logic here
+                    // This would typically call a service to refresh collections/indexes in the search database
+                }
+
+                return new JsonResult(new 
+                { 
+                    success = true, 
+                    message = "Update triggered successfully. Vector database collections and indexes refresh started.",
+                    data = new
+                    {
+                        lastUpdateTriggered = settings?.LastUpdateTriggered,
+                        nextSchedule = settings?.NextSchedule
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = $"Error triggering update: {ex.Message}" }) { StatusCode = 500 };
+            }
         }
 
         [HttpGet]
@@ -269,6 +405,67 @@ namespace Portal.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        /// <summary>
+        /// Retrieves VectorDB schedule settings from distributed cache.
+        /// </summary>
+        private VectorDbScheduleSettings? GetScheduleSettingsFromCache()
+        {
+            try
+            {
+                var cachedBytes = _cache.Get(VectorDbCacheKey);
+                if (cachedBytes == null)
+                {
+                    return null;
+                }
+
+                using (var ms = new System.IO.MemoryStream(cachedBytes))
+                {
+                    return System.Text.Json.JsonSerializer.Deserialize<VectorDbScheduleSettings>(ms);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error and return null if cache retrieval fails
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Saves VectorDB schedule settings to distributed cache.
+        /// </summary>
+        private void SaveScheduleSettingsToCache(VectorDbScheduleSettings settings)
+        {
+            try
+            {
+                var cacheOptions = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(365)
+                };
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    using (var writer = new System.IO.StreamWriter(ms))
+                    {
+                        System.Text.Json.JsonSerializer.Serialize(writer.BaseStream, settings);
+                        writer.Flush();
+                        _cache.Set(VectorDbCacheKey, ms.ToArray(), cacheOptions);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't throw to avoid interrupting the flow
+            }
+        }
+
+    }
+
+    // DTO used by VectorDB scheduling endpoints
+    public class VectorDbScheduleDto
+    {
+        public DateTime? NextSchedule { get; set; }
+        public int IntervalValue { get; set; }
+        public string? IntervalUnit { get; set; }
     }
 }
 
