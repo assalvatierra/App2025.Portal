@@ -2,7 +2,8 @@
 @inject IConfiguration Configuration
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Davao Car Rental – Self‑Drive & Corporate Car Hire for Tourist Spots and Business Trips";
+    ViewData["Description"] = "Experience reliable Davao car rental services tailored for both tourists and business travelers. Enjoy clean self‑drive cars, airport pickup, corporate travel options, and easy access to top destinations like Samal Island, Eden Nature Park, Crocodile Park, Jack’s Ridge, and Davao’s business districts.";
     var searchSettings = Configuration.GetSection("SearchSettings");
     var enableRegularSearch = searchSettings.GetValue<bool>("EnableRegularSearch", true);
     var enableVectorSearch = searchSettings.GetValue<bool>("EnableVectorSearch", true);
