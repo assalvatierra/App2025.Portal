@@ -6,6 +6,7 @@ using Portal.Models;
 using Portal.Services.VectorSearch;
 using Portal.Services.VectorSearch.Models;
 using System.Diagnostics;
+using Erp.Domain.Models;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace Portal.Controllers
@@ -18,19 +19,22 @@ namespace Portal.Controllers
         private readonly IDistributedCache _cache;
         private readonly IVectorSearchService _vectorSearchService;
         private const string VectorDbCacheKey = "VectorDbScheduleSettings";
+        private readonly IPortalConfigurationService _portalConfigurationService;
 
         public HomeController(
             IPortalItemService portalItemService, 
             IPortalCategoryServices portalCategoryService,
             IPortalContentService portalContentService,
             IDistributedCache cache,
-            IVectorSearchService vectorSearchService)
+            IVectorSearchService vectorSearchService,
+            IPortalConfigurationService portalConfigurationService)
         {
             _portalItemService = portalItemService;
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;
             _cache = cache;
             _vectorSearchService = vectorSearchService;
+            _portalConfigurationService = portalConfigurationService;
         }
 
         public async Task<IActionResult> Index()
