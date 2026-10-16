@@ -3,6 +3,8 @@ using Portal.Controllers.Attributes;
 using Portal.DBServices;
 using Portal.Helpers;
 using Portal.Models;
+using Portal.Services.VectorSearch;
+using Portal.Services.VectorSearch.Models;
 using System.Diagnostics;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -14,18 +16,21 @@ namespace Portal.Controllers
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
         private readonly IDistributedCache _cache;
+        private readonly IVectorSearchService _vectorSearchService;
         private const string VectorDbCacheKey = "VectorDbScheduleSettings";
 
         public HomeController(
             IPortalItemService portalItemService, 
             IPortalCategoryServices portalCategoryService,
             IPortalContentService portalContentService,
-            IDistributedCache cache)
+            IDistributedCache cache,
+            IVectorSearchService vectorSearchService)
         {
             _portalItemService = portalItemService;
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;
             _cache = cache;
+            _vectorSearchService = vectorSearchService;
         }
 
         public async Task<IActionResult> Index()
@@ -138,7 +143,7 @@ namespace Portal.Controllers
 
         [HttpPost]
         [Route("Home/UpdateVectorDbNow")]
-        public IActionResult UpdateVectorDbNow()
+        public async Task<IActionResult> UpdateVectorDbNow()
         {
             try
             {
@@ -158,17 +163,17 @@ namespace Portal.Controllers
                         _ => DateTime.UtcNow.AddHours(1)
                     };
 
-                    // Save updated settings back to cache only
+                    // Save updated settings back to cache
                     SaveScheduleSettingsToCache(settings);
 
-                    // TODO: Implement actual update logic here
-                    // This would typically call a service to refresh collections/indexes in the search database
+                    // Upsert vector database collections and sample data
+                    await _vectorSearchService.CreateCollection("cars", 1536);
                 }
 
                 return new JsonResult(new 
                 { 
                     success = true, 
-                    message = "Update triggered successfully. Vector database collections and indexes refresh started.",
+                    message = "Update triggered successfully. Vector database collections and indexes refreshed.",
                     data = new
                     {
                         lastUpdateTriggered = settings?.LastUpdateTriggered,
@@ -196,6 +201,101 @@ namespace Portal.Controllers
             ViewBag.cardMode = "List";
 
             return View("ItemList", results);
+        }
+
+        [HttpGet]
+        [RateLimit]
+        public async Task<IActionResult> SearchByVector([FromQuery] string query)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(query))
+                {
+                    ViewBag.PageTitle = "Vector Search Results";
+                    ViewBag.PageMessage = "Please provide a search query.";
+                    ViewBag.SearchTerm = query;
+                    var compareList = HttpContext.Session.GetObject<List<int>>("CompareList") ?? new List<int>();
+                    ViewBag.CompareList = compareList;
+                    ViewBag.cardMode = "List";
+                    return View("ItemList", new List<ItemDto>());
+                }
+
+                // Create vector search request
+                var vectorSearchRequest = new VectorSearchRequest
+                {
+                    CollectionName = "cars",
+                    Query = $"{query} cars",
+                    //ScoreThreshold = 0.65f,
+                    Limit = 5
+                };
+
+                // Search using vector database
+                //var vectorResults = await _vectorSearchService.SearchByVector(vectorSearchRequest);
+                var vectorResults = await _vectorSearchService.SearchByKeyword(vectorSearchRequest);
+
+
+                if (vectorResults == null || vectorResults.Count == 0)
+                {
+                    ViewBag.PageTitle = "Vector Search Results";
+                    ViewBag.PageMessage = $"No results found for: {query}";
+                    ViewBag.SearchTerm = query;
+                    var compareList = HttpContext.Session.GetObject<List<int>>("CompareList") ?? new List<int>();
+                    ViewBag.CompareList = compareList;
+                    ViewBag.cardMode = "List";
+                    return View("ItemList", new List<ItemDto>());
+                }
+
+                // Extract item IDs from vector search results
+                var itemIds = new List<int>();
+                foreach (var result in vectorResults)
+                {
+                    if (result.Payload != null && result.Payload.TryGetValue("id", out var idObj))
+                    {
+                        if (int.TryParse(idObj?.ToString(), out var itemId))
+                        {
+                            itemIds.Add(itemId);
+                        }
+                    }
+                }
+
+                // Fetch full item details from database
+                List<ItemDto> results = new List<ItemDto>();
+                if (itemIds.Count > 0)
+                {
+                    var portalItems = await _portalItemService.GetByIdListAsync(itemIds);
+                    //results = portalItems ?? new List<ItemDto>();
+                    foreach(var iId in itemIds)
+                    {
+                        var item = portalItems.Find(p => p.PortalItem.Id == iId);
+                        if (item != null)
+                        {
+                            results.Add(item);
+                        }
+                    }
+                }
+
+                // Set ViewBag properties
+                ViewBag.SearchTerm = query;
+                ViewBag.PageTitle = "Vector Search Results";
+                ViewBag.PageMessage = $"AI searched results for: {query}";
+
+                // Pass compare list to view
+                var compareListFinal = HttpContext.Session.GetObject<List<int>>("CompareList") ?? new List<int>();
+                ViewBag.CompareList = compareListFinal;
+                ViewBag.cardMode = "List";
+
+                return View("ItemList", results);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.PageTitle = "Vector Search Results";
+                ViewBag.PageMessage = $"An error occurred during vector search: {ex.Message}";
+                ViewBag.SearchTerm = query;
+                var compareList = HttpContext.Session.GetObject<List<int>>("CompareList") ?? new List<int>();
+                ViewBag.CompareList = compareList;
+                ViewBag.cardMode = "List";
+                return View("ItemList", new List<ItemDto>());
+            }
         }
 
         [HttpGet]

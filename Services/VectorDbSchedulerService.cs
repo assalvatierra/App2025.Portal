@@ -1,5 +1,6 @@
 using Portal.Models;
 using Portal.Helpers;
+using Portal.Services.VectorSearch;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
@@ -14,14 +15,20 @@ namespace Portal.Services
     {
         private static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(30);
         private const string VectorDbCacheKey = "VectorDbScheduleSettings";
+        private const int VectorSize = 512; // text-embedding-3-small standard dimensionality
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<VectorDbSchedulerService> _logger;
+        private readonly string _collectionName;
 
-        public VectorDbSchedulerService(IServiceScopeFactory scopeFactory, ILogger<VectorDbSchedulerService> logger)
+        public VectorDbSchedulerService(
+            IServiceScopeFactory scopeFactory,
+            ILogger<VectorDbSchedulerService> logger,
+            IConfiguration configuration)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
+            _collectionName = configuration["VectorDb:Qdrant:CollectionName"] ?? "cars";
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -164,8 +171,8 @@ namespace Portal.Services
                                 "VectorDB schedule updated. Next scheduled update: {NextSchedule} UTC",
                                 settings.NextSchedule);
 
-                            // TODO: Call the actual vector database update service here
-                            // Example: await vectorDbService.RefreshCollectionsAndIndexesAsync(cancellationToken);
+                            // Initialize/update vector collections
+                            InitializeVectorCollectionsAsync(cancellationToken).GetAwaiter().GetResult();
                         }
                         else
                         {
@@ -181,6 +188,33 @@ namespace Portal.Services
                     _logger.LogError(ex, "Unexpected error in CheckAndTriggerScheduledUpdatesAsync");
                 }
             }, cancellationToken);
+        }
+
+        private async Task InitializeVectorCollectionsAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.LogInformation(
+                    "Initializing vector collection '{CollectionName}' with size {VectorSize} at {Timestamp}",
+                    _collectionName, VectorSize, DateTime.UtcNow);
+
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var vectorSearchService = scope.ServiceProvider.GetRequiredService<IVectorSearchService>();
+                    await vectorSearchService.CreateCollection(_collectionName, VectorSize, cancellationToken);
+                }
+
+                _logger.LogInformation(
+                    "Vector collection '{CollectionName}' initialized/updated successfully at {Timestamp}",
+                    _collectionName, DateTime.UtcNow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Error while initializing vector collection '{CollectionName}'. Will retry at next scheduled interval.",
+                    _collectionName);
+                // Log and continue - don't throw. Scheduler will retry at next interval.
+            }
         }
     }
 }

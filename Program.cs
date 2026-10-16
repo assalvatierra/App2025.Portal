@@ -136,6 +136,8 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<ISitemapService, SitemapService>();
 builder.Services.AddScoped<ICtaBoxService, CtaBoxService>();
 builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOpenAI>();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<Portal.Services.VectorSearch.IVectorSearchService, Portal.Services.VectorSearch.QdrantVectorSearchService>();
 
 // MessageBroker: MassTransit (in-memory transport by default; swap for RabbitMQ/Azure Service Bus later) and outbox
 builder.Services.AddMassTransit(x =>

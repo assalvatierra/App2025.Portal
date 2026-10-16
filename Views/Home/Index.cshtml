@@ -56,6 +56,23 @@
                     </div>
                 </div>
             </form>
+            <!-- Vector Search Form -->
+            <form asp-controller="Home" asp-action="SearchByVector" method="get" class="search-form" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ddd;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vector-search-term">AI-Powered Search</label>
+                        <input type="text" id="vector-search-term" name="query" placeholder="Search by features, style, or description..." required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Semantic search powered by AI</label>
+                        <button type="submit" class="btn-search" style="background-color: #6c757d;">
+                            <i class="bi bi-search"></i> Search with AI
+                        </button>
+                    </div>
+                </div>
+            </form>
             <div class="form-row" style="margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
                 <div class="form-group">
                     <label> </label>
