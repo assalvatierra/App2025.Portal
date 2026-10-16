@@ -1,10 +1,18 @@
-﻿@{
+﻿﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@{
     ViewData["Title"] = "Davao Car Rental – Self‑Drive & Corporate Car Hire for Tourist Spots and Business Trips";
     ViewData["Description"] = "Experience reliable Davao car rental services tailored for both tourists and business travelers. Enjoy clean self‑drive cars, airport pickup, corporate travel options, and easy access to top destinations like Samal Island, Eden Nature Park, Crocodile Park, Jack’s Ridge, and Davao’s business districts.";
+    var searchSettings = Configuration.GetSection("SearchSettings");
+    var enableRegularSearch = searchSettings.GetValue<bool>("EnableRegularSearch", true);
+    var enableVectorSearch = searchSettings.GetValue<bool>("EnableVectorSearch", true);
+    var defaultSearchType = searchSettings.GetValue<string>("DefaultSearchType", "regular");
 }
 
 @* Include the Compare Toast Component *@
 @await Html.PartialAsync("_CompareToast")
+
 
 <!-- ==========================================
      SECTION 1: THE HERO & BOOKING WIDGET
@@ -12,54 +20,90 @@
 <header class="seo-hero-section">
     <div class="hero-container">
         <!-- Target your primary high-volume broad keyword here -->
-        <h1>Davao Car rental - Affordable With Driver and Self‑Drive Car Rentals in Davao City</h1>
+        <h1>Affordable Car Rentals & Vehicle Hire Worldwide</h1>
         <p class="hero-subtitle">Compare rental car rates, choose your fleet, and book online with flexible cancellations.</p>
 
         <!-- Booking Widget Container (Replace with your actual form/booking plugin iframe) -->
         <div class="booking-widget-box" aria-label="Car Rental Reservation Form">
-            <form asp-controller="Home" asp-action="SearchItems" method="get" class="search-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="search-term">Search Items</label>
-                        <input type="text" id="search-term" name="searchTerm" placeholder="Search by Type, Model or Manufacturer" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="pickup-date">Pick-up Date</label>
-                        <input type="date" id="pickup-date" name="pickup_date">
-                    </div>
-                    <div class="form-group">
-                        <label for="return-date">Return Date</label>
-                        <input type="date" id="return-date" name="return_date">
-                    </div>
+
+            <!-- ========== SEARCH OPTION 1: Regular Text Match Search ========== -->
+            @if (enableRegularSearch)
+            {
+                <div class="search-section">
+                    <h3 class="search-section-title">Search by Type, Model, or Manufacturer</h3>
+                    <p class="search-section-description">Use traditional text search to find vehicles by exact specifications.</p>
+                    <form asp-controller="Home" asp-action="SearchItems" method="get" class="search-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="search-term">Search Items</label>
+                                <input type="text" id="search-term" name="searchTerm" placeholder="Search by Type, Model or Manufacturer" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="pickup-date">Pick-up Date</label>
+                                <input type="date" id="pickup-date" name="pickup_date">
+                            </div>
+                            <div class="form-group">
+                                <label for="return-date">Return Date</label>
+                                <input type="date" id="return-date" name="return_date">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="passenger-capacity">Passenger Capacity</label>
+                                <input type="number" id="passenger-capacity" name="passenger_capacity" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="luggage-capacity">Luggage Capacity</label>
+                                <input type="number" id="luggage-capacity" name="luggage_capacity" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="transmission">Transmission</label>
+                                <select id="transmission" name="transmission">
+                                    <option value="automatic">Automatic</option>
+                                    <option value="manual">Manual</option>
+                                    <option value="any" selected>Any</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Submit to search</label>
+                                <button type="submit" class="btn-search">Find My Car</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="passenger-capacity">Passenger Capacity</label>
-                        <input type="number" id="passenger-capacity" name="passenger_capacity" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="luggage-capacity">Luggage Capacity</label>
-                        <input type="number" id="luggage-capacity" name="luggage_capacity" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="transmission">Transmission</label>
-                        <select id="transmission" name="transmission">
-                            <option value="automatic">Automatic</option>
-                            <option value="manual">Manual</option>
-                            <option value="any" selected>Any</option>
-                        </select>
-                    </div>
+            }
+
+            <!-- ========== SEARCH OPTION 2: AI-Vector Search ========== -->
+            @if (enableVectorSearch)
+            {
+                <div class="search-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #ddd;">
+                    <h3 class="search-section-title">AI-Powered Semantic Search</h3>
+                    <p class="search-section-description">Search by vehicle features, style, or description using artificial intelligence.</p>
+                    <form asp-controller="Home" asp-action="SearchByVector" method="get" class="search-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="vector-search-term">Describe Your Perfect Car</label>
+                                <input type="text" id="vector-search-term" name="query" placeholder="e.g., 'luxury sedan with great fuel efficiency' or 'spacious family SUV'" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Search with AI Intelligence</label>
+                                <button type="submit" class="btn-search" style="background-color: #6c757d;">
+                                    <i class="bi bi-search"></i> Search with AI
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Submit to search</label>
-                        <button type="submit" class="btn-search">Find My Car</button>
-                    </div>
-                </div>
-            </form>
-            <div class="form-row" style="margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+            }
+
+            <!-- ========== Quick Actions ========== -->
+            <div class="form-row" style="margin-top: 2rem; border-top: 2px solid #ddd; padding-top: 1rem;">
                 <div class="form-group">
-                    <label> </label>
+                    <label>Quick Actions</label>
                     <div style="display: flex; gap: 10px;">
                         <a href="@Url.Action("ReservationForm", "PortalReservation", new { itemId = 0, transactionType = "Booking" })" class="btn btn-outline-primary" style="flex: 1; text-align: center;">
                             <i class="bi bi-calendar-check"></i> Reserve Now
