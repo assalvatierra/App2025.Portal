@@ -11,6 +11,19 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace Portal.Controllers
 {
+    public class HomeConfiguration
+    {
+        public List<HomeSection> Sections { get; set; }
+    }
+    public class HomeSection
+    {
+        public string Section { get; set; }
+        public string Title { get; set; }
+        public string intro { get; set; }
+        public bool Enabled { get; set; }
+        public int itemsToShow { get; set; } = 0;
+    }
+
     public class HomeController : Controller
     {
         private readonly IPortalItemService _portalItemService;
@@ -39,6 +52,20 @@ namespace Portal.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var hpc = await _portalConfigurationService.GetPortalConfigurationByNameAsync("HomePage");
+            PortalConfiguration pc = hpc.FirstOrDefault();
+            if (pc != null && !string.IsNullOrEmpty(pc.Settings))
+            {
+                var homeconfig = System.Text.Json.JsonSerializer.Deserialize<HomeConfiguration>(pc.Settings);
+                ViewBag.HomeSections = homeconfig.Sections.Where(s => s.Enabled).ToList();
+
+                ViewBag.FeaturedArticlesConfig = homeconfig.Sections.Where(s => s.Section == "FeaturedArticles").FirstOrDefault();
+            }
+            else
+            {
+                ViewBag.HomeSections = new List<HomeSection>();
+            }
+
             var categories = await _portalCategoryService.GetAllByStatusAsync("Active");
 
             // fetch categories for Product
