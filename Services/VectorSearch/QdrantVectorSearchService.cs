@@ -72,19 +72,6 @@ namespace Portal.Services.VectorSearch
             //await this.UploadSamplePoints(_client, collectionName, cancellationToken);
             await this.LoadPortalItems(collectionName, cancellationToken);
 
-            var test = this.SearchByVector(new VectorSearchRequest
-            {
-                CollectionName = collectionName,
-                Vector = await GenerateEmbeddingAsync("car for heavy lifting", cancellationToken),
-                Limit = 1
-            }, cancellationToken);
-
-
-            //await _client.CreateCollectionAsync(
-            //    collectionName,
-            //    new VectorParams { Size = (ulong)vectorSize, Distance = Distance.Cosine },
-            //    cancellationToken: cancellationToken);
-
             _logger.LogInformation("Qdrant collection {CollectionName} with vector size {VectorSize} is ready.", collectionName, vectorSize);
         }
 
