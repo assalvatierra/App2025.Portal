@@ -307,8 +307,8 @@ namespace Portal.Controllers
 
                 // Set ViewBag properties
                 ViewBag.SearchTerm = query;
-                ViewBag.PageTitle = "Vector Search Results";
-                ViewBag.PageMessage = $"AI searched results for: {query}";
+                ViewBag.PageTitle = "Search Results";
+                ViewBag.PageMessage = $"Related items for: {query}";
 
                 // Pass compare list to view
                 var compareListFinal = HttpContext.Session.GetObject<List<int>>("CompareList") ?? new List<int>();
@@ -319,8 +319,8 @@ namespace Portal.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.PageTitle = "Vector Search Results";
-                ViewBag.PageMessage = $"An error occurred during vector search: {ex.Message}";
+                ViewBag.PageTitle = "Search Results";
+                ViewBag.PageMessage = $"An error occurred during search: {ex.Message}";
                 ViewBag.SearchTerm = query;
                 var compareList = HttpContext.Session.GetObject<List<int>>("CompareList") ?? new List<int>();
                 ViewBag.CompareList = compareList;
