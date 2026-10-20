@@ -85,7 +85,15 @@ namespace Portal.DBLayer
 
         public async Task<List<PortalItem>> GetByIdListAsync(List<int> IdList)
         {
-            return await _context.PortalItem.Where(p => IdList.Contains(p.Id)).ToListAsync();
+            return await _context.PortalItem
+                .Include(p => p.PortalItemCategories)
+                .ThenInclude(pic => pic.PortalCategory)
+                .Include(p => p.PortalItemSpecs)
+                .Include(portalItemPrices => portalItemPrices.PortalItemPrices
+                    .Where(p => p.Status == "Active")
+                    .OrderByDescending(p => p.ValidFrom)
+                )
+                .Where(p => IdList.Contains(p.Id)).ToListAsync();
         }
 
         public async Task<PortalItem?> GetByIdAsync(int id)

@@ -84,10 +84,11 @@ namespace Portal.Services.VectorSearch
             var recordTasks = itemDtos.Select(async item =>
             {
                 // Combine description, PortalItem.JsonData, and all PortalItemSpecs.JsonData for embedding
-                var description = item.Description ?? "";
+                var description = $"{item.PortalItem.Name} {item.PortalItem.Description} {item.Title} {item.Description}" ?? "";
                 var portalItemJsonData = item.PortalItem?.JsonData ?? "";
                 var portalItemSpecsJsonData = string.Join(" ", item.PortalItem?.PortalItemSpecs?.Select(s => s.JsonData ?? "") ?? Enumerable.Empty<string>());
-                var textForEmbedding = $"{description} {portalItemJsonData} {portalItemSpecsJsonData}".Trim();
+                var portalItemPricesJsonData = string.Join(" ", item.PortalItem?.PortalItemPrices?.Select(p => p.JsonData ?? "") ?? Enumerable.Empty<string>());
+                var textForEmbedding = $"{description} {portalItemJsonData} {portalItemSpecsJsonData} {portalItemPricesJsonData}".Trim();
 
                 // Generate embedding for the combined text
                 float[]? vector = null;
