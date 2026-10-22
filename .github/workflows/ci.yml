@@ -10,6 +10,10 @@ jobs:
   build-and-test:
     runs-on: windows-latest
 
+    env:
+      ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
+      ASPNETCORE_ENVIRONMENT: Testing
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
