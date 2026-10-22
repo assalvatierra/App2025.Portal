@@ -62,7 +62,7 @@ namespace Portal.DBServices
                 return cachedContents;
             }
 
-            var TemporaryContents = _configuration["TemporaryContents:Enabled"];
+            var TemporaryContents = _configuration["TemporaryContents:Enabled"]??"true";
             if (bool.Parse(TemporaryContents))
             {
                 var TemporaryServices = _configuration["TemporaryContents:" + type];
