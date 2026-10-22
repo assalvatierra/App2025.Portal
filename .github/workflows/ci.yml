@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, CarRental-Portal ]
+    branches: [ main, CarRental-Portal,20261021-portal-Tests-e2e ]
   pull_request:
-    branches: [ main, CarRental-Portal ]
+    branches: [ main, CarRental-Portal,20261021-portal-Tests-e2e ]
 
 jobs:
   build-and-test:
