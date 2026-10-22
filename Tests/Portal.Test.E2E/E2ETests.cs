@@ -13,8 +13,12 @@ namespace Portal.Test.E2E
             _fixture = fixture;
         }
 
-        [Fact]
-        public async Task ShouldOpenHomePage()
+        [Theory]
+        [InlineData("/", "Davao Car Rental")]
+        [InlineData("/Home/OurProducts", "Car Rental Fleet")]
+        [InlineData("/Home/OurServices", "Car Rental Services")]
+        [InlineData("/Home/Articles", "Car Rental Articles")]
+        public async Task ShouldOpenPage(string url, string expectedTitle)
         {
             using var playwright = await Playwright.CreateAsync();
             var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
@@ -23,10 +27,11 @@ namespace Portal.Test.E2E
             });
 
             var page = await browser.NewPageAsync();
-            await page.GotoAsync(_fixture.BaseUrl);
+            await page.GotoAsync($"{_fixture.BaseUrl}{url}");
 
-            Assert.Contains("Davao Car Rental", await page.TitleAsync());
+            Assert.Contains(expectedTitle, await page.TitleAsync());
         }
+
 
         [Fact]
         public async Task ShouldOpenOurProductsPage()

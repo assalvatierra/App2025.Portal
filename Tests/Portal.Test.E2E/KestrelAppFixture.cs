@@ -35,7 +35,7 @@ namespace Portal.Test.E2E
                                     // Wait until Kestrel is ready
 
             using var http = new HttpClient();
-            var timeout = TimeSpan.FromSeconds(40);
+            var timeout = TimeSpan.FromSeconds(60);
             var start = DateTime.UtcNow;
 
             while (DateTime.UtcNow - start < timeout)
