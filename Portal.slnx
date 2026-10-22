@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Portal.csproj" />
+  <Project Path="Tests/Portal.Test.E2E/Portal.Test.E2E.csproj" Id="eac0ac39-7db5-4667-8390-e7c139f9a440" />
   <Project Path="Tests/Portal.Tests/Portal.Tests.csproj" />
 </Solution>
