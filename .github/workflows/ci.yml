@@ -33,21 +33,26 @@ jobs:
       run: dotnet test Tests/Portal.Tests --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
     - name: Run integration tests
+      env:
+        ASPNETCORE_ENVIRONMENT: Testing
       run: dotnet test Tests/Portal.Test.Integration --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
     - name: Run E2E tests
+      env:
+        ASPNETCORE_ENVIRONMENT: Testing
       run: dotnet test Tests/Portal.Test.E2E --configuration Release --no-build --verbosity normal --maxproc 1 --collect:"XPlat Code Coverage"
 
     - name: Upload coverage reports
-      if: always()
+      if: always() && hashFiles('**/coverage.cobertura.xml') != ''
       uses: codecov/codecov-action@v4
       with:
         files: ./coverage.cobertura.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+        verbose: true
       env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN || '' }}
 
   build-and-push-docker:
     runs-on: ubuntu-latest
