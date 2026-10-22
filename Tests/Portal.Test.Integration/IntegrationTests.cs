@@ -14,9 +14,9 @@ namespace Portal.Test.Integration
 
         [Theory]
         [InlineData("/")]
-        //[InlineData("/Home/OurProducts")]
-        //[InlineData("/Home/OurServices")]
-        //[InlineData("/Home/Articles")]
+        [InlineData("/Home/OurProducts")]
+        [InlineData("/Home/OurServices")]
+        [InlineData("/Home/Articles")]
         public async Task Get_EndpointsReturnSuccessAndCorrectContentType(string url)
         {
             // Arrange
