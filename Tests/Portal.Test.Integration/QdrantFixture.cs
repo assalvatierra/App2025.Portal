@@ -6,20 +6,31 @@ using Testcontainers.Qdrant;
 public class QdrantFixture : IAsyncLifetime
 {
     public QdrantContainer Qdrant { get; private set; }
+    public bool IsDockerAvailable { get; private set; } = true;
 
     public async Task InitializeAsync()
     {
-        Qdrant = new QdrantBuilder()
-            .WithImage("qdrant/qdrant:latest")
-            .WithPortBinding(6333, 6333)   // REST API
-            .WithPortBinding(6334, 6334)   // gRPC
-            .Build();
+        try
+        {
+            Qdrant = new QdrantBuilder()
+                .WithImage("qdrant/qdrant:latest")
+                .WithPortBinding(6333, 6333)   // REST API
+                .WithPortBinding(6334, 6334)   // gRPC
+                .Build();
 
-        await Qdrant.StartAsync();
+            await Qdrant.StartAsync();
+        }
+        catch (DockerUnavailableException)
+        {
+            IsDockerAvailable = false;
+        }
     }
 
     public async Task DisposeAsync() 
     {
-        await Qdrant.StopAsync();
+        if (Qdrant != null && IsDockerAvailable)
+        {
+            await Qdrant.StopAsync();
+        }
     }
 }

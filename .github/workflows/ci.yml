@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     env:
       ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
