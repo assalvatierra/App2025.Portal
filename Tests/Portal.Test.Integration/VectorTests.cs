@@ -13,11 +13,6 @@ public class VectorTests : IClassFixture<QdrantFixture>
     [Fact]
     public async Task ShouldStoreVector()
     {
-        if (!_fixture.IsDockerAvailable)
-        {
-            throw new SkipTestException("Docker is not available. Skipping integration test.");
-        }
-
         var client = new QdrantClient("localhost", 6334);
 
         // Example: create a collection
