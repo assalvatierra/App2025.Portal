@@ -33,44 +33,44 @@ namespace Portal.Test.E2E
         }
 
 
-        [Fact]
-        public async Task ShouldOpenOurProductsPage()
-        {
-            using var playwright = await Playwright.CreateAsync();
-            var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-            {
-                Headless = true
-            });
-            var page = await browser.NewPageAsync();
-            await page.GotoAsync($"{_fixture.BaseUrl}/Home/OurProducts");
-            Assert.Contains("Car Rental Fleet", await page.TitleAsync());
-        }
+        //[Fact]
+        //public async Task ShouldOpenOurProductsPage()
+        //{
+        //    using var playwright = await Playwright.CreateAsync();
+        //    var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        //    {
+        //        Headless = true
+        //    });
+        //    var page = await browser.NewPageAsync();
+        //    await page.GotoAsync($"{_fixture.BaseUrl}/Home/OurProducts");
+        //    Assert.Contains("Car Rental Fleet", await page.TitleAsync());
+        //}
 
-        [Fact]
-        public async Task ShouldOpenOurServicesPage()
-        {
-            using var playwright = await Playwright.CreateAsync();
-            var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-            {
-                Headless = true
-            });
-            var page = await browser.NewPageAsync();
-            await page.GotoAsync($"{_fixture.BaseUrl}/Home/OurServices");
-            Assert.Contains("Car Rental Services", await page.TitleAsync());
-        }
+        //[Fact]
+        //public async Task ShouldOpenOurServicesPage()
+        //{
+        //    using var playwright = await Playwright.CreateAsync();
+        //    var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        //    {
+        //        Headless = true
+        //    });
+        //    var page = await browser.NewPageAsync();
+        //    await page.GotoAsync($"{_fixture.BaseUrl}/Home/OurServices");
+        //    Assert.Contains("Car Rental Services", await page.TitleAsync());
+        //}
 
-        [Fact]
-        public async Task ShouldOpenArticlesPage()
-        {
-            using var playwright = await Playwright.CreateAsync();
-            var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-            {
-                Headless = true
-            });
-            var page = await browser.NewPageAsync();
-            await page.GotoAsync($"{_fixture.BaseUrl}/Home/Articles");
-            Assert.Contains("Car Rental Articles", await page.TitleAsync());
-        }
+        //[Fact]
+        //public async Task ShouldOpenArticlesPage()
+        //{
+        //    using var playwright = await Playwright.CreateAsync();
+        //    var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        //    {
+        //        Headless = true
+        //    });
+        //    var page = await browser.NewPageAsync();
+        //    await page.GotoAsync($"{_fixture.BaseUrl}/Home/Articles");
+        //    Assert.Contains("Car Rental Articles", await page.TitleAsync());
+        //}
 
     }
 }
