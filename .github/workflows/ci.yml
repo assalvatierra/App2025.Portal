@@ -40,7 +40,8 @@ jobs:
     - name: Run E2E tests
       env:
         ASPNETCORE_ENVIRONMENT: Testing
-      run: dotnet test Tests/Portal.Test.E2E --configuration Release --no-build --verbosity normal --maxproc 1 --collect:"XPlat Code Coverage"
+        DOTNET_CLI_MAX_PARALLEL_TESTS: 1
+      run: dotnet test Tests/Portal.Test.E2E --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
     - name: Upload coverage reports
       if: always() && hashFiles('**/coverage.cobertura.xml') != ''
