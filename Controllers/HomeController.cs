@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Erp.Domain.Models;
+using MassTransit;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Portal.Controllers.Attributes;
 using Portal.DBServices;
 using Portal.Helpers;
@@ -6,8 +9,6 @@ using Portal.Models;
 using Portal.Services.VectorSearch;
 using Portal.Services.VectorSearch.Models;
 using System.Diagnostics;
-using Erp.Domain.Models;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace Portal.Controllers
 {
@@ -30,6 +31,7 @@ namespace Portal.Controllers
         private readonly IPortalCategoryServices _portalCategoryService;
         private readonly IPortalContentService _portalContentService;
         private readonly IDistributedCache _cache;
+        private readonly IVectorService _vectorService;
         private readonly IVectorSearchService _vectorSearchService;
         private const string VectorDbCacheKey = "VectorDbScheduleSettings";
         private readonly IPortalConfigurationService _portalConfigurationService;
@@ -39,6 +41,7 @@ namespace Portal.Controllers
             IPortalCategoryServices portalCategoryService,
             IPortalContentService portalContentService,
             IDistributedCache cache,
+            IVectorService vectorService,
             IVectorSearchService vectorSearchService,
             IPortalConfigurationService portalConfigurationService)
         {
@@ -46,6 +49,7 @@ namespace Portal.Controllers
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;
             _cache = cache;
+            _vectorService = vectorService;
             _vectorSearchService = vectorSearchService;
             _portalConfigurationService = portalConfigurationService;
         }
@@ -92,29 +96,10 @@ namespace Portal.Controllers
         public IActionResult VectorDB()
         {
             // Retrieve saved schedule settings from distributed cache
-            var scheduleSettings = GetScheduleSettingsFromCache();
+            var scheduleSettings = this._vectorService.GetScheduleSetting();
 
-            // Map to DTO for view
-            var viewDto = new VectorDbScheduleViewDto();
-
-            if (scheduleSettings != null)
-            {
-                viewDto.HasSchedule = true;
-                viewDto.NextScheduleFormatted = scheduleSettings.NextSchedule.ToString("yyyy-MM-dd HH:mm:ss");
-                viewDto.NextScheduleDateTime = scheduleSettings.NextSchedule;
-                viewDto.IntervalDisplay = $"{scheduleSettings.IntervalValue} {scheduleSettings.IntervalUnit}";
-                viewDto.IntervalValue = scheduleSettings.IntervalValue;
-                viewDto.IntervalUnit = scheduleSettings.IntervalUnit;
-
-                if (scheduleSettings.LastUpdateTriggered.HasValue)
-                {
-                    viewDto.LastUpdateTriggeredFormatted = scheduleSettings.LastUpdateTriggered.Value.ToString("yyyy-MM-dd HH:mm:ss");
-                }
-            }
-            else
-            {
-                viewDto.HasSchedule = false;
-            }
+            // Map to DTO for view using extension method
+            var viewDto = scheduleSettings.MapTo();
 
             return View(viewDto);
         }
@@ -152,7 +137,7 @@ namespace Portal.Controllers
                 };
 
                 // Save to distributed cache only
-                SaveScheduleSettingsToCache(settings);
+                this._vectorService.SetScheduleSetting(settings);
 
                 return new JsonResult(new 
                 { 
@@ -179,7 +164,7 @@ namespace Portal.Controllers
             try
             {
                 // Get current schedule settings from cache
-                var settings = GetScheduleSettingsFromCache();
+                var settings = this._vectorService.GetScheduleSetting();
 
                 if (settings != null)
                 {
@@ -195,7 +180,8 @@ namespace Portal.Controllers
                     };
 
                     // Save updated settings back to cache
-                    SaveScheduleSettingsToCache(settings);
+                    this._vectorService.SetScheduleSetting(settings);
+
 
                     // Upsert vector database collections and sample data
                     await _vectorSearchService.CreateCollection("cars", 1536);

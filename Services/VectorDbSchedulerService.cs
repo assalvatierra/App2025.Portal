@@ -1,6 +1,7 @@
 using Portal.Models;
 using Portal.Helpers;
 using Portal.Services.VectorSearch;
+using Portal.Services.VectorSearch.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;

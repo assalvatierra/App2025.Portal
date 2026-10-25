@@ -138,7 +138,8 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<ISitemapService, SitemapService>();
 builder.Services.AddScoped<ICtaBoxService, CtaBoxService>();
 builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOpenAI>();
-builder.Services.AddHttpClient();
+builder.Services.AddScoped<Portal.Services.VectorSearch.IVectorService, Portal.Services.VectorSearch.VectorService>();
+
 builder.Services.AddScoped<Portal.Services.VectorSearch.IVectorSearchService, Portal.Services.VectorSearch.QdrantVectorSearchService>();
 
 // MessageBroker: MassTransit with RabbitMQ, Azure Service Bus, and In-Memory transport options
@@ -212,6 +213,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddHttpClient();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

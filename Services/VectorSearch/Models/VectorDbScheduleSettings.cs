@@ -1,4 +1,4 @@
-namespace Portal.Models
+namespace Portal.Services.VectorSearch.Models
 {
     /// <summary>
     /// Represents the scheduling configuration for VectorDB collection and index refreshes.
