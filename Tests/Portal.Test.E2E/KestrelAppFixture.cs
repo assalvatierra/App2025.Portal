@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Builder;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -23,19 +24,39 @@ namespace Portal.Test.E2E
                 FileName = "dotnet",
                 Arguments = "run --urls=http://localhost:5000",
                 WorkingDirectory = appProjectAbsolutePath,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+                UseShellExecute = true,
                 CreateNoWindow = true
             };
-
-
             _app = Process.Start(startInfo);
-            await Task.Delay(5000); // Wait for the app to start
+
+            //var startInfo = new ProcessStartInfo
+            //{
+            //    FileName = "dotnet",
+            //    Arguments = $"{appProjectAbsolutePath}/bin/Release/net8.0/YourApp.dll --urls=http://localhost:55006",
+            //    WorkingDirectory = appProjectAbsolutePath,
+            //    RedirectStandardOutput = false,
+            //    RedirectStandardError = false,
+            //    UseShellExecute = true,
+            //    CreateNoWindow = false
+            //};
+            //_app = Process.Start(startInfo);
+
+            //var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+            //{
+            //    ContentRootPath = appProjectAbsolutePath,
+            //    Args = new[] { "--urls=http://localhost:55006" }
+            //});
+            //var app = builder.Build();
+            //await app.StartAsync();
+
+
+            await Task.Delay(10000); // Wait for the app to start
                                     // Wait until Kestrel is ready
 
-            using var http = new HttpClient();
-            var timeout = TimeSpan.FromSeconds(60);
+               using var http = new HttpClient();
+            var timeout = TimeSpan.FromSeconds(120);
             var start = DateTime.UtcNow;
 
             while (DateTime.UtcNow - start < timeout)
@@ -46,7 +67,10 @@ namespace Portal.Test.E2E
                     if (res.IsSuccessStatusCode)
                         return;
                 }
-                catch { }
+                catch(Exception e) 
+                {
+                    Console.WriteLine(e);
+                }
 
                 await Task.Delay(2000);
             }
