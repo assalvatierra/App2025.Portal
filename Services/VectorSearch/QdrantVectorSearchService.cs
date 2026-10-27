@@ -27,18 +27,19 @@ namespace Portal.Services.VectorSearch
             IConfiguration configuration,
             ILogger<QdrantVectorSearchService> logger,
             IHttpClientFactory httpClientFactory,
-            IPortalItemService portalItemService)
+            IPortalItemService portalItemService,
+            QdrantClient client)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _portalItemService = portalItemService;
+            _client = client;
 
-            var host = configuration["VectorDb:Qdrant:Host"] ?? "localhost";
-            var port = configuration.GetValue<int?>("VectorDb:Qdrant:Port") ?? 6334;
-            var https = configuration.GetValue<bool?>("VectorDb:Qdrant:Https") ?? false;
-            var apiKey = configuration["VectorDb:Qdrant:ApiKey"];
-
-            _client = new QdrantClient(host, port, https, apiKey);
+            //var host = configuration["VectorDb:Qdrant:Host"] ?? "localhost";
+            //var port = configuration.GetValue<int?>("VectorDb:Qdrant:Port") ?? 6334;
+            //var https = configuration.GetValue<bool?>("VectorDb:Qdrant:Https") ?? false;
+            //var apiKey = configuration["VectorDb:Qdrant:ApiKey"];
+            //_client = new QdrantClient(host, port, https, apiKey);
 
             _openAiApiKey = configuration["OpenAI:ApiKey"] ?? string.Empty;
             _openAiEndpoint = configuration["VectorDb:EmbeddingEndpoint"]
@@ -56,23 +57,31 @@ namespace Portal.Services.VectorSearch
         /// <inheritdoc />
         public async Task CreateCollection(string collectionName, int vectorSize, CancellationToken cancellationToken = default)
         {
-            var exists = await _client.CollectionExistsAsync(collectionName, cancellationToken);
-
-            if (exists)
+            try
             {
-                _logger.LogInformation("Qdrant collection {CollectionName} already exists. Updating data.", collectionName);
+
+                var exists = await _client.CollectionExistsAsync(collectionName, cancellationToken);
+
+                if (exists)
+                {
+                    _logger.LogInformation("Qdrant collection {CollectionName} already exists. Updating data.", collectionName);
+                }
+                else
+                {
+                    _logger.LogInformation("Creating Qdrant collection {CollectionName} with vector size {VectorSize}.", collectionName, vectorSize);
+                    await this.CreateSampleCollection(_client, collectionName, cancellationToken);
+                }
+
+                // Always upsert sample points (create or update)
+                //await this.UploadSamplePoints(_client, collectionName, cancellationToken);
+                await this.LoadPortalItems(collectionName, cancellationToken);
+
+                _logger.LogInformation("Qdrant collection {CollectionName} with vector size {VectorSize} is ready.", collectionName, vectorSize);
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogInformation("Creating Qdrant collection {CollectionName} with vector size {VectorSize}.", collectionName, vectorSize);
-                await this.CreateSampleCollection(_client, collectionName, cancellationToken);
+                _logger.LogError(ex, "Error creating or updating Qdrant collection {CollectionName}.", collectionName);
             }
-
-            // Always upsert sample points (create or update)
-            //await this.UploadSamplePoints(_client, collectionName, cancellationToken);
-            await this.LoadPortalItems(collectionName, cancellationToken);
-
-            _logger.LogInformation("Qdrant collection {CollectionName} with vector size {VectorSize} is ready.", collectionName, vectorSize);
         }
 
         private async Task LoadPortalItems(string collectionName, CancellationToken cancellationToken = default)

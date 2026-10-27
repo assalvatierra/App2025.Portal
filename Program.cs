@@ -10,6 +10,7 @@ using Portal.Services.MessageBroker;
 using Portal.Services.Observability;
 using Serilog;
 using StackExchange.Redis;
+using Portal.Services.VectorSearch;
 
 // Configure Serilog before building the host
 Log.Logger = new LoggerConfiguration()
@@ -27,93 +28,110 @@ try
     Log.Information("Application starting up");
     var builder = WebApplication.CreateBuilder(args);
 
+    /*
+     * OBSERVABILITY AND MONITORING CONFIGURATION
+     * 
+     */
     // Add OpenTelemetry - must be called before building the app
     builder.AddPortalOpenTelemetry();
 
     // Add services to the container.
     builder.Host.UseSerilog();
 
+
+
+    /*
+     * DATABASE AND IDENTITY CONFIGURATION
+     * 
+     */
     // Configure database context with SQL Server
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(connectionString));
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    // Configure Identity with default settings and require confirmed account
+    builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        .AddEntityFrameworkStores<ApplicationDbContext>();
 
+    // Configure Qdrant vector search service
+    builder.Services.AddQdrant(builder.Configuration);
 
-// Register CacheService with StackExchange.Redis
-// Read Redis configuration from appsettings
-var redisEnabled = builder.Configuration.GetValue<bool>("Caching:Redis:enabled");
+    /*
+     * REDIS AND CACHING CONFIGURATION  
+     * 
+     */
+    // Register CacheService with StackExchange.Redis
+    // Read Redis configuration from appsettings
+    var redisEnabled = builder.Configuration.GetValue<bool>("Caching:Redis:enabled");
 
-if (redisEnabled)
-{
-    var redisHostRaw = builder.Configuration.GetValue<string>("Caching:Redis:https") 
-        ?? throw new InvalidOperationException("Redis host not configured in Caching:Redis:https");
-    var redisPort = builder.Configuration.GetValue<string>("Caching:Redis:port") ?? "6379";
-    var redisToken = builder.Configuration.GetValue<string>("Caching:Redis:token") 
-        ?? throw new InvalidOperationException("Redis token not configured in Caching:Redis:token");
-
-    // Normalize host: remove scheme if the value includes https:// or http://
-    var redisHost = redisHostRaw;
-    if (redisHostRaw.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+    if (redisEnabled)
     {
-        try
+        var redisHostRaw = builder.Configuration.GetValue<string>("Caching:Redis:https") 
+            ?? throw new InvalidOperationException("Redis host not configured in Caching:Redis:https");
+        var redisPort = builder.Configuration.GetValue<string>("Caching:Redis:port") ?? "6379";
+        var redisToken = builder.Configuration.GetValue<string>("Caching:Redis:token") 
+            ?? throw new InvalidOperationException("Redis token not configured in Caching:Redis:token");
+
+        // Normalize host: remove scheme if the value includes https:// or http://
+        var redisHost = redisHostRaw;
+        if (redisHostRaw.StartsWith("http", StringComparison.OrdinalIgnoreCase))
         {
-            redisHost = new Uri(redisHostRaw).Host;
+            try
+            {
+                redisHost = new Uri(redisHostRaw).Host;
+            }
+            catch
+            {
+                // If parsing fails, keep the raw value and let the connection attempt fail gracefully
+                redisHost = redisHostRaw;
+            }
         }
-        catch
+
+        // Read optional connection options from config (fallback to safe defaults)
+        var redisOptions = builder.Configuration.GetValue<string>("Caching:Redis:options")
+            ?? "abortConnect=false,connectTimeout=5000,syncTimeout=5000";
+
+        // Build Redis connection string with authentication and resilience options
+        var redisConnectionString = $"{redisHost}:{redisPort},password={redisToken},ssl=true,{redisOptions}";
+
+        Log.Information("Redis configuration loaded: Host={Host}, Port={Port}, Options={Options}", 
+            redisHost, redisPort, redisOptions);
+
+        builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
-            // If parsing fails, keep the raw value and let the connection attempt fail gracefully
-            redisHost = redisHostRaw;
-        }
+            try
+            {
+                Log.Information("Attempting Redis connection to {Host}:{Port}", redisHost, redisPort);
+                var mux = ConnectionMultiplexer.Connect(redisConnectionString);
+
+                if (mux.IsConnected)
+                {
+                    Log.Information("Redis connected successfully to {Host}:{Port}", redisHost, redisPort);
+                }
+                else
+                {
+                    Log.Warning("Redis multiplexer created but not yet connected to {Host}:{Port}. " +
+                        "Connection will retry in background (abortConnect=false)", redisHost, redisPort);
+                }
+
+                return mux;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to create Redis connection multiplexer for {Host}:{Port}. " + 
+                    "Application will continue but caching will be unavailable until Redis connects.", 
+                    redisHost, redisPort);
+                throw;
+            }
+        });
+        builder.Services.AddScoped<ICache, RedisCache>();
     }
-
-    // Read optional connection options from config (fallback to safe defaults)
-    var redisOptions = builder.Configuration.GetValue<string>("Caching:Redis:options")
-        ?? "abortConnect=false,connectTimeout=5000,syncTimeout=5000";
-
-    // Build Redis connection string with authentication and resilience options
-    var redisConnectionString = $"{redisHost}:{redisPort},password={redisToken},ssl=true,{redisOptions}";
-
-    Log.Information("Redis configuration loaded: Host={Host}, Port={Port}, Options={Options}", 
-        redisHost, redisPort, redisOptions);
-
-    builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    else
     {
-        try
-        {
-            Log.Information("Attempting Redis connection to {Host}:{Port}", redisHost, redisPort);
-            var mux = ConnectionMultiplexer.Connect(redisConnectionString);
-
-            if (mux.IsConnected)
-            {
-                Log.Information("Redis connected successfully to {Host}:{Port}", redisHost, redisPort);
-            }
-            else
-            {
-                Log.Warning("Redis multiplexer created but not yet connected to {Host}:{Port}. " +
-                    "Connection will retry in background (abortConnect=false)", redisHost, redisPort);
-            }
-
-            return mux;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to create Redis connection multiplexer for {Host}:{Port}. " + 
-                "Application will continue but caching will be unavailable until Redis connects.", 
-                redisHost, redisPort);
-            throw;
-        }
-    });
-    builder.Services.AddScoped<ICache, RedisCache>();
-}
-else
-{
-    // Fallback to in-memory cache if Redis is disabled
-    builder.Services.AddSingleton<ICache, InMemoryCache>();
-}
+        // Fallback to in-memory cache if Redis is disabled
+        builder.Services.AddSingleton<ICache, InMemoryCache>();
+    }
 
 // Register RateLimitSettings configuration
 builder.Services.Configure<RateLimitSettings>(builder.Configuration.GetSection("RateLimit"));
@@ -138,8 +156,8 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<ISitemapService, SitemapService>();
 builder.Services.AddScoped<ICtaBoxService, CtaBoxService>();
 builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOpenAI>();
-builder.Services.AddScoped<Portal.Services.VectorSearch.IVectorService, Portal.Services.VectorSearch.VectorService>();
 
+builder.Services.AddScoped<Portal.Services.VectorSearch.IVectorService, Portal.Services.VectorSearch.VectorService>();
 builder.Services.AddScoped<Portal.Services.VectorSearch.IVectorSearchService, Portal.Services.VectorSearch.QdrantVectorSearchService>();
 
 // MessageBroker: MassTransit with RabbitMQ, Azure Service Bus, and In-Memory transport options

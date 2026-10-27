@@ -32,7 +32,15 @@ namespace Portal.Services.MessageBroker
             _logger.LogInformation("Outbox cleanup service started with {RetentionDays} day(s) retention", _settings.RetentionDays);
 
             // Initial delay to avoid running immediately on startup
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Outbox cleanup service is stopping");
+                return;
+            }
 
             while (!stoppingToken.IsCancellationRequested)
             {

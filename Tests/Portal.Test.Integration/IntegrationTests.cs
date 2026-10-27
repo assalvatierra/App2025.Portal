@@ -3,18 +3,24 @@ using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.Text;
 using System.Text.Json;
 using Portal.Models;
+using DotNet.Testcontainers.Containers;
 
 namespace Portal.Test.Integration
 {
-    public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+    /// <summary>
+    /// Integration tests for Portal application with Qdrant TestContainer support.
+    /// Tests run against the full application with an isolated Qdrant vector database container.
+    /// Uses QdrantWebApplicationCompositeFixture which combines Qdrant container lifecycle
+    /// management and web application factory configuration into a single fixture.
+    /// </summary>
+    public class IntegrationTests : IClassFixture<QdrantWebApplicationCompositeFixture>
     {
-        private readonly WebApplicationFactory<Program> _factory;
+        private readonly QdrantWebApplicationCompositeFixture _factory;
 
-        public IntegrationTests(WebApplicationFactory<Program> factory)
+        public IntegrationTests(QdrantWebApplicationCompositeFixture factory)
         {
             _factory = factory;
         }
-
         [Theory]
         [InlineData("/")]
         [InlineData("/Home/OurProducts")]

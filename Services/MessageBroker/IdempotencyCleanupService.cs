@@ -19,7 +19,15 @@ namespace Portal.Services.MessageBroker
             _logger.LogInformation("Idempotency cleanup service started");
 
             // Initial delay to avoid running immediately on startup
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Idempotency cleanup service is stopping");
+                return;
+            }
 
             while (!stoppingToken.IsCancellationRequested)
             {
