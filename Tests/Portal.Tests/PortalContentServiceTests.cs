@@ -243,7 +243,7 @@ namespace Portal.Tests.DBServices
             // Arrange
             _mockContentDbLayer
                 .Setup(x => x.GetByIdAsync(999))
-                .ReturnsAsync((PortalContent)null);
+                .ReturnsAsync((PortalContent?)null);
 
             // Act
             var result = await _service.GetByIdAsync(999);

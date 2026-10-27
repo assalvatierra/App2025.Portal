@@ -85,11 +85,11 @@ namespace Portal.Controllers
             }
             if (contentData != null && !string.IsNullOrWhiteSpace(contentData.SeoData))
             {
-                SeoMetadata seo = System.Text.Json.JsonSerializer.Deserialize<SeoMetadata>(contentData.SeoData);
+                SeoMetadata? seo = System.Text.Json.JsonSerializer.Deserialize<SeoMetadata>(contentData.SeoData??"");
                 if (seo != null)
                 {
-                    ViewBag.SeoTitle = seo.Title ?? content.Name;
-                    ViewBag.SeoDescription = seo.Description ?? content.Name;
+                    ViewBag.SeoTitle = seo.Title ?? content?.Name;
+                    ViewBag.SeoDescription = seo.Description ?? content?.Name;
                     ViewBag.SeoKeywords = seo.Keywords ?? "";
                 }
             }
@@ -124,11 +124,11 @@ namespace Portal.Controllers
             }
             if(contentData != null && !string.IsNullOrWhiteSpace(contentData.SeoData))
             {
-                SeoMetadata seo = System.Text.Json.JsonSerializer.Deserialize<SeoMetadata>(contentData.SeoData);
+                SeoMetadata? seo = System.Text.Json.JsonSerializer.Deserialize<SeoMetadata>(contentData.SeoData??"");
                 if(seo != null)
                 {
-                    ViewBag.SeoTitle = seo.Title?? item.Name;
-                    ViewBag.SeoDescription = seo.Description??item.Description;
+                    ViewBag.SeoTitle = seo.Title?? item?.Name;
+                    ViewBag.SeoDescription = seo.Description??item?.Description;
                     ViewBag.SeoKeywords = seo.Keywords??"";
                 }
             }

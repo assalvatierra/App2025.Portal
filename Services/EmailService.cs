@@ -18,8 +18,8 @@ namespace Portal.Services
             // https://myaccount.google.com/apppasswords
 
             var smtpServer = _configuration["EmailSettings:Host"];
-            var smtpPort = int.Parse(_configuration["EmailSettings:Port"]);
-            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"]);
+            var smtpPort = int.Parse(_configuration["EmailSettings:Port"] ?? "465");
+            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"] ?? "false");
             var fromAddress = _configuration["EmailSettings:FromAddress"];
             var displayName = _configuration["EmailSettings:FromName"];
             var username = _configuration["EmailSettings:UserName"];

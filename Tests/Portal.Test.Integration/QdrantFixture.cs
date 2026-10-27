@@ -14,7 +14,7 @@ namespace Portal.Test.Integration
         /// <summary>
         /// The Qdrant container instance. Null if Docker is unavailable.
         /// </summary>
-        public QdrantContainer Qdrant { get; private set; }
+        public QdrantContainer? Qdrant { get; private set; }
 
         /// <summary>
         /// Indicates whether Docker is available on the system.
@@ -31,7 +31,7 @@ namespace Portal.Test.Integration
         {
             try
             {
-                Qdrant = new QdrantBuilder()
+                Qdrant = new QdrantBuilder("qdrant/qdrant:latest")
                     .WithImage("qdrant/qdrant:latest")
                     .WithPortBinding(6333, 6333)   // REST API
                     .WithPortBinding(6334, 6334)   // gRPC

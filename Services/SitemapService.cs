@@ -111,8 +111,8 @@ namespace Portal.Services
 
             var categories = _categoryServices.GetAllByStatusAsync(categoryStatus);
             var result = categories.Result
-                .Where(c => c.PortalCategory.CategoryType == categoryType)
-                .Select(c => categoryEndpoint + "?category=" + c.PortalCategory.Name)
+                .Where(c => c.PortalCategory?.CategoryType == categoryType)
+                .Select(c => categoryEndpoint + "?category=" + c.PortalCategory?.Name)
                 .ToList();
             return result;
         }
@@ -123,7 +123,7 @@ namespace Portal.Services
 
 
             var contents = _contentService.GetContentsByCategoryAsync(categories, null).Result
-                .Select(c => string.IsNullOrEmpty(c.PageUrl) ? $"/Contents/{GenerateSlug(c.ContentName)}" : c.PageUrl)
+                .Select(c => string.IsNullOrEmpty(c.PageUrl) ? $"/Contents/{GenerateSlug(c.ContentName?? string.Empty)}" : c.PageUrl)
                 .ToList();
 
             return contents;

@@ -162,7 +162,7 @@ namespace Portal.Tests.DBServices
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             _mockDbLayer.Verify(x => x.GetItemsByCategoryAsync(category, type), Times.Once);
         }
 
@@ -278,7 +278,7 @@ namespace Portal.Tests.DBServices
         public async Task AddAsync_ShouldSetCreatedOnToUtcNow()
         {
             // Arrange
-            PortalItem capturedItem = null;
+            PortalItem? capturedItem = null;
             var newItem = new PortalItem { Name = "New Item", CreatedBy = "Test", LastEditBy = "Test" };
             _mockDbLayer.Setup(x => x.AddAsync(It.IsAny<PortalItem>()))
                 .Callback<PortalItem>(item => capturedItem = item)
@@ -304,7 +304,7 @@ namespace Portal.Tests.DBServices
         public async Task UpdateAsync_ShouldUpdateLastEditOnToUtcNow()
         {
             // Arrange
-            PortalItem capturedItem = null;
+            PortalItem? capturedItem = null;
             var itemToUpdate = new PortalItem { Id = 1, Name = "Updated Item", CreatedBy = "Test", LastEditBy = "Test", CreatedOn = DateTime.UtcNow.AddDays(-1) };
             _mockDbLayer.Setup(x => x.UpdateAsync(It.IsAny<PortalItem>()))
                 .Callback<PortalItem>(item => capturedItem = item)

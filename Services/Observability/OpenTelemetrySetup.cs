@@ -75,12 +75,10 @@ namespace Portal.Services.Observability
                                 return message.RequestUri?.AbsolutePath?.Contains("health") != true;
                             };
                         })
-                        .AddEntityFrameworkCoreInstrumentation(opts =>
-                        {
-                            opts.SetDbStatementForText = true;
-                        })
+                        .AddEntityFrameworkCoreInstrumentation()
                         .AddSqlClientInstrumentation(opts =>
                         {
+                            //opts.SetDbStatementForText = true;
                             opts.RecordException = true;
                         })
                         .AddSource("Portal.Services.Observability.PortalActivitySource");

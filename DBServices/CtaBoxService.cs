@@ -13,10 +13,12 @@ namespace Portal.DBServices
         private const string CTA_BOX_CONFIG_NAME = "CtaBox";
 
         private readonly IPortalConfigurationDbLayer _portalConfigurationDbLayer;
+        private readonly ILogger<CtaBoxService> _logger;
 
-        public CtaBoxService(IPortalConfigurationDbLayer portalConfigurationDbLayer)
+        public CtaBoxService(IPortalConfigurationDbLayer portalConfigurationDbLayer, ILogger<CtaBoxService> logger)
         {
             _portalConfigurationDbLayer = portalConfigurationDbLayer;
+            _logger = logger;
         }
 
         /// <summary>
@@ -34,14 +36,14 @@ namespace Portal.DBServices
 
                 if (configs == null || configs.Count == 0)
                 {
-                    return null;
+                    return new CtaBoxViewModel();
                 }
 
                 // Get the first configuration with matching name
                 var config = configs.FirstOrDefault();
                 if (config == null || string.IsNullOrEmpty(config.Settings))
                 {
-                    return null;
+                    return new CtaBoxViewModel();
                 }
 
                 // Deserialize JSON string to CtaBoxViewModel
@@ -51,8 +53,8 @@ namespace Portal.DBServices
             catch (Exception ex)
             {
                 // Log exception if needed
-                // _logger.LogError($"Error retrieving CTA Box configuration: {ex.Message}");
-                return null;
+                _logger.LogError($"Error retrieving CTA Box configuration: {ex.Message}");
+                return new CtaBoxViewModel();
             }
         }
     }

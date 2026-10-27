@@ -93,7 +93,7 @@ namespace Portal.Services.VectorSearch
             var recordTasks = itemDtos.Select(async item =>
             {
                 // Combine description, PortalItem.JsonData, and all PortalItemSpecs.JsonData for embedding
-                var description = $"{item.PortalItem.Name} {item.PortalItem.Description} {item.Title} {item.Description}" ?? "";
+                var description = $"{item.PortalItem?.Name} {item.PortalItem?.Description} {item.Title} {item.Description}" ?? "";
                 var portalItemJsonData = item.PortalItem?.JsonData ?? "";
                 var portalItemSpecsJsonData = string.Join(" ", item.PortalItem?.PortalItemSpecs?.Select(s => s.JsonData ?? "") ?? Enumerable.Empty<string>());
                 var portalItemPricesJsonData = string.Join(" ", item.PortalItem?.PortalItemPrices?.Select(p => p.JsonData ?? "") ?? Enumerable.Empty<string>());
@@ -117,11 +117,11 @@ namespace Portal.Services.VectorSearch
                 {
                     Id = item.PortalItem?.Id.ToString() ?? Guid.NewGuid().ToString(),
                     Vector = vector,
-                    Payload = new Dictionary<string, object>
+                    Payload = new Dictionary<string, object?>
                     {
-                        { "id", item.PortalItem?.Id ?? 0 },
-                        { "name", item.Title ?? "Unknown" },
-                        { "description", item.Description ?? "" }
+                        { "id", item?.PortalItem?.Id ?? 0 },
+                        { "name", item?.Title ?? "Unknown" },
+                        { "description", item?.Description ?? "" }
                     }
                 };
             });
@@ -246,10 +246,10 @@ namespace Portal.Services.VectorSearch
         {
             if (request.Vector == null || request.Vector.Length == 0)
             {
-                request.Vector = await GenerateEmbeddingAsync(request.Query, cancellationToken);
+                request.Vector = await GenerateEmbeddingAsync(request.Query ?? string.Empty, cancellationToken);
             }
 
-            var points = await _client.SearchAsync(
+            var points = await _client.QueryAsync(
                 request.CollectionName,
                 request.Vector,
                 limit: (ulong)request.Limit,
@@ -272,7 +272,7 @@ namespace Portal.Services.VectorSearch
                 {
                     Vectors = new Vectors
                     {
-                        Vector = new Vector { Data = { r.Vector } }
+                        Vector = new Vector { Data = { r.Vector ?? Array.Empty<float>() } }
                     }
                 };
 

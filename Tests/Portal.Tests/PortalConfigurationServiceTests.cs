@@ -163,7 +163,7 @@ namespace Portal.Tests.DBServices
             // Arrange
             _mockConfigDbLayer
                 .Setup(x => x.GetPortalConfigurationByNameAndCodeAsync("Portal", "PORTAL"))
-                .ReturnsAsync((List<PortalConfiguration>)null);
+                .ReturnsAsync((List<PortalConfiguration>?)null);
 
             // Act
             var result = await _service.GetPortalAdminEmail();

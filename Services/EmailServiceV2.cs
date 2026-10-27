@@ -19,8 +19,8 @@ namespace Portal.Services
             // https://myaccount.google.com/apppasswords
 
             var smtpServer = _configuration["EmailSettings:Host"];
-            var smtpPort = int.Parse(_configuration["EmailSettings:Port"]);
-            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"]);
+            var smtpPort = int.Parse(_configuration["EmailSettings:Port"] ?? "465");
+            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"] ?? "false");
             var fromAddress = _configuration["EmailSettings:FromAddress"];
             var displayName = _configuration["EmailSettings:FromName"];
             var username = _configuration["EmailSettings:UserName"];
@@ -120,10 +120,10 @@ namespace Portal.Services
                 }
 
                 // Connect to SMTP server
-                await client.ConnectAsync(smtpServer, smtpPort, secureSocketOptions);
+                await client.ConnectAsync(smtpServer ?? string.Empty, smtpPort, secureSocketOptions);
 
                 // Authenticate
-                await client.AuthenticateAsync(username, password);
+                await client.AuthenticateAsync(username ?? string.Empty, password ?? string.Empty);
 
                 // Send the message
                 await client.SendAsync(message);

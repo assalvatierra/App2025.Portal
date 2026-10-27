@@ -125,7 +125,7 @@ namespace Portal.Tests.DBServices
             // Arrange
             _mockDb
                 .Setup(x => x.GetByIdAsync(999))
-                .ReturnsAsync((PortalItemSpec)null);
+                .ReturnsAsync((PortalItemSpec?)null);
 
             // Act
             var result = await _service.GetByIdAsync(999);

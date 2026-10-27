@@ -29,11 +29,11 @@ namespace Portal.Services.SemanticKernelPlugins
 
             // fetch categories for Product
             var productCategories = categories
-                .Where(c => c.PortalCategory.CategoryType == "Product")
+                .Where(c => c.PortalCategory?.CategoryType == "Product")
                 .Select(c => new
                 {
-                    CategoryName = c.PortalCategory.Name,
-                    CategoryType = c.PortalCategory.CategoryType,
+                    CategoryName = c.PortalCategory?.Name,
+                    CategoryType = c.PortalCategory?.CategoryType,
                     Title = c.Title,
                     Description = c.Description,
                     SeoTitle = c.SeoTitle,
@@ -59,12 +59,12 @@ namespace Portal.Services.SemanticKernelPlugins
 
                 var products = items.Select(p=>
                         new { 
-                            Name = p.PortalItem.Name ,
-                            Description = p.PortalItem.Description,
-                            Title = p.Title,
-                            LongDescription = p.Description,
-                            Specification = p.PortalItem.PortalItemSpecs.Select(s => s.JsonData),
-                            PriceConfiguration = p.PortalItem.PortalItemPrices.Select(s => 
+                            Name = p.PortalItem?.Name ?? string.Empty,
+                            Description = p.PortalItem?.Description ?? string.Empty,
+                            Title = p.Title ?? string.Empty,
+                            LongDescription = p.Description ?? string.Empty,
+                            Specification = p.PortalItem?.PortalItemSpecs?.Select(s => s.JsonData ?? string.Empty),
+                            PriceConfiguration = p.PortalItem?.PortalItemPrices?.Select(s => 
                             new {
                                 Price = s.BasePrice,
                                 Currency = s.BaseCurrency,

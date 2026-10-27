@@ -14,7 +14,7 @@ namespace Portal.Services.VectorSearch.Models
         /// <summary>
         /// The embedding vector representing this record.
         /// </summary>
-        public float[] Vector { get; set; } = Array.Empty<float>();
+        public float[]? Vector { get; set; } = Array.Empty<float>();
 
         /// <summary>
         /// The payload/metadata to store alongside the vector (e.g., source text, category, etc.).

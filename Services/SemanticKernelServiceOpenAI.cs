@@ -77,7 +77,7 @@ namespace Portal.Services
             _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
         }
 
-        public async Task<string> ProcessUserMessageAsync(string userMessage, List<ChatMessage> chatHistory = null)
+        public async Task<string> ProcessUserMessageAsync(string? userMessage, List<ChatMessage>? chatHistory = null)
         {
             try
             {
@@ -100,16 +100,16 @@ Keep responses concise and professional.Maintain a chat friendly format in the r
                     {
                         if (msg.Role?.ToLower() == "user")
                         {
-                            chatHistoryObj.AddUserMessage(msg.Content);
+                            chatHistoryObj.AddUserMessage(msg.Content ?? string.Empty);
                         }
                         else if (msg.Role?.ToLower() == "assistant")
                         {
-                            chatHistoryObj.AddAssistantMessage(msg.Content);
+                            chatHistoryObj.AddAssistantMessage(msg.Content ?? string.Empty);
                         }
                     }
                 }
 
-                chatHistoryObj.AddUserMessage(userMessage);
+                chatHistoryObj.AddUserMessage(userMessage ?? string.Empty);
 
                 // Get response from OpenAI
                 var response = await _chatCompletionService.GetChatMessageContentAsync(

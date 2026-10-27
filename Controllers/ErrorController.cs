@@ -17,7 +17,7 @@ namespace Portal.Controllers
         /// Displays the rate limit exceeded page.
         /// </summary>
         [Route("Error/RateLimitReached")]
-        public IActionResult RateLimitReached(string returnUrl = null, int requestsPerWindow = 10, int windowSeconds = 60)
+        public IActionResult RateLimitReached(string? returnUrl = null, int requestsPerWindow = 10, int windowSeconds = 60)
         {
             try
             {

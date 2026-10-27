@@ -21,7 +21,7 @@ namespace App2025.Portal.Models
             if (string.IsNullOrEmpty(jsonString))
                 return new CtaBoxViewModel();
 
-            return JsonSerializer.Deserialize<CtaBoxViewModel>(jsonString, JsonOptions);
+            return JsonSerializer.Deserialize<CtaBoxViewModel>(jsonString, JsonOptions) ?? new CtaBoxViewModel();
         }
 
         /// <summary>

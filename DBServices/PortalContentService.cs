@@ -66,7 +66,7 @@ namespace Portal.DBServices
             if (bool.Parse(TemporaryContents))
             {
                 var TemporaryServices = _configuration["TemporaryContents:" + type];
-                category = category.Concat(new[] { TemporaryServices }).ToList();
+                category = category.Concat(new[] { TemporaryServices ?? "" }).ToList();
             }
 
             var content = await _portalContentDbLayer.GetContentsByCategoryAsync(category, type);

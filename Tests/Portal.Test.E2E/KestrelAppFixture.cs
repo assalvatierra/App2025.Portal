@@ -15,7 +15,7 @@ namespace Portal.Test.E2E
         {
             // Get the absolute path to the Portal project
             var testAssemblyPath = Path.GetDirectoryName(typeof(KestrelAppFixture).Assembly.Location);
-            var appProjectPath = Path.Combine(testAssemblyPath, "../../../../..");
+            var appProjectPath = Path.Combine(testAssemblyPath??"", "../../../../..");
             var appProjectAbsolutePath = Path.GetFullPath(appProjectPath);
             //var appProjectAbsolutePathtmp = "C:\\Code\\Github-2\\App2025.Portal";
 

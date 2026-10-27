@@ -26,10 +26,10 @@ namespace Portal.DBServices
         public async Task<List<ItemDto>> SearchItemsAsync(SearchDto search)
         {
             var specs = await _dbItemSpecs.GetItemISpecsCriteriaAsync(search);
-            var itemIds = specs.Select(s => (int)s.PortalItemId).Distinct().ToList();
+            List<int> itemIds = specs.Select(s => s.PortalItemId??0).Distinct().ToList();
             //return itemIds;
             //List<int> itemIds = await _dbItemSpecs.GetItemIdsBySpecsCriteriaAsync(search);
-            var items = await _db.SearchItemsAsync(search.searchTerm, itemIds);
+            var items = await _db.SearchItemsAsync(search?.searchTerm ?? "", itemIds);
             return items.Select(item => 
             { 
                 var dto = item.MapToDto();

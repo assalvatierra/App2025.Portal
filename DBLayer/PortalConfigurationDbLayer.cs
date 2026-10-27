@@ -11,7 +11,7 @@ namespace Portal.DBLayer
         {
             _context = context;
         }
-        public async Task<List<PortalConfiguration>> GetPortalConfigurationByNameAndCodeAsync(string name, string code)
+        public async Task<List<PortalConfiguration>?> GetPortalConfigurationByNameAndCodeAsync(string name, string code)
         {
             //return portal configurations that match the name and code
             return await _context.PortalConfiguration

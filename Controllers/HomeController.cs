@@ -14,13 +14,13 @@ namespace Portal.Controllers
 {
     public class HomeConfiguration
     {
-        public List<HomeSection> Sections { get; set; }
+        public List<HomeSection>? Sections { get; set; }
     }
     public class HomeSection
     {
-        public string Section { get; set; }
-        public string Title { get; set; }
-        public string intro { get; set; }
+        public string? Section { get; set; }
+        public string? Title { get; set; }
+        public string? intro { get; set; }
         public bool Enabled { get; set; }
         public int itemsToShow { get; set; } = 0;
     }
@@ -36,7 +36,10 @@ namespace Portal.Controllers
         private const string VectorDbCacheKey = "VectorDbScheduleSettings";
         private readonly IPortalConfigurationService _portalConfigurationService;
 
+        private readonly ILogger<HomeController> _logger;
+
         public HomeController(
+            ILogger<HomeController> logger,
             IPortalItemService portalItemService, 
             IPortalCategoryServices portalCategoryService,
             IPortalContentService portalContentService,
@@ -45,6 +48,7 @@ namespace Portal.Controllers
             IVectorSearchService vectorSearchService,
             IPortalConfigurationService portalConfigurationService)
         {
+            _logger = logger;
             _portalItemService = portalItemService;
             _portalCategoryService = portalCategoryService;
             _portalContentService = portalContentService;
@@ -57,13 +61,13 @@ namespace Portal.Controllers
         public async Task<IActionResult> Index()
         {
             var hpc = await _portalConfigurationService.GetPortalConfigurationByNameAsync("HomePage");
-            PortalConfiguration pc = hpc.FirstOrDefault();
+            PortalConfiguration? pc = hpc?.FirstOrDefault();
             if (pc != null && !string.IsNullOrEmpty(pc.Settings))
             {
                 var homeconfig = System.Text.Json.JsonSerializer.Deserialize<HomeConfiguration>(pc.Settings);
-                ViewBag.HomeSections = homeconfig.Sections.Where(s => s.Enabled).ToList();
+                ViewBag.HomeSections = homeconfig?.Sections?.Where(s => s.Enabled).ToList();
 
-                ViewBag.FeaturedArticlesConfig = homeconfig.Sections.Where(s => s.Section == "FeaturedArticles").FirstOrDefault();
+                ViewBag.FeaturedArticlesConfig = homeconfig?.Sections?.Where(s => s.Section == "FeaturedArticles").FirstOrDefault();
             }
             else
             {
@@ -74,7 +78,7 @@ namespace Portal.Controllers
 
             // fetch categories for Product
             ViewBag.ProductCategories = categories
-                .Where(c => c.PortalCategory.CategoryType == "Product");
+                .Where(c => c?.PortalCategory?.CategoryType == "Product");
 
             ViewBag.ServiceCategories = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, "Service");
             ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "WhyUs" }, "WhyUs");
@@ -308,7 +312,7 @@ namespace Portal.Controllers
                     //results = portalItems ?? new List<ItemDto>();
                     foreach(var iId in itemIds)
                     {
-                        var item = portalItems.Find(p => p.PortalItem.Id == iId);
+                        var item = portalItems.Find(p =>p?.PortalItem?.Id == iId);
                         if (item != null)
                         {
                             results.Add(item);
@@ -569,6 +573,7 @@ namespace Portal.Controllers
             catch (Exception ex)
             {
                 // Log error and return null if cache retrieval fails
+                _logger.LogError(ex, "Error retrieving VectorDB schedule settings from cache.");
                 return null;
             }
         }
@@ -597,6 +602,7 @@ namespace Portal.Controllers
             catch (Exception ex)
             {
                 // Log error but don't throw to avoid interrupting the flow
+                _logger.LogError(ex, "Error saving VectorDB schedule settings to cache.");
             }
         }
 

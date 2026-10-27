@@ -19,7 +19,7 @@ namespace Portal.DBServices
         {
             _portalConfigurationDbLayer = portalConfigurationDbLayer;
         }
-        public async Task<List<PortalConfiguration>> GetPortalConfigurationByNameAsync(string name)
+        public async Task<List<PortalConfiguration>?> GetPortalConfigurationByNameAsync(string name)
         {
             // Call the database layer to get portal configurations by name
             return await _portalConfigurationDbLayer.GetPortalConfigurationByNameAndCodeAsync(name, PORTAL_CODE);
@@ -30,8 +30,8 @@ namespace Portal.DBServices
             var config = this.GetPortalConfigurationByNameAsync(PORTAL_MAIN_CONFIG).Result;
             if (config != null && config.Count > 0)
             {
-                string jsonsetting = config.First().Settings;
-                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonsetting);
+                string? jsonsetting = config.First().Settings;
+                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonsetting ?? "");
                 if (settings != null && settings.ContainsKey(ADMIN_EMAIL))
                 {
                     return Task.FromResult(settings[ADMIN_EMAIL]);

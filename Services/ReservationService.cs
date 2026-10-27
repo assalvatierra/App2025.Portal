@@ -94,27 +94,27 @@ namespace Portal.Services
         public async Task SendInternalReservationNotification(List<PortalReservation> reservations)
         {
             string[] EmailRecipient = Array.Empty<string>();
-            string emailSubject = string.Empty;
-            string emailTitle = string.Empty;
-            string emailMessage = string.Empty;
+            string? emailSubject = string.Empty;
+            string? emailTitle = string.Empty;
+            string? emailMessage = string.Empty;
 
             //get configuration setting value
             var config = _configuration.GetPortalConfigurationByNameAsync("Reservation").Result;
             if(config != null)
             {
-                string jsonsetting = config.First().Settings;
-                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                string? jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting?? string.Empty);
 
-                string notificationEmail = !settings.InternalNotificationEmails.IsNullOrEmpty() ? 
-                                    Regex.Replace(settings.InternalNotificationEmails, @"[\r\n\t]", string.Empty)
+                string notificationEmail = !(settings?.InternalNotificationEmails?? string.Empty).IsNullOrEmpty() ? 
+                                    Regex.Replace(settings?.InternalNotificationEmails?? string.Empty, @"[\r\n\t]", string.Empty)
                                     .Replace("[", string.Empty).Replace("]", string.Empty).Replace("\"", "") : string.Empty;
 
                 EmailRecipient =  notificationEmail.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                    .Select(e => e.Trim()).ToArray();
 
-                emailSubject = !settings.InternalNotificationEmailSubject.IsNullOrEmpty() ? settings.InternalNotificationEmailSubject : "New Reservation";
-                emailTitle = !settings.InternalNotificationEmailTitle.IsNullOrEmpty() ? settings.InternalNotificationEmailTitle : "Reservation";
-                emailMessage = !settings.InternalNotificationEmailMessage.IsNullOrEmpty() ? settings.InternalNotificationEmailMessage : "A new reservation has been made.";
+                emailSubject = !(settings?.InternalNotificationEmailSubject?? string.Empty).IsNullOrEmpty() ? settings?.InternalNotificationEmailSubject : "New Reservation";
+                emailTitle = !(settings?.InternalNotificationEmailTitle?? string.Empty).IsNullOrEmpty() ? settings?.InternalNotificationEmailTitle : "Reservation";
+                emailMessage = !(settings?.InternalNotificationEmailMessage?? string.Empty).IsNullOrEmpty() ? settings?.InternalNotificationEmailMessage : "A new reservation has been made.";
             }
 
             // make list of reservation details
@@ -129,9 +129,9 @@ namespace Portal.Services
                 EmailRecipient,
                 Array.Empty<string>(),
                 Array.Empty<string>(),
-                emailSubject,
-                $"{emailTitle}\n<br>" +
-                $"{emailMessage}\n<br>" +
+                emailSubject ?? "New Reservation",
+                $"{emailTitle ?? "Reservation"}\n<br>" +
+                $"{emailMessage ?? "A new reservation has been made."}\n<br>" +
                 $"{reservationDetails}\n<br>" 
                 );
             }
@@ -169,7 +169,7 @@ namespace Portal.Services
                               "Regards,<br/>Portal Team";
 
                 await _emailService.SendEmailAsync(
-                    new[] { reservation.ContactEmail },
+                    new[] { reservation.ContactEmail ?? string.Empty },
                     Array.Empty<string>(),
                     Array.Empty<string>(),
                     subject,

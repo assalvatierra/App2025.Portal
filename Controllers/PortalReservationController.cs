@@ -143,11 +143,11 @@ namespace Portal.Controllers
 
             ViewBag.Message = "Reservation submitted successfully!";
             var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
-            if(config.Any())
+            if(config != null && config.Any())
             {
-                string jsonsetting = config.First().Settings;
-                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
-                ViewBag.ProceedToPayment = settings.ProceedToPayment != null && bool.TryParse(settings.ProceedToPayment, out var proceed) ? proceed : false;  
+                string? jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting??"");
+                ViewBag.ProceedToPayment = settings?.ProceedToPayment != null && bool.TryParse(settings.ProceedToPayment, out var proceed) ? proceed : false;  
             }
             return View(reservations);
         }
@@ -191,16 +191,16 @@ namespace Portal.Controllers
 
             //get OTP Timeout and MaxAttempts from configuration
             var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
-            if (config.Any())
+            if (config != null && config.Any())
             {
-                string jsonsetting = config.First().Settings;
-                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                string? jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting??"");
                 int otpTimeout = 0;
-                int.TryParse(settings.OtpTimeout, out otpTimeout);
+                int.TryParse(settings?.OtpTimeout, out otpTimeout);
                 otp.Timeout = otpTimeout > 0 ? otpTimeout : 300; // 5 minutes (default)
 
                 int maxAttempts = 0;
-                int.TryParse(settings.OtpMaxAttempts, out maxAttempts);
+                int.TryParse(settings?.OtpMaxAttempts, out maxAttempts);
                 otp.MaxAttempts = maxAttempts > 0 ? maxAttempts : 3; // Default to 3 if not set
             }
 
@@ -212,7 +212,7 @@ namespace Portal.Controllers
 
             // Check if timeout flag is set (OTP expired)
             string timeoutKey = $"OTPTimeout_{id}";
-            string timeoutFlag = HttpContext.Session.GetString(timeoutKey);
+            string? timeoutFlag = HttpContext.Session.GetString(timeoutKey);
             if (!string.IsNullOrEmpty(timeoutFlag) && timeoutFlag == "true")
             {
                 otp.Message = "OTP Verification Failed - Maximum timeout exceeded. Your reservation could not be verified and will be discarded.";
@@ -227,7 +227,7 @@ namespace Portal.Controllers
 
             // Check if max attempts already exceeded
             string attemptKey = $"OTPAttempts_{id}";
-            string attemptCountStr = HttpContext.Session.GetString(attemptKey);
+            string? attemptCountStr = HttpContext.Session.GetString(attemptKey);
             if (int.TryParse(attemptCountStr, out int attempts) && attempts >= otp.MaxAttempts)
             {
                 otp.Message = $"Maximum OTP attempts ({otp.MaxAttempts}) exceeded. Your reservation could not be verified and will be discarded.";
@@ -273,14 +273,14 @@ namespace Portal.Controllers
             // Get max attempts from configuration
             int maxAttempts = 3; // Default
             var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
-            if (config.Any())
+            if (config != null && config.Any())
             {
-                string jsonsetting = config.First().Settings;
-                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                string? jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting??"");
                 int configMaxAttempts = 0;
                 if (settings != null)
                 {
-                    int.TryParse(settings.OtpMaxAttempts, out configMaxAttempts);
+                    int.TryParse(settings?.OtpMaxAttempts, out configMaxAttempts);
                 }
                 maxAttempts = configMaxAttempts > 0 ? configMaxAttempts : 3;
             }
@@ -353,14 +353,14 @@ namespace Portal.Controllers
             // Get max attempts from configuration
             int maxAttempts = 3; // Default
             var config = await _Configuration.GetPortalConfigurationByNameAsync("Reservation");
-            if (config.Any())
+            if (config != null && config.Any())
             {
-                string jsonsetting = config.First().Settings;
-                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting);
+                string? jsonsetting = config.First().Settings;
+                var settings = JsonSerializer.Deserialize<InternalEmailNotificationJsonModel>(jsonsetting??"");
                 int configMaxAttempts = 0;
                 if (settings != null)
                 {
-                    int.TryParse(settings.OtpMaxAttempts, out configMaxAttempts);
+                    int.TryParse(settings?.OtpMaxAttempts, out configMaxAttempts);
                 }
                 maxAttempts = configMaxAttempts > 0 ? configMaxAttempts : 3;
             }

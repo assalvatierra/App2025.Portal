@@ -4,7 +4,7 @@ namespace Portal.Services
 {
     public interface ISemanticKernelService
     {
-        Task<string> ProcessUserMessageAsync(string userMessage, List<ChatMessage> chatHistory = null);
+        Task<string> ProcessUserMessageAsync(string? userMessage, List<ChatMessage>? chatHistory = null);
     }
 
 }

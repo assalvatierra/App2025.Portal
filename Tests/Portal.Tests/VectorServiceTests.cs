@@ -3,6 +3,7 @@ using Portal.Models;
 using Portal.Services.VectorSearch;
 using Portal.Services.VectorSearch.Models;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using Xunit;
 
@@ -17,7 +18,8 @@ namespace Portal.Tests.Services.VectorSearch
         public VectorServiceTests()
         {
             _mockCache = new Mock<IDistributedCache>();
-            _service = new VectorService(_mockCache.Object);
+            var mockLogger = new Mock<ILogger<VectorService>>();
+            _service = new VectorService(_mockCache.Object, mockLogger.Object);
         }
 
         #region GetScheduleSetting Tests
@@ -61,7 +63,7 @@ namespace Portal.Tests.Services.VectorSearch
             // Arrange
             _mockCache
                 .Setup(x => x.Get(VectorDbCacheKey))
-                .Returns((byte[])null);
+                .Returns((byte[]?)null);
 
             // Act
             var result = _service.GetScheduleSetting();
@@ -227,7 +229,7 @@ namespace Portal.Tests.Services.VectorSearch
                 LastUpdateTriggered = new DateTime(2024, 12, 10, 10, 15, 0)
             };
 
-            byte[] capturedBytes = null;
+            byte[]? capturedBytes = null;
 
             _mockCache
                 .Setup(x => x.Set(
@@ -248,11 +250,11 @@ namespace Portal.Tests.Services.VectorSearch
 
             // Verify serialized and deserialized data matches
             var deserializedSettings = JsonSerializer.Deserialize<VectorDbScheduleSettings>(capturedBytes);
-            Assert.Equal(settings.NextSchedule, deserializedSettings.NextSchedule);
-            Assert.Equal(settings.IntervalValue, deserializedSettings.IntervalValue);
-            Assert.Equal(settings.IntervalUnit, deserializedSettings.IntervalUnit);
-            Assert.Equal(settings.LastModified, deserializedSettings.LastModified);
-            Assert.Equal(settings.LastUpdateTriggered, deserializedSettings.LastUpdateTriggered);
+            Assert.Equal(settings.NextSchedule, deserializedSettings?.NextSchedule);
+            Assert.Equal(settings.IntervalValue, deserializedSettings?.IntervalValue);
+            Assert.Equal(settings.IntervalUnit, deserializedSettings?.IntervalUnit);
+            Assert.Equal(settings.LastModified, deserializedSettings?.LastModified);
+            Assert.Equal(settings.LastUpdateTriggered, deserializedSettings?.LastUpdateTriggered);
         }
 
         #endregion
@@ -272,7 +274,7 @@ namespace Portal.Tests.Services.VectorSearch
                 LastUpdateTriggered = null
             };
 
-            byte[] serializedData = null;
+            byte[]? serializedData = null;
 
             // Setup: Capture the data when Set is called
             _mockCache

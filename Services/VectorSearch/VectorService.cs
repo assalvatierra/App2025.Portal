@@ -7,12 +7,15 @@ namespace Portal.Services.VectorSearch
     {
         private const string VectorDbCacheKey = "VectorDbScheduleSettings";
         private readonly IDistributedCache _cache;
+        private readonly ILogger<VectorService> _logger;
 
         public VectorService(
-                        IDistributedCache cache
+                        IDistributedCache cache,
+                        ILogger<VectorService> logger
             )
         {
             _cache = cache;
+            _logger = logger;
         }
 
         public VectorDbScheduleSettings? GetScheduleSetting()
@@ -33,6 +36,7 @@ namespace Portal.Services.VectorSearch
             catch (Exception ex)
             {
                 // Log error and return null if cache retrieval fails
+                _logger.LogError(ex, "Failed to retrieve VectorDbScheduleSettings from cache.");
                 return null;
             }
         }
@@ -49,6 +53,7 @@ namespace Portal.Services.VectorSearch
             catch (Exception ex)
             {
                 // Log error and return 0 if cache update fails
+                _logger.LogError(ex, "Failed to set VectorDbScheduleSettings in cache.");
                 return 0;
             }
         }

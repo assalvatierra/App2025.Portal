@@ -16,7 +16,7 @@ namespace Portal.Test.Integration
     /// </summary>
     public class QdrantWebApplicationCompositeFixture : WebApplicationFactory<Program>, IAsyncLifetime
     {
-        private QdrantContainer _qdrant;
+        private QdrantContainer? _qdrant;
         private string _qdrantEndpoint = "localhost:6334";
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Portal.Test.Integration
         {
             try
             {
-                _qdrant = new QdrantBuilder()
+                _qdrant = new QdrantBuilder("qdrant/qdrant:latest")
                     .WithImage("qdrant/qdrant:latest")
                     .WithPortBinding(6333, 6333)   // REST API
                     .WithPortBinding(6334, 6334)   // gRPC

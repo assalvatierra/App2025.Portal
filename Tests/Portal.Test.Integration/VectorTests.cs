@@ -30,7 +30,7 @@ namespace Portal.Test.Integration
             }
         });
 
-            var result = await client.SearchAsync("Sample", new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
+            var result = await client.QueryAsync("Sample", new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
 
             Assert.NotEmpty(result);
         }

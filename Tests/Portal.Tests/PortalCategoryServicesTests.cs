@@ -33,7 +33,7 @@ namespace Portal.Tests.DBServices
 
             _mockCache
                 .Setup(x => x.GetAsync<List<ItemCategoryDTO>>(It.IsAny<string>()))
-                .ReturnsAsync((List<ItemCategoryDTO>)null);
+                .ReturnsAsync((List<ItemCategoryDTO>?)null);
 
             _mockDbLayer
                 .Setup(x => x.GetAllByStatusAsync("Active"))
@@ -88,7 +88,7 @@ namespace Portal.Tests.DBServices
 
             _mockCache
                 .Setup(x => x.GetAsync<List<ItemCategoryDTO>>(It.IsAny<string>()))
-                .ReturnsAsync((List<ItemCategoryDTO>)null);
+                .ReturnsAsync((List<ItemCategoryDTO>?)null);
 
             _mockDbLayer
                 .Setup(x => x.GetAllByStatusAsync(null))
@@ -113,7 +113,7 @@ namespace Portal.Tests.DBServices
             // Arrange
             _mockCache
                 .Setup(x => x.GetAsync<List<ItemCategoryDTO>>(It.IsAny<string>()))
-                .ReturnsAsync((List<ItemCategoryDTO>)null);
+                .ReturnsAsync((List<ItemCategoryDTO>?)null);
 
             _mockDbLayer
                 .Setup(x => x.GetAllByStatusAsync("Inactive"))
@@ -137,7 +137,7 @@ namespace Portal.Tests.DBServices
             // Arrange
             _mockDbLayer
                 .Setup(x => x.GetByIdAsync(999))
-                .ReturnsAsync((PortalCategory)null);
+                .ReturnsAsync((PortalCategory?)null);
 
             // Act
             var result = await _service.GetByIdAsync(999);
@@ -217,7 +217,7 @@ namespace Portal.Tests.DBServices
 
             _mockCache
                 .Setup(x => x.GetAsync<List<ItemCategoryDTO>>(It.IsAny<string>()))
-                .ReturnsAsync((List<ItemCategoryDTO>)null);
+                .ReturnsAsync((List<ItemCategoryDTO>?)null);
 
             _mockDbLayer
                 .Setup(x => x.GetByTypeAsync("Type1"))
@@ -261,7 +261,7 @@ namespace Portal.Tests.DBServices
             // Arrange
             _mockCache
                 .Setup(x => x.GetAsync<List<ItemCategoryDTO>>(It.IsAny<string>()))
-                .ReturnsAsync((List<ItemCategoryDTO>)null);
+                .ReturnsAsync((List<ItemCategoryDTO>?)null);
 
             _mockDbLayer
                 .Setup(x => x.GetByTypeAsync("NonexistentType"))
