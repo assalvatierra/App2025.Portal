@@ -18,10 +18,10 @@ namespace Portal.Test.Integration
             var client = new QdrantClient("localhost", 6334);
 
             // Example: create a collection
-            await client.CreateCollectionAsync("cars", new VectorParams { Size = 4, Distance = Distance.Cosine });
+            await client.CreateCollectionAsync("Sample", new VectorParams { Size = 4, Distance = Distance.Cosine });
 
             // Insert a vector
-            await client.UpsertAsync("cars", new[]
+            await client.UpsertAsync("Sample", new[]
             {
             new PointStruct
             {
@@ -30,7 +30,7 @@ namespace Portal.Test.Integration
             }
         });
 
-            var result = await client.SearchAsync("cars", new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
+            var result = await client.SearchAsync("Sample", new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
 
             Assert.NotEmpty(result);
         }
