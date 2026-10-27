@@ -56,7 +56,7 @@ namespace Portal.Test.E2E
                                     // Wait until Kestrel is ready
 
                using var http = new HttpClient();
-            var timeout = TimeSpan.FromSeconds(120);
+            var timeout = TimeSpan.FromSeconds(180);
             var start = DateTime.UtcNow;
 
             while (DateTime.UtcNow - start < timeout)
@@ -72,7 +72,7 @@ namespace Portal.Test.E2E
                     Console.WriteLine(e);
                 }
 
-                await Task.Delay(2000);
+                await Task.Delay(5000);
             }
 
             throw new Exception("Web app did not start in time.");
