@@ -1,4 +1,6 @@
 using DotNet.Testcontainers.Containers;
+using Qdrant.Client;
+using Qdrant.Client.Grpc;
 
 namespace Portal.Test.Integration
 {
@@ -270,5 +272,33 @@ namespace Portal.Test.Integration
                 Assert.Fail($"Could not reach Qdrant Collections API at {collectionsApiUrl}: {ex.Message}");
             }
         }
+
+        [Fact]
+        public async Task ShouldStoreVector()
+        {
+            var qdrantContainer = _qdrantFixture.Qdrant;
+
+            var client = new QdrantClient(qdrantContainer.Hostname, qdrantContainer.GetMappedPublicPort(6334));
+
+            // Example: create a collection
+            await client.CreateCollectionAsync("Sample", new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+            // Insert a vector
+            await client.UpsertAsync("Sample", new[]
+            {
+            new PointStruct
+            {
+                Id = 1,
+                Vectors = new float[] { 0.1f, 0.2f, 0.3f, 0.4f }
+            }
+        });
+
+            var result = await client.QueryAsync("Sample", new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
+
+            Assert.NotEmpty(result);
+        }
+
+
+
     }
 }

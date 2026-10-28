@@ -26,7 +26,7 @@ namespace Portal.Test.E2E
                 WorkingDirectory = appProjectAbsolutePath,
                 RedirectStandardOutput = false,
                 RedirectStandardError = false,
-                UseShellExecute = true,
+                UseShellExecute = false,
                 CreateNoWindow = true
             };
             _app = Process.Start(startInfo);
