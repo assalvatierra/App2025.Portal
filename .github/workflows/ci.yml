@@ -44,7 +44,7 @@ jobs:
       env:
         ASPNETCORE_ENVIRONMENT: Testing
         DOTNET_CLI_MAX_PARALLEL_TESTS: 1
-      run: dotnet test Tests/Portal.Test.E2E --configuration Testing --verbosity normal --collect:"XPlat Code Coverage"
+      run: dotnet test Tests/Portal.Test.E2E/Portal.Test.E2E.csproj --logger "console;verbosity=detailed"
 
     - name: Upload coverage reports
       if: always() && hashFiles('**/coverage.cobertura.xml') != ''
