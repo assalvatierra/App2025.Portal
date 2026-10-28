@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ namespace Portal.Test.E2E
             var startInfo = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = "run --no-build --urls=http://localhost:5000",
+                Arguments = "run --urls=http://localhost:5000",
                 WorkingDirectory = appProjectAbsolutePath,
                 RedirectStandardOutput = false,
                 RedirectStandardError = false,
