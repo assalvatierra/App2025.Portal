@@ -27,15 +27,15 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Testing --no-restore
 
     - name: Run unit tests
-      run: dotnet test Tests/Portal.Tests --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+      run: dotnet test Tests/Portal.Tests --configuration Testing --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
     - name: Run integration tests
       env:
         ASPNETCORE_ENVIRONMENT: Testing
-      run: dotnet test Tests/Portal.Test.Integration --configuration Testing --verbosity normal --collect:"XPlat Code Coverage"
+      run: dotnet test Tests/Portal.Test.Integration --configuration Testing --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
     - name: Install Playwright browsers
       run: dotnet tool install -g Microsoft.Playwright.CLI && playwright install
@@ -44,7 +44,7 @@ jobs:
       env:
         ASPNETCORE_ENVIRONMENT: Testing
         DOTNET_CLI_MAX_PARALLEL_TESTS: 1
-      run: dotnet test Tests/Portal.Test.E2E/Portal.Test.E2E.csproj --logger "console;verbosity=detailed"
+      run: dotnet test Tests/Portal.Test.E2E/Portal.Test.E2E.csproj --no-build --logger "console;verbosity=detailed"
 
     - name: Upload coverage reports
       if: always() && hashFiles('**/coverage.cobertura.xml') != ''

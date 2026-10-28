@@ -52,11 +52,11 @@ namespace Portal.Test.E2E
             //await app.StartAsync();
 
 
-            await Task.Delay(30000); // Wait for the app to start
+            await Task.Delay(5000); // Wait for the app to start
                                     // Wait until Kestrel is ready
 
                using var http = new HttpClient();
-            var timeout = TimeSpan.FromSeconds(600);
+            var timeout = TimeSpan.FromSeconds(90);
             var start = DateTime.UtcNow;
 
             while (DateTime.UtcNow - start < timeout)
