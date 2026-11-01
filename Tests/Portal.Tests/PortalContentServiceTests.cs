@@ -3,9 +3,9 @@ using Portal.DBLayer;
 using Portal.DBServices;
 using Erp.Domain.Models;
 using Portal.Models;
-using Portal.Services;
 using Xunit;
 using Microsoft.Extensions.Configuration;
+using Portal.Services.Caching;
 
 namespace Portal.Tests.DBServices
 {

@@ -1,4 +1,4 @@
-﻿namespace Portal.Services
+﻿namespace Portal.Services.Caching
 {
     public interface ICache
     {

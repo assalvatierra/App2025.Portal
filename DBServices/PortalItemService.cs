@@ -1,7 +1,7 @@
 using Erp.Domain.Models;
 using Portal.DBLayer;
 using Portal.Models;
-using Portal.Services;
+using Portal.Services.Caching;
 
 namespace Portal.DBServices
 {

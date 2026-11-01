@@ -2,7 +2,7 @@
 using System.Text.Json;
 
 
-namespace Portal.Services
+namespace Portal.Services.Caching
 {
 
     public class RedisCache : ICache

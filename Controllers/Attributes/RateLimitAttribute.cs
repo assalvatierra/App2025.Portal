@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Portal.Services;
+using Portal.Services.Caching;
 
 namespace Portal.Controllers.Attributes
 {

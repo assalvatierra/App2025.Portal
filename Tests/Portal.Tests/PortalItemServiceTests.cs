@@ -4,7 +4,7 @@ using Erp.Domain.Models;
 using Portal.DBLayer;
 using Portal.DBServices;
 using Portal.Models;
-using Portal.Services;
+using Portal.Services.Caching;
 
 namespace Portal.Tests.DBServices
 {
