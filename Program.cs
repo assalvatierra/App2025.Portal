@@ -54,12 +54,16 @@ try
     builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
+
+    /*
+     * VECTOR DATABASE (Qdrant) CONFIGURATION
+     */
     // Configure Qdrant vector search service
     builder.Services.AddQdrant(builder.Configuration);
 
+
     /*
      * REDIS AND CACHING CONFIGURATION  
-     * 
      */
     // Register CacheService with StackExchange.Redis
     // Read Redis configuration from appsettings
