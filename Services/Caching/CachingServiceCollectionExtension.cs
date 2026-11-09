@@ -32,6 +32,7 @@ public static class CachingServiceCollectionExtension
             var redisHostRaw = configuration.GetValue<string>("Caching:Redis:https") 
                 ?? throw new InvalidOperationException("Redis host not configured in Caching:Redis:https");
             var redisPort = configuration.GetValue<string>("Caching:Redis:port") ?? "6379";
+            var redisSSL = configuration.GetValue<string>("Caching:Redis:ssl") ?? "false";
             var redisToken = configuration.GetValue<string>("Caching:Redis:token") 
                 ?? throw new InvalidOperationException("Redis token not configured in Caching:Redis:token");
 
@@ -55,7 +56,7 @@ public static class CachingServiceCollectionExtension
                 ?? "abortConnect=false,connectTimeout=5000,syncTimeout=5000";
 
             // Build Redis connection string with authentication and resilience options
-            var redisConnectionString = $"{redisHost}:{redisPort},password={redisToken},ssl=true,{redisOptions}";
+            var redisConnectionString = $"{redisHost}:{redisPort},password={redisToken},ssl={redisSSL},{redisOptions}";
 
             Log.Information("Redis configuration loaded: Host={Host}, Port={Port}, Options={Options}", 
                 redisHost, redisPort, redisOptions);
