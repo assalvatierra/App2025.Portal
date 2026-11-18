@@ -1,4 +1,4 @@
-﻿namespace Portal.ViewModels
+﻿namespace Portal.Models
 {
     public class OTPViewModel
     {

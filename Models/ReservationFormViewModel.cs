@@ -1,7 +1,6 @@
 using Erp.Domain.Models;
-using Portal.Models;
 
-namespace Portal.ViewModels
+namespace Portal.Models
 {
     public class ReservationFormViewModel
     {

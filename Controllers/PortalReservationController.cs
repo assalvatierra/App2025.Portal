@@ -8,7 +8,6 @@ using Portal.Models;
 using Portal.Services;
 using Portal.Services.MessageBroker;
 using Portal.Services.MessageBroker.Events;
-using Portal.ViewModels;
 using System.Text.Json;
 using static System.Net.WebRequestMethods;
 using Portal.Controllers.Attributes;

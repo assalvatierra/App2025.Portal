@@ -53,6 +53,7 @@
 
   <ItemGroup>
     <Folder Include="instructions\Docker\" />
+    <Folder Include="ViewModels\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
