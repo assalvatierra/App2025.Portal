@@ -13,23 +13,23 @@ namespace Portal.Services.MessageBroker
                 x.AddConsumer<BrokerMessageConsumer>();
 
                 // === RABBITMQ CONFIGURATION (ACTIVE) ===
-                var rabbitMqHost = configuration["MessageBroker:RabbitMQ:Host"]
-                    ?? throw new InvalidOperationException("RabbitMQ host not configured. Set MessageBroker:RabbitMQ:Host in appsettings.");
-                var rabbitMqPort = configuration.GetValue<int>("MessageBroker:RabbitMQ:Port", 5672);
-                var rabbitMqUsername = configuration["MessageBroker:RabbitMQ:Username"]
-                    ?? throw new InvalidOperationException("RabbitMQ username not configured. Set MessageBroker:RabbitMQ:Username in appsettings.");
-                var rabbitMqPassword = configuration["MessageBroker:RabbitMQ:Password"]
-                    ?? throw new InvalidOperationException("RabbitMQ password not configured. Set MessageBroker:RabbitMQ:Password in appsettings.");
-                var rabbitMqVirtualHost = configuration["MessageBroker:RabbitMQ:VirtualHost"]
-                    ?? throw new InvalidOperationException("RabbitMQ virtual host not configured. Set MessageBroker:RabbitMQ:VirtualHost in appsettings.");
-                var useSsl = configuration.GetValue<bool>("MessageBroker:RabbitMQ:UseSsl", true);
+                //var rabbitMqHost = configuration["MessageBroker:RabbitMQ:Host"]
+                //    ?? throw new InvalidOperationException("RabbitMQ host not configured. Set MessageBroker:RabbitMQ:Host in appsettings.");
+                //var rabbitMqPort = configuration.GetValue<int>("MessageBroker:RabbitMQ:Port", 5672);
+                //var rabbitMqUsername = configuration["MessageBroker:RabbitMQ:Username"]
+                //    ?? throw new InvalidOperationException("RabbitMQ username not configured. Set MessageBroker:RabbitMQ:Username in appsettings.");
+                //var rabbitMqPassword = configuration["MessageBroker:RabbitMQ:Password"]
+                //    ?? throw new InvalidOperationException("RabbitMQ password not configured. Set MessageBroker:RabbitMQ:Password in appsettings.");
+                //var rabbitMqVirtualHost = configuration["MessageBroker:RabbitMQ:VirtualHost"]
+                //    ?? throw new InvalidOperationException("RabbitMQ virtual host not configured. Set MessageBroker:RabbitMQ:VirtualHost in appsettings.");
+                //var useSsl = configuration.GetValue<bool>("MessageBroker:RabbitMQ:UseSsl", true);
 
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(new Uri($"amqps://{rabbitMqUsername}:{rabbitMqPassword}@{rabbitMqHost}:{rabbitMqPort}/{rabbitMqVirtualHost}"));
+                //x.UsingRabbitMq((context, cfg) =>
+                //{
+                //    cfg.Host(new Uri($"amqps://{rabbitMqUsername}:{rabbitMqPassword}@{rabbitMqHost}:{rabbitMqPort}/{rabbitMqVirtualHost}"));
 
-                    cfg.ConfigureEndpoints(context);
-                });
+                //    cfg.ConfigureEndpoints(context);
+                //});
 
                 // === AZURE SERVICE BUS CONFIGURATION (COMMENTED OUT) ===
                 //var serviceBusConnectionString = configuration.GetConnectionString("AzureServiceBus")
@@ -46,7 +46,7 @@ namespace Portal.Services.MessageBroker
                 //});
 
                 // === IN-MEMORY CONFIGURATION (COMMENTED OUT) ===
-                //x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
             });
 
             services.AddMessageConsumers();
