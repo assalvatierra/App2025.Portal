@@ -4,18 +4,22 @@ using Portal.DBServices;
 using Erp.Domain.Models;
 using Xunit;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace Portal.Tests.DBServices
 {
     public class PortalConfigurationServiceTests
     {
         private readonly Mock<IPortalConfigurationDbLayer> _mockConfigDbLayer;
+        private readonly Mock<IConfiguration> _mockConfiguration;
         private readonly PortalConfigurationService _service;
 
         public PortalConfigurationServiceTests()
         {
             _mockConfigDbLayer = new Mock<IPortalConfigurationDbLayer>();
-            _service = new PortalConfigurationService(_mockConfigDbLayer.Object);
+            _mockConfiguration = new Mock<IConfiguration>();
+            _mockConfiguration.Setup(c => c.GetSection(It.IsAny<string>())).Returns(new Mock<IConfigurationSection>().Object);
+            _service = new PortalConfigurationService(_mockConfigDbLayer.Object, _mockConfiguration.Object);
         }
 
         [Fact]
