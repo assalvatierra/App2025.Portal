@@ -24,11 +24,11 @@ namespace Portal.Controllers
     {
         public string? Section { get; set; }
         public string? Title { get; set; }
-        public string? intro { get; set; }
+        public string? Intro { get; set; }
         public bool Enabled { get; set; }
         public int itemsToShow { get; set; } = 0;
     }
-
+    
     public class HomeController : Controller
     {
         private readonly IPortalItemService _portalItemService;

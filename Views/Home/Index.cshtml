@@ -5,17 +5,22 @@
 @{
     ViewData["Title"] = ViewBag.Title ?? "Portal";
     ViewData["Description"] = ViewBag.Description ?? "Portal Description";
-    var searchSettings = Configuration.GetSection("SearchSettings");
-    var enableRegularSearch = searchSettings.GetValue<bool>("EnableRegularSearch", true);
-    var enableVectorSearch = searchSettings.GetValue<bool>("EnableVectorSearch", true);
-    var defaultSearchType = searchSettings.GetValue<string>("DefaultSearchType", "regular");
-    
+
     var sections = ViewBag.HomeSections as List<HomeSection>;
     var hasProductCategoriesSection = sections?.Any(s => s.Section == "ProductCategories") ?? false;
     var hasServicesSection = sections?.Any(s => s.Section == "Services") ?? false;
     var hasWhyusSection = sections?.Any(s => s.Section == "WhyUs") ?? false;
     var hasFeaturedArticlesSection = sections?.Any(s => s.Section == "FeaturedArticles") ?? false;
     var hasFaqSection = sections?.Any(s => s.Section == "Faq") ?? false;
+    var hasRegularSearchSection = sections?.Any(s => s.Section == "RegularSearch") ?? false;
+    var hasVectorSearchSection = sections?.Any(s => s.Section == "VectorSearch") ?? false;
+
+    var regularSearchSection = sections?.FirstOrDefault(s => s.Section == "RegularSearch");
+    var vectorSearchSection = sections?.FirstOrDefault(s => s.Section == "VectorSearch");
+    var productCategoriesSection = sections?.FirstOrDefault(s => s.Section == "ProductCategories");
+    var servicesSection = sections?.FirstOrDefault(s => s.Section == "Services");
+    var whyUsSection = sections?.FirstOrDefault(s => s.Section == "WhyUs");
+    var featuredArticlesSection = sections?.FirstOrDefault(s => s.Section == "FeaturedArticles");
 }
 
 @* Include the Compare Toast Component *@
@@ -34,11 +39,11 @@
         <div class="booking-widget-box" aria-label="Car Rental Reservation Form">
 
             <!-- ========== SEARCH OPTION 1: Regular Text Match Search ========== -->
-            @if (enableRegularSearch)
+            @if (hasRegularSearchSection)
             {
                 <div class="search-section">
-                    <h3 class="search-section-title">Search by Type, Model, or Manufacturer</h3>
-                    <p class="search-section-description">Use traditional text search to find vehicles by exact specifications.</p>
+                    <h3 class="search-section-title">@(regularSearchSection?.Title ?? "Search by Type, Model, or Manufacturer")</h3>
+                    <p class="search-section-description">@(regularSearchSection?.Intro ?? "Use traditional text search to find vehicles by exact specifications.")</p>
                     <form asp-controller="Home" asp-action="SearchItems" method="get" class="search-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -83,11 +88,11 @@
             }
 
             <!-- ========== SEARCH OPTION 2: AI-Vector Search ========== -->
-            @if (enableVectorSearch)
+            @if (hasVectorSearchSection)
             {
                 <div class="search-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #ddd;">
-                    <h3 class="search-section-title">AI-Powered Semantic Search</h3>
-                    <p class="search-section-description">Search by vehicle features, style, or description using artificial intelligence.</p>
+                    <h3 class="search-section-title">@(vectorSearchSection?.Title ?? "Semantic Search")</h3>
+                    <p class="search-section-description">@(vectorSearchSection?.Intro ?? "Search Semantically")</p>
                     <form asp-controller="Home" asp-action="SearchByVector" method="get" class="search-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -131,8 +136,8 @@
      ========================================== -->
 @if(hasProductCategoriesSection){
     <section class="seo-fleet-section" aria-labelledby="fleet-heading">
-        <h2 id="fleet-heading">Explore Our Diverse Rental Car Fleet</h2>
-        <p class="section-intro">Select from our wide range of reliable vehicles tailored to fit your specific travel needs and budget constraints.</p>
+        <h2 id="fleet-heading">@(productCategoriesSection?.Title ?? "Explore Our Diverse Rental Car Fleet")</h2>
+        <p class="section-intro">@(productCategoriesSection?.Intro ?? "Select from our wide range of reliable vehicles tailored to fit your specific travel needs and budget constraints.")</p>
 
         <div class="fleet-grid">
             @if (ViewBag.ProductCategories != null)
@@ -159,8 +164,8 @@
 @if(hasServicesSection)
 {
     <section class="seo-locations-section" aria-labelledby="locations-heading">
-        <h2 id="locations-heading">Car Rental Services</h2>
-        <p class="section-intro">Pick up your vehicle at any of our highly rated local airport stations or convenient downtown branch offices.</p>
+        <h2 id="locations-heading">@(servicesSection?.Title ?? "Car Rental Services")</h2>
+        <p class="section-intro">@(servicesSection?.Intro ?? "Pick up your vehicle at any of our highly rated local airport stations or convenient downtown branch offices.")</p>
 
         <div class="locations-list">
             @if (ViewBag.ServiceCategories != null)
@@ -191,7 +196,7 @@
 @if (hasWhyusSection)
 {
     <section class="seo-value-section" aria-labelledby="value-heading">
-        <h2 id="value-heading">Why Choose Us For Your Next Road Trip?</h2>
+        <h2 id="value-heading">@(whyUsSection?.Title ?? "Why Choose Us For Your Next Road Trip?")</h2>
 
         <div class="value-grid">
             @if (ViewBag.WhyUs != null)
@@ -222,8 +227,8 @@
 @if (hasFeaturedArticlesSection)
 {
     <section class="seo-locations-section" aria-labelledby="locations-heading">
-        <h2 id="locations-heading">Featured Articles</h2>
-        <p class="section-intro">Stay informed with our latest insights and tips for a seamless car rental experience.</p>
+        <h2 id="locations-heading">@(featuredArticlesSection?.Title ?? "Featured Articles")</h2>
+        <p class="section-intro">@(featuredArticlesSection?.Intro ?? "Stay informed with our latest insights and tips for a seamless car rental experience.")</p>
 
     <div class="locations-list">
         @if (ViewBag.FeaturedArticles != null)
