@@ -21,6 +21,7 @@
     var servicesSection = sections?.FirstOrDefault(s => s.Section == "Services");
     var whyUsSection = sections?.FirstOrDefault(s => s.Section == "WhyUs");
     var featuredArticlesSection = sections?.FirstOrDefault(s => s.Section == "FeaturedArticles");
+    var faqSection = sections?.FirstOrDefault(s => s.Section == "Faq");
 }
 
 @* Include the Compare Toast Component *@
@@ -38,6 +39,7 @@
         <!-- Booking Widget Container (Replace with your actual form/booking plugin iframe) -->
         <div class="booking-widget-box" aria-label="Car Rental Reservation Form">
 
+@* TODO: Update the search section to be flexible to any kind of business. as of now, regular search is car rental specific. *@
             <!-- ========== SEARCH OPTION 1: Regular Text Match Search ========== -->
             @if (hasRegularSearchSection)
             {
@@ -96,15 +98,15 @@
                     <form asp-controller="Home" asp-action="SearchByVector" method="get" class="search-form">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="vector-search-term">Describe Your Perfect Car</label>
-                                <input type="text" id="vector-search-term" name="query" placeholder="e.g., 'luxury sedan with great fuel efficiency' or 'spacious family SUV'" required>
+                                <label for="vector-search-term">@(vectorSearchSection?.FieldLabel ?? "Describe the item you want")</label>
+                                <input type="text" id="vector-search-term" name="query" placeholder="@(vectorSearchSection?.FieldText ?? "e.g., 'Item for '")" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Search with AI Intelligence</label>
+                                <label>@(vectorSearchSection?.ButtonLabel ?? "Search with AI Intelligence")</label>
                                 <button type="submit" class="btn-search" style="background-color: #6c757d;">
-                                    <i class="bi bi-search"></i> Search with AI
+                                    <i class="bi bi-search"></i> @(vectorSearchSection?.ButtonText ?? "Search with AI")
                                 </button>
                             </div>
                         </div>
@@ -136,8 +138,8 @@
      ========================================== -->
 @if(hasProductCategoriesSection){
     <section class="seo-fleet-section" aria-labelledby="fleet-heading">
-        <h2 id="fleet-heading">@(productCategoriesSection?.Title ?? "Explore Our Diverse Rental Car Fleet")</h2>
-        <p class="section-intro">@(productCategoriesSection?.Intro ?? "Select from our wide range of reliable vehicles tailored to fit your specific travel needs and budget constraints.")</p>
+        <h2 id="fleet-heading">@(productCategoriesSection?.Title ?? "Explore Our Products")</h2>
+        <p class="section-intro">@(productCategoriesSection?.Intro ?? "Select from our wide range of Products")</p>
 
         <div class="fleet-grid">
             @if (ViewBag.ProductCategories != null)
@@ -146,9 +148,9 @@
                 {
                     <div class="fleet-card">
                         <article class="fleet-card">
-                        <img src="@category.ImageUrl" alt="@category.Title rental car available" loading="lazy">
+                            <img src="@category.ImageUrl" alt="@category.Title @(productCategoriesSection?.ExtraInfo?? "")" loading="lazy">
                         <h3>@category.Title</h3>
-                        <p>@(category.Description ?? "Explore our selection of quality vehicles in this category.")</p>
+                        <p>@(category.Description ?? "Explore this category.")</p>
                         <a href="@category.PageUrl" class="fleet-link">Browse @category.Title</a>
                         </article>
                     </div>
@@ -160,12 +162,13 @@
 }
 <!-- ==========================================
      SECTION 3: SERVICES
+
      ========================================== -->
 @if(hasServicesSection)
 {
     <section class="seo-locations-section" aria-labelledby="locations-heading">
-        <h2 id="locations-heading">@(servicesSection?.Title ?? "Car Rental Services")</h2>
-        <p class="section-intro">@(servicesSection?.Intro ?? "Pick up your vehicle at any of our highly rated local airport stations or convenient downtown branch offices.")</p>
+        <h2 id="locations-heading">@(servicesSection?.Title ?? "Services")</h2>
+        <p class="section-intro">@(servicesSection?.Intro ?? "Highly rated services")</p>
 
         <div class="locations-list">
             @if (ViewBag.ServiceCategories != null)
@@ -174,7 +177,7 @@
                 {
                     <div class="location-item">
                         <img src="@service.ImageUrl"
-                        alt="@service.Title rental car available"
+                        alt="@service.Title @(servicesSection?.ExtraInfo?? "")"
                         loading="lazy"
                         width="230"
                         height="150">
@@ -237,7 +240,7 @@
             {
                 <div class="location-item">
                     <img src="@article.ImageUrl"
-                         alt="@article.Title rental car available"
+                         alt="@article.Title @(featuredArticlesSection?.ExtraInfo?? "")"
                          loading="lazy"
                          width="230"
                          height="150">
@@ -283,7 +286,7 @@
 @if (hasFaqSection)
 {
     <section class="seo-faq-section" aria-labelledby="faq-heading">
-        <h2 id="faq-heading">Frequently Asked Questions About Car Rental</h2>
+        <h2 id="faq-heading">@(faqSection?.Title ?? "Frequently Asked Questions")</h2>
 
     <!-- Use structured semantic details tag for excellent mobile user-experience and clean layout -->
     <div class="faq-accordion-wrapper">
