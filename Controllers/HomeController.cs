@@ -12,29 +12,6 @@ using System.Diagnostics;
 
 namespace Portal.Controllers
 {
-    public class HomeConfiguration
-    {
-        public string? Title { get; set; }
-        public string? Description { get; set; }
-        public string? h1Title { get; set; }
-        public string? h1Subtitle { get; set; }
-        public List<HomeSection>? Sections { get; set; }
-    }
-    public class HomeSection
-    {
-        public string? Section { get; set; }
-        public string? Title { get; set; }
-        public string? Intro { get; set; }
-        public string? FieldLabel { get; set; }
-        public string? FieldText { get; set; }
-        public string? ButtonLabel { get; set; }
-        public string? ButtonText { get; set; }
-        public string? ExtraInfo { get; set; }
-        public string? DataFilter { get; set; }
-        public bool Enabled { get; set; }
-        public int itemsToShow { get; set; } = 0;
-    }
-    
     public class HomeController : Controller
     {
         private readonly IPortalItemService _portalItemService;
@@ -655,4 +632,3 @@ namespace Portal.Controllers
         public string? IntervalUnit { get; set; }
     }
 }
-
