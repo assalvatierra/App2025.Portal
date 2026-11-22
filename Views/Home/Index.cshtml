@@ -1,13 +1,27 @@
 ﻿@using Microsoft.Extensions.Configuration
+@using Portal.Controllers;
 @inject IConfiguration Configuration
 
 @{
-    ViewData["Title"] = "Davao Car Rental – Self‑Drive & Corporate Car Hire for Tourist Spots and Business Trips";
-    ViewData["Description"] = "Experience reliable Davao car rental services tailored for both tourists and business travelers. Enjoy clean self‑drive cars, airport pickup, corporate travel options, and easy access to top destinations like Samal Island, Eden Nature Park, Crocodile Park, Jack’s Ridge, and Davao’s business districts.";
-    var searchSettings = Configuration.GetSection("SearchSettings");
-    var enableRegularSearch = searchSettings.GetValue<bool>("EnableRegularSearch", true);
-    var enableVectorSearch = searchSettings.GetValue<bool>("EnableVectorSearch", true);
-    var defaultSearchType = searchSettings.GetValue<string>("DefaultSearchType", "regular");
+    ViewData["Title"] = ViewBag.Title ?? "Portal";
+    ViewData["Description"] = ViewBag.Description ?? "Portal Description";
+
+    var sections = ViewBag.HomeSections as List<HomeSection>;
+    var hasProductCategoriesSection = sections?.Any(s => s.Section == "ProductCategories") ?? false;
+    var hasServicesSection = sections?.Any(s => s.Section == "Services") ?? false;
+    var hasWhyusSection = sections?.Any(s => s.Section == "WhyUs") ?? false;
+    var hasFeaturedArticlesSection = sections?.Any(s => s.Section == "FeaturedArticles") ?? false;
+    var hasFaqSection = sections?.Any(s => s.Section == "Faq") ?? false;
+    var hasRegularSearchSection = sections?.Any(s => s.Section == "RegularSearch") ?? false;
+    var hasVectorSearchSection = sections?.Any(s => s.Section == "VectorSearch") ?? false;
+
+    var regularSearchSection = sections?.FirstOrDefault(s => s.Section == "RegularSearch");
+    var vectorSearchSection = sections?.FirstOrDefault(s => s.Section == "VectorSearch");
+    var productCategoriesSection = sections?.FirstOrDefault(s => s.Section == "ProductCategories");
+    var servicesSection = sections?.FirstOrDefault(s => s.Section == "Services");
+    var whyUsSection = sections?.FirstOrDefault(s => s.Section == "WhyUs");
+    var featuredArticlesSection = sections?.FirstOrDefault(s => s.Section == "FeaturedArticles");
+    var faqSection = sections?.FirstOrDefault(s => s.Section == "Faq");
 }
 
 @* Include the Compare Toast Component *@
@@ -19,18 +33,19 @@
 <header class="seo-hero-section">
     <div class="hero-container">
         <!-- Target your primary high-volume broad keyword here -->
-        <h1>Affordable Car Rentals & Vehicle Hire Worldwide</h1>
-        <p class="hero-subtitle">Compare rental car rates, choose your fleet, and book online with flexible cancellations.</p>
+        <h1>@(ViewBag.H1Title ?? "H1 Title")</h1>
+        <p class="hero-subtitle">@(ViewBag.H1Subtitle ?? "H1 SubTitle")</p>
 
         <!-- Booking Widget Container (Replace with your actual form/booking plugin iframe) -->
         <div class="booking-widget-box" aria-label="Car Rental Reservation Form">
 
+@* TODO: Update the search section to be flexible to any kind of business. as of now, regular search is car rental specific. *@
             <!-- ========== SEARCH OPTION 1: Regular Text Match Search ========== -->
-            @if (enableRegularSearch)
+            @if (hasRegularSearchSection)
             {
                 <div class="search-section">
-                    <h3 class="search-section-title">Search by Type, Model, or Manufacturer</h3>
-                    <p class="search-section-description">Use traditional text search to find vehicles by exact specifications.</p>
+                    <h3 class="search-section-title">@(regularSearchSection?.Title ?? "Search by Type, Model, or Manufacturer")</h3>
+                    <p class="search-section-description">@(regularSearchSection?.Intro ?? "Use traditional text search to find vehicles by exact specifications.")</p>
                     <form asp-controller="Home" asp-action="SearchItems" method="get" class="search-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -75,23 +90,23 @@
             }
 
             <!-- ========== SEARCH OPTION 2: AI-Vector Search ========== -->
-            @if (enableVectorSearch)
+            @if (hasVectorSearchSection)
             {
                 <div class="search-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #ddd;">
-                    <h3 class="search-section-title">AI-Powered Semantic Search</h3>
-                    <p class="search-section-description">Search by vehicle features, style, or description using artificial intelligence.</p>
+                    <h3 class="search-section-title">@(vectorSearchSection?.Title ?? "Semantic Search")</h3>
+                    <p class="search-section-description">@(vectorSearchSection?.Intro ?? "Search Semantically")</p>
                     <form asp-controller="Home" asp-action="SearchByVector" method="get" class="search-form">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="vector-search-term">Describe Your Perfect Car</label>
-                                <input type="text" id="vector-search-term" name="query" placeholder="e.g., 'luxury sedan with great fuel efficiency' or 'spacious family SUV'" required>
+                                <label for="vector-search-term">@(vectorSearchSection?.FieldLabel ?? "Describe the item you want")</label>
+                                <input type="text" id="vector-search-term" name="query" placeholder="@(vectorSearchSection?.FieldText ?? "e.g., 'Item for '")" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Search with AI Intelligence</label>
+                                <label>@(vectorSearchSection?.ButtonLabel ?? "Search with AI Intelligence")</label>
                                 <button type="submit" class="btn-search" style="background-color: #6c757d;">
-                                    <i class="bi bi-search"></i> Search with AI
+                                    <i class="bi bi-search"></i> @(vectorSearchSection?.ButtonText ?? "Search with AI")
                                 </button>
                             </div>
                         </div>
@@ -121,94 +136,102 @@
 <!-- ==========================================
      SECTION 2: CORE FLEET CATEGORIES
      ========================================== -->
-<section class="seo-fleet-section" aria-labelledby="fleet-heading">
-    <h2 id="fleet-heading">Explore Our Diverse Rental Car Fleet</h2>
-    <p class="section-intro">Select from our wide range of reliable vehicles tailored to fit your specific travel needs and budget constraints.</p>
+@if(hasProductCategoriesSection){
+    <section class="seo-fleet-section" aria-labelledby="fleet-heading">
+        <h2 id="fleet-heading">@(productCategoriesSection?.Title ?? "Explore Our Products")</h2>
+        <p class="section-intro">@(productCategoriesSection?.Intro ?? "Select from our wide range of Products")</p>
 
-    <div class="fleet-grid">
-        @if (ViewBag.ProductCategories != null)
-        {
-            foreach (var category in ViewBag.ProductCategories)
+        <div class="fleet-grid">
+            @if (ViewBag.ProductCategories != null)
             {
-                <div class="fleet-card">
-                    <article class="fleet-card">
-                    <img src="@category.ImageUrl" alt="@category.Title rental car available" loading="lazy">
-                    <h3>@category.Title</h3>
-                    <p>@(category.Description ?? "Explore our selection of quality vehicles in this category.")</p>
-                    <a href="@category.PageUrl" class="fleet-link">Browse @category.Title</a>
-                    </article>
-                </div>
+                foreach (var category in ViewBag.ProductCategories)
+                {
+                    <div class="fleet-card">
+                        <article class="fleet-card">
+                            <img src="@category.ImageUrl" alt="@category.Title @(productCategoriesSection?.ExtraInfo?? "")" loading="lazy">
+                        <h3>@category.Title</h3>
+                        <p>@(category.Description ?? "Explore this category.")</p>
+                        <a href="@category.PageUrl" class="fleet-link">Browse @category.Title</a>
+                        </article>
+                    </div>
+                }
             }
-        }
-    </div>
+        </div>
 
-</section>
-
+    </section>
+}
 <!-- ==========================================
      SECTION 3: SERVICES
+
      ========================================== -->
-<section class="seo-locations-section" aria-labelledby="locations-heading">
-    <h2 id="locations-heading">Car Rental Services</h2>
-    <p class="section-intro">Pick up your vehicle at any of our highly rated local airport stations or convenient downtown branch offices.</p>
+@if(hasServicesSection)
+{
+    <section class="seo-locations-section" aria-labelledby="locations-heading">
+        <h2 id="locations-heading">@(servicesSection?.Title ?? "Services")</h2>
+        <p class="section-intro">@(servicesSection?.Intro ?? "Highly rated services")</p>
 
-    <div class="locations-list">
-        @if (ViewBag.ServiceCategories != null)
-        {
-            foreach (var service in ViewBag.ServiceCategories)
+        <div class="locations-list">
+            @if (ViewBag.ServiceCategories != null)
             {
-                <div class="location-item">
-                    <img src="@service.ImageUrl"
-                         alt="@service.Title rental car available"
-                         loading="lazy"
-                         width="230"
-                         height="150">
-                    <h3>@service.Title</h3>
-                    <p>@(service.Description ?? "Convenient service location for all your rental needs.")</p>
-                    <a href="@service.PageUrl" class="location-link">@service.Title Services</a>
-                </div>
+                foreach (var service in ViewBag.ServiceCategories)
+                {
+                    <div class="location-item">
+                        <img src="@service.ImageUrl"
+                        alt="@service.Title @(servicesSection?.ExtraInfo?? "")"
+                        loading="lazy"
+                        width="230"
+                        height="150">
+                        <h3>@service.Title</h3>
+                        <p>@(service.Description ?? "Convenient service location for all your rental needs.")</p>
+                        <a href="@service.PageUrl" class="location-link">@service.Title Services</a>
+                    </div>
+                }
             }
-        }
-    </div>
-    <div class="all-locations-btn-container">
-        <a href="/Home/OurServices" class="btn-secondary">View All Rental Services</a>
-    </div>
-</section>
-
+        </div>
+        <div class="all-locations-btn-container">
+            <a href="/Home/OurServices" class="btn-secondary">View All Rental Services</a>
+        </div>
+    </section>
+}
 <!-- ==========================================
      SECTION 4: WhyUs (VALUE PROP & HOW IT WORKS)
      ========================================== -->
-<section class="seo-value-section" aria-labelledby="value-heading">
-    <h2 id="value-heading">Why Choose Us For Your Next Road Trip?</h2>
+@if (hasWhyusSection)
+{
+    <section class="seo-value-section" aria-labelledby="value-heading">
+        <h2 id="value-heading">@(whyUsSection?.Title ?? "Why Choose Us For Your Next Road Trip?")</h2>
 
-    <div class="value-grid">
-        @if (ViewBag.WhyUs != null)
-        {
-            foreach (var whyus in ViewBag.WhyUs)
+        <div class="value-grid">
+            @if (ViewBag.WhyUs != null)
             {
-                <div class="value-prop-item">
-                    @if (!string.IsNullOrEmpty(whyus.ImageUrl))
-                    {
-                        <img src="@whyus.ImageUrl" 
-                             alt="@whyus.Title" 
-                             loading="lazy"
-                             width="60"
-                             height="60"
-                             class="value-icon">
-                    }
-                    <h3>@whyus.Title</h3>
-                    <p>@(whyus.Description ?? "Discover the benefits of choosing our car rental services.")</p>
-                </div>
+                foreach (var whyus in ViewBag.WhyUs)
+                {
+                    <div class="value-prop-item">
+                        @if (!string.IsNullOrEmpty(whyus.ImageUrl))
+                        {
+                            <img src="@whyus.ImageUrl" 
+                            alt="@whyus.Title" 
+                            loading="lazy"
+                            width="60"
+                            height="60"
+                            class="value-icon">
+                        }
+                        <h3>@whyus.Title</h3>
+                        <p>@(whyus.Description ?? "Discover the benefits of choosing our car rental services.")</p>
+                    </div>
+                }
             }
-        }
-    </div>
-</section>
-
+        </div>
+    </section>
+}
 <!-- ==========================================
      SECTION 5: FEATURED ARTICLES
      ========================================== -->
-<section class="seo-locations-section" aria-labelledby="locations-heading">
-    <h2 id="locations-heading">Featured Articles</h2>
-    <p class="section-intro">Stay informed with our latest insights and tips for a seamless car rental experience.</p>
+@if (hasFeaturedArticlesSection)
+{
+    <section class="seo-locations-section" aria-labelledby="locations-heading">
+        <h2 id="locations-heading">@(featuredArticlesSection?.Title ?? "Featured Articles")</h2>
+        <p class="section-intro">@(featuredArticlesSection?.Intro ?? "Stay informed with our latest insights and tips for a seamless car rental experience.")</p>
 
     <div class="locations-list">
         @if (ViewBag.FeaturedArticles != null)
@@ -217,7 +240,7 @@
             {
                 <div class="location-item">
                     <img src="@article.ImageUrl"
-                         alt="@article.Title rental car available"
+                         alt="@article.Title @(featuredArticlesSection?.ExtraInfo?? "")"
                          loading="lazy"
                          width="230"
                          height="150">
@@ -232,8 +255,8 @@
         <a href="/Home/Articles" class="btn-secondary">View All Car Rental Articles</a>
     </div>
 
-</section>
-
+    </section>
+}
 
 <!-- ==========================================
      SECTION 5: SOCIAL PROOF & TRUST (E-E-A-T)
@@ -260,8 +283,10 @@
 <!-- ==========================================
      SECTION 6: FREQUENTLY ASKED QUESTIONS
      ========================================== -->
-<section class="seo-faq-section" aria-labelledby="faq-heading">
-    <h2 id="faq-heading">Frequently Asked Questions About Car Rental</h2>
+@if (hasFaqSection)
+{
+    <section class="seo-faq-section" aria-labelledby="faq-heading">
+        <h2 id="faq-heading">@(faqSection?.Title ?? "Frequently Asked Questions")</h2>
 
     <!-- Use structured semantic details tag for excellent mobile user-experience and clean layout -->
     <div class="faq-accordion-wrapper">
@@ -304,4 +329,5 @@
         <a href="/Home/FaqList" class="btn-secondary">View All Rental FAQs</a>
     </div>
 
-</section>
+    </section>
+}

@@ -14,17 +14,27 @@ namespace Portal.Controllers
 {
     public class HomeConfiguration
     {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public string? h1Title { get; set; }
+        public string? h1Subtitle { get; set; }
         public List<HomeSection>? Sections { get; set; }
     }
     public class HomeSection
     {
         public string? Section { get; set; }
         public string? Title { get; set; }
-        public string? intro { get; set; }
+        public string? Intro { get; set; }
+        public string? FieldLabel { get; set; }
+        public string? FieldText { get; set; }
+        public string? ButtonLabel { get; set; }
+        public string? ButtonText { get; set; }
+        public string? ExtraInfo { get; set; }
+        public string? DataFilter { get; set; }
         public bool Enabled { get; set; }
         public int itemsToShow { get; set; } = 0;
     }
-
+    
     public class HomeController : Controller
     {
         private readonly IPortalItemService _portalItemService;
@@ -65,25 +75,54 @@ namespace Portal.Controllers
             if (pc != null && !string.IsNullOrEmpty(pc.Settings))
             {
                 var homeconfig = System.Text.Json.JsonSerializer.Deserialize<HomeConfiguration>(pc.Settings);
+                ViewBag.Title = homeconfig?.Title;
+                ViewBag.Description = homeconfig?.Description;
+                ViewBag.H1Title = homeconfig?.h1Title;
+                ViewBag.H1Subtitle = homeconfig?.h1Subtitle;
                 ViewBag.HomeSections = homeconfig?.Sections?.Where(s => s.Enabled).ToList();
 
-                ViewBag.FeaturedArticlesConfig = homeconfig?.Sections?.Where(s => s.Section == "FeaturedArticles").FirstOrDefault();
+                //ViewBag.FeaturedArticlesConfig = homeconfig?.Sections?.Where(s => s.Section == "FeaturedArticles").FirstOrDefault();
             }
             else
             {
                 ViewBag.HomeSections = new List<HomeSection>();
             }
 
-            var categories = await _portalCategoryService.GetAllByStatusAsync("Active");
+            var sections = ViewBag.HomeSections as List<HomeSection>;
+            var hasProductCategoriesSection = sections?.Any(s => s.Section == "ProductCategories") ?? false;
+            var hasServicesSection = sections?.Any(s => s.Section == "Services") ?? false;
+            var hasWhyusSection = sections?.Any(s => s.Section == "WhyUs") ?? false;
+            var hasFeaturedArticlesSection = sections?.Any(s => s.Section == "FeaturedArticles") ?? false;
+            var hasFaqSection = sections?.Any(s => s.Section == "Faq") ?? false;
 
-            // fetch categories for Product
-            ViewBag.ProductCategories = categories
-                .Where(c => c?.PortalCategory?.CategoryType == "Product");
+            if(hasProductCategoriesSection)
+            {
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "ProductCategories")?.DataFilter ?? "Product";
+                var categories = await _portalCategoryService.GetAllByStatusAsync("Active");
+                ViewBag.ProductCategories = categories
+                    .Where(cat => cat?.PortalCategory?.CategoryType == datafilter);
+            }
 
-            ViewBag.ServiceCategories = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, "Service");
-            ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "WhyUs" }, "WhyUs");
-            ViewBag.Faq = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Faq" }, "Faq");
-            ViewBag.FeaturedArticles = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "FeaturedBlog" }, "FeaturedBlog");
+            if (hasServicesSection)
+            {
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "Services")?.DataFilter ?? "Service";
+                ViewBag.ServiceCategories = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, datafilter);
+            }
+            if (hasWhyusSection)
+            {
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "WhyUs")?.DataFilter ?? "WhyUs";
+                ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "WhyUs" }, datafilter);
+            }
+            if (hasFaqSection)
+            {
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "Faq")?.DataFilter ?? "Faq";
+                ViewBag.Faq = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Faq" }, datafilter);
+            }
+            if (hasFeaturedArticlesSection)
+            {
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "FeaturedArticles")?.DataFilter ?? "FeaturedBlog";
+                ViewBag.FeaturedArticles = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "FeaturedBlog" }, datafilter);
+            }
 
             return View();
         }
