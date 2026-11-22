@@ -30,6 +30,7 @@ namespace Portal.Controllers
         public string? ButtonLabel { get; set; }
         public string? ButtonText { get; set; }
         public string? ExtraInfo { get; set; }
+        public string? DataFilter { get; set; }
         public bool Enabled { get; set; }
         public int itemsToShow { get; set; } = 0;
     }
@@ -96,26 +97,31 @@ namespace Portal.Controllers
 
             if(hasProductCategoriesSection)
             {
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "ProductCategories")?.DataFilter ?? "Product";
                 var categories = await _portalCategoryService.GetAllByStatusAsync("Active");
                 ViewBag.ProductCategories = categories
-                    .Where(c => c?.PortalCategory?.CategoryType == "Product");
+                    .Where(cat => cat?.PortalCategory?.CategoryType == datafilter);
             }
 
             if (hasServicesSection)
             {
-                ViewBag.ServiceCategories = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, "Service");
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "Services")?.DataFilter ?? "Service";
+                ViewBag.ServiceCategories = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, datafilter);
             }
             if (hasWhyusSection)
             {
-                ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "WhyUs" }, "WhyUs");
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "WhyUs")?.DataFilter ?? "WhyUs";
+                ViewBag.WhyUs = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "WhyUs" }, datafilter);
             }
             if (hasFaqSection)
             {
-                ViewBag.Faq = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Faq" }, "Faq");
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "Faq")?.DataFilter ?? "Faq";
+                ViewBag.Faq = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Faq" }, datafilter);
             }
             if (hasFeaturedArticlesSection)
             {
-                ViewBag.FeaturedArticles = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "FeaturedBlog" }, "FeaturedBlog");
+                string datafilter = sections?.FirstOrDefault(s => s.Section == "FeaturedArticles")?.DataFilter ?? "FeaturedBlog";
+                ViewBag.FeaturedArticles = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "FeaturedBlog" }, datafilter);
             }
 
             return View();
