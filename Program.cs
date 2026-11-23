@@ -100,6 +100,9 @@ builder.Services.AddScoped<ISemanticKernelService, SemanticKernelServiceOpenAI>(
 builder.Services.AddScoped<IVectorService, VectorService>();
 builder.Services.AddScoped<IVectorSearchService, QdrantVectorSearchService>();
 
+// Register navigation service
+builder.Services.AddScoped<INavigationService, NavigationService>();
+
 
 // VectorDB Scheduler for monitoring and triggering search database refreshes
 builder.Services.AddHostedService<VectorDbSchedulerService>();

@@ -1,0 +1,13 @@
+@model List<Portal.Services.NavigationItem>
+
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var item in Model)
+        {
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="@item.ControllerName" asp-action="@item.ActionName">@item.Label</a>
+            </li>
+        }
+    }
+</ul>

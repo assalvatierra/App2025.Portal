@@ -47,16 +47,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse justify-content-between" id="mainNavbar">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="OurProducts">Our Fleet</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="OurServices">Car Rental Services</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Articles">Car Rental Blogs</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="FaqList">FAQs</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="AskAI">Ask AI</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="VectorDB">VectorDB</a></li>
-                    </ul>
+                    @await Component.InvokeAsync("Navigation")
                     <div class="d-flex align-items-center gap-2">
                         <partial name="_LoginPartial" />
                         <a class="btn btn-cta ms-2 d-none d-lg-inline-block" asp-area="" asp-controller="Home" asp-action="Contact">Get Started</a>
