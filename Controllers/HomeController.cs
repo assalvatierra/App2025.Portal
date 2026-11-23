@@ -77,7 +77,8 @@ namespace Portal.Controllers
                 string datafilter = sections?.FirstOrDefault(s => s.Section == "ProductCategories")?.DataFilter ?? "Product";
                 var categories = await _portalCategoryService.GetAllByStatusAsync("Active");
                 ViewBag.ProductCategories = categories
-                    .Where(cat => cat?.PortalCategory?.CategoryType == datafilter);
+                    .Where(cat => cat?.PortalCategory?.CategoryType == datafilter)
+                    .ToList();
             }
 
             if (hasServicesSection)
