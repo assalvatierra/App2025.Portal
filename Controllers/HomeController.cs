@@ -1,5 +1,5 @@
 ﻿using Erp.Domain.Models;
-using MassTransit;
+//using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Portal.Controllers.Attributes;
@@ -365,7 +365,13 @@ namespace Portal.Controllers
         [RateLimit]
         public async Task<IActionResult> ItemsByCategory(string category)
         {
-            var results = await _portalItemService.GetItemsByCategory(category,"Product");
+            var hpc = await _portalConfigurationService.GetPortalConfigurationByNameAsync("HomePage");
+            PortalConfiguration? pc = hpc?.FirstOrDefault();
+            var homeconfig = System.Text.Json.JsonSerializer.Deserialize<HomeConfiguration>(pc.Settings);
+            var sections = homeconfig?.Sections?.Where(s => s.Enabled).ToList<HomeSection>();
+            string datafilter = sections?.FirstOrDefault(s => s.Section == "ProductCategories")?.DataFilter ?? "Product";
+
+            var results = await _portalItemService.GetItemsByCategory(category, datafilter);
             var catResult = await _portalCategoryService.GetByName(category);
             ViewBag.PageTitle = catResult?.SeoTitle ?? $"Items in category: {category}";
             ViewBag.PageDescription = catResult?.SeoDescription ?? $"Items in category: {category}";
@@ -414,9 +420,17 @@ namespace Portal.Controllers
         [RateLimit]
         public async Task<IActionResult> OurServices()
         {
+            var hpc = await _portalConfigurationService.GetPortalConfigurationByNameAsync("HomePage");
+            PortalConfiguration? pc = hpc?.FirstOrDefault();
+            var homeconfig = System.Text.Json.JsonSerializer.Deserialize<HomeConfiguration>(pc.Settings);
+            var sections = homeconfig?.Sections?.Where(s => s.Enabled).ToList<HomeSection>();
+            string datafilter = sections?.FirstOrDefault(s => s.Section == "Services")?.DataFilter ?? "Service";
+            var results = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, datafilter);
+
+            // TODO: Consider using a more dynamic approach to set the page title based on configuration or content metadata
             ViewBag.PageTitle = "Car Rental Services";
 
-            var results = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, null);
+            //var results = await _portalContentService.GetContentsByCategoryAsync(new List<string> { "Services" }, null);
 
             return View("ContentList", results);
         }
