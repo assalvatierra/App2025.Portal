@@ -182,7 +182,7 @@
                         height="150">
                         <h3>@service.Title</h3>
                         <p>@(service.Description ?? "Convenient service location for all your rental needs.")</p>
-                        <a href="@service.PageUrl" class="location-link">@service.Title Services</a>
+                        <a href="@service.PageUrl" class="location-link">@service.Title @(servicesSection?.ExtraInfo ?? "")</a>
                     </div>
                 }
             }
