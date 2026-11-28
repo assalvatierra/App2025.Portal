@@ -87,7 +87,7 @@ namespace Portal.Services.VectorSearch
         private async Task LoadPortalItems(string collectionName, CancellationToken cancellationToken = default)
         {
             // Load portal items from database using GetItemsByCategory
-            var itemDtos = await _portalItemService.GetItemsByCategory("", "Product");
+            var itemDtos = await _portalItemService.GetItemsByCategory("", "Sites");
 
             // Convert ItemDto to VectorRecord format with embedding generation
             var recordTasks = itemDtos.Select(async item =>

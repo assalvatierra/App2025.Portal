@@ -286,8 +286,8 @@ namespace Portal.Controllers
                 // Create vector search request
                 var vectorSearchRequest = new VectorSearchRequest
                 {
-                    CollectionName = "cars",
-                    Query = $"{query} cars",
+                    CollectionName = "Sites",
+                    Query = $"{query} Sites",
                     //ScoreThreshold = 0.65f,
                     Limit = 5
                 };

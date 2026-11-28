@@ -29,7 +29,7 @@ namespace Portal.Services
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
-            _collectionName = configuration["VectorDb:Qdrant:CollectionName"] ?? "cars";
+            _collectionName = configuration["Qdrant:CollectionName"] ?? "Default";
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
